@@ -66,7 +66,7 @@ docker exec miroshark-ollama ollama pull nomic-embed-text
 
 Open `http://localhost:3000` — that's it.
 
-### Option B: Manual
+### Option B: Manual (Local Ollama)
 
 **1. Start Neo4j**
 
@@ -95,6 +95,40 @@ cp .env.example .env
 npm run setup:all
 
 # Start both frontend and backend
+npm run dev
+```
+
+### Option C: Cloud API (no GPU needed)
+
+Only Neo4j is required locally. LLM and embeddings use a cloud API.
+
+**1. Start Neo4j** (same as above, or `brew install neo4j && brew services start neo4j`)
+
+**2. Configure & run**
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your API key (e.g. OpenRouter):
+
+```bash
+LLM_API_KEY=sk-or-v1-your-key
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL_NAME=qwen/qwen-2.5-72b-instruct
+
+EMBEDDING_PROVIDER=openai
+EMBEDDING_MODEL=openai/text-embedding-3-small
+EMBEDDING_BASE_URL=https://openrouter.ai/api
+EMBEDDING_API_KEY=sk-or-v1-your-key
+EMBEDDING_DIMENSIONS=768
+
+OPENAI_API_KEY=sk-or-v1-your-key
+OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+```
+
+```bash
+npm run setup:all
 npm run dev
 ```
 
