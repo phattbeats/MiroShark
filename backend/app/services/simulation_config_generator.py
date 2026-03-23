@@ -228,6 +228,7 @@ class SimulationConfigGenerator:
         model_name: Optional[str] = None
     ):
         self.model_name = model_name or Config.LLM_MODEL_NAME
+        self.base_url = base_url or Config.LLM_BASE_URL
         self.llm = create_llm_client(
             api_key=api_key,
             base_url=base_url,

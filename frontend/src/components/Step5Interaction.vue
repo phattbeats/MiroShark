@@ -316,19 +316,24 @@
           <!-- Survey Setup -->
           <div class="survey-setup">
             <div class="setup-section">
-              <div class="section-header">
-                <span class="section-title">Select Persona</span>
+              <div class="section-header section-header-toggle" @click="showPersonaSection = !showPersonaSection">
+                <div class="section-header-left">
+                  <svg :class="['toggle-chevron', { expanded: showPersonaSection }]" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                  <span class="section-title">Select Persona</span>
+                </div>
                 <span class="selection-count">Selected {{ selectedAgents.size }} / {{ profiles.length }}</span>
               </div>
-              <div class="agents-grid">
-                <label 
-                  v-for="(agent, idx) in profiles" 
+              <div v-show="showPersonaSection" class="agents-grid">
+                <label
+                  v-for="(agent, idx) in profiles"
                   :key="idx"
                   class="agent-checkbox"
                   :class="{ checked: selectedAgents.has(idx) }"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :checked="selectedAgents.has(idx)"
                     @change="toggleAgentSelection(idx)"
                   >
@@ -344,7 +349,7 @@
                   </div>
                 </label>
               </div>
-              <div class="selection-actions">
+              <div v-show="showPersonaSection" class="selection-actions">
                 <button class="action-link" @click="selectAllAgents">Select All</button>
                 <span class="action-divider">|</span>
                 <button class="action-link" @click="clearAgentSelection">Clear</button>
@@ -500,6 +505,7 @@ const profilePopupAgent = ref(null)
 const profilePopupActions = ref([])
 const profilePopupLoading = ref(false)
 const showFullPersona = ref(false)
+const showPersonaSection = ref(true)
 const expandedActions = ref(new Set())
 
 const toggleAction = (i) => {
@@ -2314,12 +2320,39 @@ watch(() => props.simulationId, (newId) => {
 }
 
 /* Agents Grid */
+.section-header-toggle {
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.section-header-toggle:hover {
+  background-color: #F3F4F6;
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toggle-chevron {
+  transition: transform 0.2s ease;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+.toggle-chevron.expanded {
+  transform: rotate(90deg);
+}
+
 .agents-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
-  min-height: 120px;
-  max-height: 240px;
+  max-height: 110px;
   overflow-y: auto;
   padding: 4px;
   align-content: start;

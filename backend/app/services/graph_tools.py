@@ -1173,9 +1173,14 @@ Return the sub-questions as a JSON list."""
 
             if not api_result.get("success", False):
                 error_msg = api_result.get("error", "Unknown error")
-                logger.warning(f"Interview API call failed: {error_msg}")
-                result.summary = f"Interview API call failed: {error_msg}. Please check the OASIS simulation environment status."
-                return result
+                logger.warning(f"Interview API call failed: {error_msg}, falling back to LLM-based interview")
+                return self._fallback_interview(
+                    result=result,
+                    selected_agents=selected_agents,
+                    selected_indices=selected_indices,
+                    combined_prompt=combined_prompt,
+                    interview_requirement=interview_requirement,
+                )
 
             # Step 5: Parse API response
             api_data = api_result.get("result", {})
@@ -1236,16 +1241,15 @@ Return the sub-questions as a JSON list."""
 
             result.interviewed_count = len(result.interviews)
 
-        except ValueError as e:
-            logger.warning(f"Interview API call failed (environment not running?): {e}")
-            result.summary = f"Interview failed: {str(e)}. The simulation environment may be closed. Please ensure the OASIS environment is running."
-            return result
-        except Exception as e:
-            logger.error(f"Interview API call exception: {e}")
-            import traceback
-            logger.error(traceback.format_exc())
-            result.summary = f"An error occurred during the interview process: {str(e)}"
-            return result
+        except (ValueError, Exception) as e:
+            logger.warning(f"Interview API call failed ({type(e).__name__}): {e}, falling back to LLM-based interview")
+            return self._fallback_interview(
+                result=result,
+                selected_agents=selected_agents,
+                selected_indices=selected_indices,
+                combined_prompt=combined_prompt,
+                interview_requirement=interview_requirement,
+            )
 
         # Step 6: Generate interview summary
         if result.interviews:
@@ -1277,6 +1281,87 @@ Return the sub-questions as a JSON list."""
             if match:
                 return match.group(1).replace('\\n', '\n').replace('\\"', '"')
         return response
+
+    def _fallback_interview(
+        self,
+        result: 'InterviewResult',
+        selected_agents: List[Dict[str, Any]],
+        selected_indices: List[int],
+        combined_prompt: str,
+        interview_requirement: str,
+    ) -> 'InterviewResult':
+        """
+        Fallback: generate interviews using the LLM directly from agent profiles
+        when the real OASIS interview API is unavailable or fails.
+        """
+        import re
+
+        logger.info(f"Running LLM-based fallback interview for {len(selected_agents)} agents")
+
+        for i, agent_idx in enumerate(selected_indices):
+            agent = selected_agents[i]
+            agent_name = agent.get("realname", agent.get("username", f"Agent_{agent_idx}"))
+            agent_role = agent.get("profession", "Unknown")
+            agent_bio = agent.get("bio", "")
+            agent_persona = agent.get("persona", "")
+
+            profile_desc = f"Name: {agent_name}\nRole: {agent_role}"
+            if agent_bio:
+                profile_desc += f"\nBio: {agent_bio[:500]}"
+            if agent_persona:
+                profile_desc += f"\nPersona: {agent_persona[:500]}"
+
+            prompt = (
+                f"You are role-playing as the following character in a simulation:\n\n"
+                f"{profile_desc}\n\n"
+                f"Stay fully in character. Answer the following interview questions based on "
+                f"your profile, beliefs, and perspective. Be specific and substantive.\n\n"
+                f"{combined_prompt}"
+            )
+
+            try:
+                response_text = self.llm.chat(
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.7,
+                    max_tokens=2048,
+                )
+                if not response_text:
+                    response_text = "(No response generated)"
+            except Exception as e:
+                logger.warning(f"Fallback interview failed for {agent_name}: {e}")
+                response_text = f"(Interview generation failed: {e})"
+
+            # Extract key quotes
+            clean_text = re.sub(r'#{1,6}\s+', '', response_text)
+            clean_text = re.sub(r'Question\s*\d+[：:]\s*', '', clean_text)
+            sentences = re.split(r'[.。！？!?]', clean_text)
+            meaningful = [
+                s.strip() for s in sentences
+                if 20 <= len(s.strip()) <= 150
+            ]
+            meaningful.sort(key=len, reverse=True)
+            key_quotes = [s + "." for s in meaningful[:3]]
+
+            interview = AgentInterview(
+                agent_name=agent_name,
+                agent_role=agent_role,
+                agent_bio=agent_bio[:1000],
+                question=combined_prompt,
+                response=f"[LLM-based Interview]\n{response_text}",
+                key_quotes=key_quotes[:5]
+            )
+            result.interviews.append(interview)
+
+        result.interviewed_count = len(result.interviews)
+
+        if result.interviews:
+            result.summary = self._generate_interview_summary(
+                interviews=result.interviews,
+                interview_requirement=interview_requirement
+            )
+
+        logger.info(f"Fallback interview complete: {result.interviewed_count} agents")
+        return result
 
     def _load_agent_profiles(self, simulation_id: str) -> List[Dict[str, Any]]:
         """Load Agent profile files for simulation"""

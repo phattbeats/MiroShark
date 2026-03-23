@@ -1287,8 +1287,8 @@ class ReportAgent:
         
         # ReACT loop
         tool_calls_count = 0
-        max_iterations = 5  # Maximum iteration rounds
-        min_tool_calls = 3  # Minimum tool call count
+        max_iterations = 8  # Maximum iteration rounds
+        min_tool_calls = 2  # Minimum tool call count
         conflict_retries = 0  # Consecutive conflict count when tool call and Final Answer appear simultaneously
         used_tools = set()  # Track names of tools already called
         all_tools = {"insight_forge", "panorama_search", "quick_search", "interview_agents"}
