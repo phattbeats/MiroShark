@@ -31,28 +31,11 @@
           <span class="hint-close" @click="hideUpdateHint = true">&times;</span>
         </div>
         
-        <!-- Post-simulation Hint -->
-        <div v-if="showSimulationFinishedHint" class="graph-building-hint finished-hint">
-          <div class="hint-icon-wrapper">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hint-icon">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-          </div>
-          <span class="hint-text">Some content is still being processed. Please manually refresh the graph shortly.</span>
-          <button class="hint-close-btn" @click="dismissFinishedHint" title="Close Hint">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
         
         <!-- Node/Edge Detail Panel -->
         <div v-if="selectedItem" class="detail-panel">
           <div class="detail-panel-header">
-            <span class="detail-title">{{ selectedItem.type === 'node' ? 'Node Details' : 'Relationship' }}</span>
+            <span class="detail-title">{{ selectedItem.type === 'node' ? 'Agent Details' : 'Relationship' }}</span>
             <span v-if="selectedItem.type === 'node'" class="detail-type-badge" :style="{ background: selectedItem.color, color: '#fff' }">
               {{ selectedItem.entityType }}
             </span>
@@ -98,6 +81,96 @@
                 <span v-for="label in selectedItem.data.labels" :key="label" class="label-tag">
                   {{ label }}
                 </span>
+              </div>
+            </div>
+
+            <!-- Agent Actions (shown during simulation) -->
+            <div class="detail-section" v-if="simulationId">
+              <div class="section-title actions-title" @click="actionsExpanded = !actionsExpanded" style="cursor: pointer;">
+                <span class="actions-toggle">{{ actionsExpanded ? '▼' : '▶' }}</span>
+                Agent Actions
+                <span v-if="agentActionsLoading" class="actions-loading">loading...</span>
+                <span v-else-if="agentActions.length > 0" class="actions-count">{{ agentActions.length }}</span>
+              </div>
+              <div v-show="actionsExpanded">
+                <div v-if="agentActions.length > 0" class="agent-actions-list">
+                  <div
+                    v-for="(action, idx) in agentActions"
+                    :key="idx"
+                    class="action-item"
+                    :class="{ expanded: expandedActions.has(idx) }"
+                    @click="toggleAction(idx)"
+                  >
+                    <div class="action-header">
+                      <span class="action-platform" :class="action.platform">{{ action.platform }}</span>
+                      <span class="action-type">{{ action.action_type }}</span>
+                      <span class="action-round" v-if="action.round_num != null">R{{ action.round_num }}</span>
+                      <span class="action-expand-icon">{{ expandedActions.has(idx) ? '−' : '+' }}</span>
+                    </div>
+                    <div class="action-content" :class="{ 'action-content-full': expandedActions.has(idx) }" v-if="action.action_args?.content">{{ action.action_args.content }}</div>
+
+                    <!-- Expanded details -->
+                    <div v-show="expandedActions.has(idx)" class="action-details">
+                      <div class="action-detail-row" v-if="action.timestamp">
+                        <span class="action-detail-label">Time</span>
+                        <span class="action-detail-value">{{ action.timestamp }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.agent_name">
+                        <span class="action-detail-label">Agent</span>
+                        <span class="action-detail-value">{{ action.agent_name }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.agent_id != null">
+                        <span class="action-detail-label">Agent ID</span>
+                        <span class="action-detail-value mono">{{ action.agent_id }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.post_id != null">
+                        <span class="action-detail-label">Post ID</span>
+                        <span class="action-detail-value mono">#{{ action.action_args.post_id }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.comment_id != null">
+                        <span class="action-detail-label">Comment ID</span>
+                        <span class="action-detail-value mono">#{{ action.action_args.comment_id }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.target_post_id != null">
+                        <span class="action-detail-label">Target Post</span>
+                        <span class="action-detail-value mono">#{{ action.action_args.target_post_id }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.market_id != null">
+                        <span class="action-detail-label">Market</span>
+                        <span class="action-detail-value mono">#{{ action.action_args.market_id }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.outcome">
+                        <span class="action-detail-label">Position</span>
+                        <span class="action-detail-value" :class="action.action_args.outcome === 'YES' ? 'text-green' : 'text-orange'">{{ action.action_args.outcome }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.cost != null">
+                        <span class="action-detail-label">Cost</span>
+                        <span class="action-detail-value">${{ action.action_args.cost.toFixed(2) }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.shares != null">
+                        <span class="action-detail-label">Shares</span>
+                        <span class="action-detail-value">{{ action.action_args.shares.toFixed(2) }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.price != null">
+                        <span class="action-detail-label">Price</span>
+                        <span class="action-detail-value">${{ action.action_args.price.toFixed(4) }}</span>
+                      </div>
+                      <div class="action-detail-row" v-else-if="action.action_args?.usd_received != null && action.action_args?.shares">
+                        <span class="action-detail-label">Price</span>
+                        <span class="action-detail-value">${{ (action.action_args.usd_received / action.action_args.shares).toFixed(4) }}</span>
+                      </div>
+                      <div class="action-detail-row" v-if="action.action_args?.usd_received != null">
+                        <span class="action-detail-label">Received</span>
+                        <span class="action-detail-value text-green">${{ action.action_args.usd_received.toFixed(2) }}</span>
+                      </div>
+                      <div class="action-detail-row">
+                        <span class="action-detail-label">Success</span>
+                        <span class="action-detail-value" :class="action.success ? 'text-green' : 'text-orange'">{{ action.success ? 'YES' : 'NO' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div v-else-if="!agentActionsLoading" class="actions-empty">No actions recorded yet</div>
               </div>
             </div>
           </div>
@@ -254,15 +327,30 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 import * as d3 from 'd3'
+import { getSimulationActions } from '../api/simulation'
 
 const props = defineProps({
   graphData: Object,
   loading: Boolean,
   currentPhase: Number,
-  isSimulating: Boolean
+  isSimulating: Boolean,
+  simulationId: String
 })
 
 const emit = defineEmits(['refresh', 'toggle-maximize'])
+
+// Agent actions state
+const agentActions = ref([])
+const agentActionsLoading = ref(false)
+const actionsExpanded = ref(true)
+const expandedActions = ref(new Set())
+
+const toggleAction = (idx) => {
+  const s = new Set(expandedActions.value)
+  if (s.has(idx)) s.delete(idx)
+  else s.add(idx)
+  expandedActions.value = s
+}
 
 const graphContainer = ref(null)
 const graphSvg = ref(null)
@@ -320,7 +408,7 @@ const entityTypes = computed(() => {
   if (!props.graphData?.nodes) return []
   const typeMap = {}
   // Aesthetic color palette
-  const colors = ['#FF6B35', '#004E89', '#7B2D8E', '#1A936F', '#C5283D', '#E9724C', '#3498db', '#9b59b6', '#27ae60', '#f39c12']
+  const colors = ['#FF6B1A', '#43C165', '#0A0A0A', '#FFB347', '#FF4444', '#FF8C42', '#2D9B5E', '#D45B1A', '#7A7A7A', '#B8522E']
   
   props.graphData.nodes.forEach(node => {
     const type = node.labels?.find(l => l !== 'Entity') || 'Entity'
@@ -352,8 +440,35 @@ const formatDateTime = (dateStr) => {
 
 const closeDetailPanel = () => {
   selectedItem.value = null
-  expandedSelfLoops.value = new Set() // Reset expanded state
+  expandedSelfLoops.value = new Set()
+  agentActions.value = []
+  expandedActions.value = new Set()
 }
+
+// Fetch agent actions when a node is selected during simulation
+const fetchAgentActions = async (agentName) => {
+  if (!props.simulationId || !agentName) return
+  agentActionsLoading.value = true
+  agentActions.value = []
+  expandedActions.value = new Set()
+  try {
+    const res = await getSimulationActions(props.simulationId, { limit: 200 })
+    if (res.success && res.data) {
+      const all = Array.isArray(res.data) ? res.data : (res.data.actions || [])
+      agentActions.value = all.filter(a => a.agent_name === agentName)
+    }
+  } catch (e) {
+    console.warn('Failed to fetch agent actions:', e)
+  } finally {
+    agentActionsLoading.value = false
+  }
+}
+
+watch(selectedItem, (item) => {
+  if (item?.type === 'node' && props.simulationId) {
+    fetchAgentActions(item.data?.name)
+  }
+})
 
 let currentSimulation = null
 let linkLabelsRef = null
@@ -605,18 +720,18 @@ const renderGraph = () => {
   const link = linkGroup.selectAll('path')
     .data(edges)
     .enter().append('path')
-    .attr('stroke', '#C0C0C0')
+    .attr('stroke', 'rgba(250,250,250,0.15)')
     .attr('stroke-width', 1.5)
     .attr('fill', 'none')
     .style('cursor', 'pointer')
     .on('click', (event, d) => {
       event.stopPropagation()
       // Reset previously selected edge styles
-      linkGroup.selectAll('path').attr('stroke', '#C0C0C0').attr('stroke-width', 1.5)
-      linkLabelBg.attr('fill', 'rgba(255,255,255,0.95)')
-      linkLabels.attr('fill', '#666')
+      linkGroup.selectAll('path').attr('stroke', 'rgba(250,250,250,0.15)').attr('stroke-width', 1.5)
+      linkLabelBg.attr('fill', 'rgba(10,10,10,0.85)')
+      linkLabels.attr('fill', 'rgba(250,250,250,0.5)')
       // Highlight currently selected edge
-      d3.select(event.target).attr('stroke', '#3498db').attr('stroke-width', 3)
+      d3.select(event.target).attr('stroke', '#FF6B1A').attr('stroke-width', 3)
       
       selectedItem.value = {
         type: 'edge',
@@ -628,20 +743,20 @@ const renderGraph = () => {
   const linkLabelBg = linkGroup.selectAll('rect')
     .data(edges)
     .enter().append('rect')
-    .attr('fill', 'rgba(255,255,255,0.95)')
-    .attr('rx', 3)
-    .attr('ry', 3)
+    .attr('fill', 'rgba(10,10,10,0.85)')
+    .attr('rx', 0)
+    .attr('ry', 0)
     .style('cursor', 'pointer')
     .style('pointer-events', 'all')
     .style('display', showEdgeLabels.value ? 'block' : 'none')
     .on('click', (event, d) => {
       event.stopPropagation()
-      linkGroup.selectAll('path').attr('stroke', '#C0C0C0').attr('stroke-width', 1.5)
-      linkLabelBg.attr('fill', 'rgba(255,255,255,0.95)')
-      linkLabels.attr('fill', '#666')
+      linkGroup.selectAll('path').attr('stroke', 'rgba(250,250,250,0.15)').attr('stroke-width', 1.5)
+      linkLabelBg.attr('fill', 'rgba(10,10,10,0.85)')
+      linkLabels.attr('fill', 'rgba(250,250,250,0.5)')
       // Highlight corresponding edge
-      link.filter(l => l === d).attr('stroke', '#3498db').attr('stroke-width', 3)
-      d3.select(event.target).attr('fill', 'rgba(52, 152, 219, 0.1)')
+      link.filter(l => l === d).attr('stroke', '#FF6B1A').attr('stroke-width', 3)
+      d3.select(event.target).attr('fill', 'rgba(255, 107, 26, 0.1)')
       
       selectedItem.value = {
         type: 'edge',
@@ -655,21 +770,21 @@ const renderGraph = () => {
     .enter().append('text')
     .text(d => d.name)
     .attr('font-size', '9px')
-    .attr('fill', '#666')
+    .attr('fill', 'rgba(250,250,250,0.5)')
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
     .style('cursor', 'pointer')
     .style('pointer-events', 'all')
-    .style('font-family', 'system-ui, sans-serif')
+    .style('font-family', "'Space Mono', 'Courier New', monospace")
     .style('display', showEdgeLabels.value ? 'block' : 'none')
     .on('click', (event, d) => {
       event.stopPropagation()
-      linkGroup.selectAll('path').attr('stroke', '#C0C0C0').attr('stroke-width', 1.5)
-      linkLabelBg.attr('fill', 'rgba(255,255,255,0.95)')
-      linkLabels.attr('fill', '#666')
+      linkGroup.selectAll('path').attr('stroke', 'rgba(250,250,250,0.15)').attr('stroke-width', 1.5)
+      linkLabelBg.attr('fill', 'rgba(10,10,10,0.85)')
+      linkLabels.attr('fill', 'rgba(250,250,250,0.5)')
       // Highlight corresponding edge
-      link.filter(l => l === d).attr('stroke', '#3498db').attr('stroke-width', 3)
-      d3.select(event.target).attr('fill', '#3498db')
+      link.filter(l => l === d).attr('stroke', '#FF6B1A').attr('stroke-width', 3)
+      d3.select(event.target).attr('fill', '#FF6B1A')
 
       selectedItem.value = {
         type: 'edge',
@@ -691,7 +806,7 @@ const renderGraph = () => {
     .attr('r', 10)
     .attr('fill', d => getColor(d.type))
     .attr('data-entity-type', d => d.type)
-    .attr('stroke', '#fff')
+    .attr('stroke', 'rgba(10,10,10,0.6)')
     .attr('stroke-width', 2.5)
     .style('cursor', 'pointer')
     .call(d3.drag()
@@ -733,13 +848,13 @@ const renderGraph = () => {
     .on('click', (event, d) => {
       event.stopPropagation()
       // Reset all node styles
-      node.attr('stroke', '#fff').attr('stroke-width', 2.5)
-      linkGroup.selectAll('path').attr('stroke', '#C0C0C0').attr('stroke-width', 1.5)
+      node.attr('stroke', 'rgba(10,10,10,0.6)').attr('stroke-width', 2.5)
+      linkGroup.selectAll('path').attr('stroke', 'rgba(250,250,250,0.15)').attr('stroke-width', 1.5)
       // Highlight selected node
-      d3.select(event.target).attr('stroke', '#E91E63').attr('stroke-width', 4)
+      d3.select(event.target).attr('stroke', '#FF6B1A').attr('stroke-width', 4)
       // Highlight edges connected to this node
       link.filter(l => l.source.id === d.id || l.target.id === d.id)
-        .attr('stroke', '#E91E63')
+        .attr('stroke', '#FF6B1A')
         .attr('stroke-width', 2.5)
       
       selectedItem.value = {
@@ -751,12 +866,12 @@ const renderGraph = () => {
     })
     .on('mouseenter', (event, d) => {
       if (!selectedItem.value || selectedItem.value.data?.uuid !== d.rawData.uuid) {
-        d3.select(event.target).attr('stroke', '#333').attr('stroke-width', 3)
+        d3.select(event.target).attr('stroke', 'rgba(250,250,250,0.5)').attr('stroke-width', 3)
       }
     })
     .on('mouseleave', (event, d) => {
       if (!selectedItem.value || selectedItem.value.data?.uuid !== d.rawData.uuid) {
-        d3.select(event.target).attr('stroke', '#fff').attr('stroke-width', 2.5)
+        d3.select(event.target).attr('stroke', 'rgba(10,10,10,0.6)').attr('stroke-width', 2.5)
       }
     })
 
@@ -766,13 +881,13 @@ const renderGraph = () => {
     .enter().append('text')
     .text(d => d.name.length > 8 ? d.name.substring(0, 8) + '…' : d.name)
     .attr('font-size', '11px')
-    .attr('fill', '#333')
+    .attr('fill', 'rgba(250,250,250,0.8)')
     .attr('font-weight', '500')
     .attr('dx', 14)
     .attr('dy', 4)
     .attr('data-entity-type', d => d.type)
     .style('pointer-events', 'none')
-    .style('font-family', 'system-ui, sans-serif')
+    .style('font-family', "'Space Mono', 'Courier New', monospace")
 
   simulation.on('tick', () => {
     // Update curve paths
@@ -812,10 +927,10 @@ const renderGraph = () => {
   // Click on blank area to close detail panel
   svg.on('click', () => {
     selectedItem.value = null
-    node.attr('stroke', '#fff').attr('stroke-width', 2.5)
-    linkGroup.selectAll('path').attr('stroke', '#C0C0C0').attr('stroke-width', 1.5)
-    linkLabelBg.attr('fill', 'rgba(255,255,255,0.95)')
-    linkLabels.attr('fill', '#666')
+    node.attr('stroke', 'rgba(10,10,10,0.6)').attr('stroke-width', 2.5)
+    linkGroup.selectAll('path').attr('stroke', 'rgba(250,250,250,0.15)').attr('stroke-width', 1.5)
+    linkLabelBg.attr('fill', 'rgba(10,10,10,0.85)')
+    linkLabels.attr('fill', 'rgba(250,250,250,0.5)')
   })
 }
 
@@ -887,12 +1002,28 @@ const handleResize = () => {
   nextTick(renderGraph)
 }
 
+let resizeObserver = null
+
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  // Re-render when container becomes visible (e.g. switching from workbench to graph view)
+  if (graphContainer.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0 && entry.contentRect.height > 0 && props.graphData) {
+          nextTick(renderGraph)
+        }
+      }
+    })
+    resizeObserver.observe(graphContainer.value)
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
   if (currentSimulation) {
     currentSimulation.stop()
   }
@@ -904,9 +1035,11 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-color: #FAFAFA;
-  background-image: radial-gradient(rgba(10,10,10,0.12) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
+  background-color: #0A0A0A;
+  background-image:
+    linear-gradient(rgba(67,193,101,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(67,193,101,0.06) 1px, transparent 1px);
+  background-size: 70px 70px;
   overflow: hidden;
 }
 
@@ -945,7 +1078,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(to bottom, rgba(250,250,250,0.95), rgba(250,250,250,0));
+  background: linear-gradient(to bottom, rgba(10,10,10,0.95), rgba(10,10,10,0));
   pointer-events: none;
 }
 
@@ -953,7 +1086,7 @@ onUnmounted(() => {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  color: rgba(10,10,10,0.4);
+  color: rgba(250,250,250,0.5);
   text-transform: uppercase;
   letter-spacing: 3px;
   pointer-events: auto;
@@ -969,14 +1102,14 @@ onUnmounted(() => {
 .tool-btn {
   height: 32px;
   padding: 0 12px;
-  border: 2px solid rgba(10,10,10,0.12);
-  background: #FAFAFA;
+  border: 2px solid rgba(250,250,250,0.12);
+  background: rgba(10,10,10,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  color: rgba(10,10,10,0.5);
+  color: rgba(250,250,250,0.5);
   transition: all 0.2s;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -985,9 +1118,9 @@ onUnmounted(() => {
 }
 
 .tool-btn:hover {
-  background: var(--color-gray);
-  color: #0A0A0A;
-  border-color: rgba(10,10,10,0.2);
+  background: rgba(250,250,250,0.1);
+  color: #FAFAFA;
+  border-color: #FF6B1A;
 }
 
 .tool-btn .btn-text {
@@ -1020,7 +1153,7 @@ onUnmounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  color: rgba(10,10,10,0.4);
+  color: rgba(250,250,250,0.4);
   font-family: var(--font-mono);
 }
 
@@ -1035,9 +1168,10 @@ onUnmounted(() => {
   position: absolute;
   bottom: 24px;
   left: 24px;
-  background: rgba(250,250,250,0.95);
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(8px);
   padding: 12px 16px;
-  border: 2px solid rgba(10,10,10,0.08);
+  border: 2px solid rgba(250,250,250,0.08);
   z-index: 10;
 }
 
@@ -1065,7 +1199,7 @@ onUnmounted(() => {
   gap: 6px;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: rgba(10,10,10,0.5);
+  color: rgba(250,250,250,0.5);
   cursor: pointer;
   user-select: none;
   transition: opacity 0.15s;
@@ -1101,9 +1235,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #FAFAFA;
+  background: rgba(10,10,10,0.85);
+  backdrop-filter: blur(8px);
   padding: 8px 14px;
-  border: 2px solid rgba(10,10,10,0.12);
+  border: 2px solid rgba(250,250,250,0.08);
   z-index: 10;
 }
 
@@ -1133,7 +1268,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(10,10,10,0.12);
+  background-color: rgba(250,250,250,0.15);
   transition: 0.3s;
 }
 
@@ -1144,7 +1279,7 @@ onUnmounted(() => {
   width: 16px;
   left: 3px;
   bottom: 3px;
-  background-color: #FAFAFA;
+  background-color: rgba(250,250,250,0.7);
   transition: 0.3s;
 }
 
@@ -1159,7 +1294,7 @@ input:checked + .slider:before {
 .toggle-label {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: rgba(10,10,10,0.5);
+  color: rgba(250,250,250,0.5);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -1342,6 +1477,184 @@ input:checked + .slider:before {
   letter-spacing: 1px;
 }
 
+/* Agent Actions */
+.actions-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.actions-toggle {
+  font-size: 9px;
+  color: rgba(10,10,10,0.4);
+  width: 12px;
+}
+
+.actions-loading {
+  font-size: 10px;
+  color: #FF6B1A;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.actions-count {
+  font-size: 10px;
+  background: #FF6B1A;
+  color: #FAFAFA;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+}
+
+.agent-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.agent-actions-list::-webkit-scrollbar { width: 4px; }
+.agent-actions-list::-webkit-scrollbar-thumb { background: rgba(10,10,10,0.12); }
+
+.action-item {
+  padding: 10px;
+  border: 2px solid rgba(10,10,10,0.06);
+  background: #FAFAFA;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+.action-item:hover {
+  border-color: rgba(10,10,10,0.15);
+}
+
+.action-item.expanded {
+  border-color: #FF6B1A;
+}
+
+.action-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-platform {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #FAFAFA;
+  background: #0A0A0A;
+}
+
+.action-platform.twitter { background: #0A0A0A; }
+.action-platform.reddit { background: #FF6B1A; }
+.action-platform.polymarket { background: #43C165; }
+
+.action-type {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(10,10,10,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.action-round {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #FF6B1A;
+  font-weight: 700;
+}
+
+.action-expand-icon {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: rgba(10,10,10,0.3);
+  width: 16px;
+  text-align: center;
+}
+
+.action-content {
+  font-size: 12px;
+  color: rgba(10,10,10,0.7);
+  line-height: 1.5;
+  margin-top: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.action-content-full {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
+/* Expanded action details */
+.action-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(10,10,10,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-detail-row {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  align-items: baseline;
+}
+
+.action-detail-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(10,10,10,0.4);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.action-detail-value {
+  color: rgba(10,10,10,0.7);
+  word-break: break-all;
+}
+
+.action-detail-value.mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.action-detail-value.text-green { color: #43C165; font-weight: 700; }
+.action-detail-value.text-orange { color: #FF6B1A; font-weight: 700; }
+
+.reasoning-text {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(10,10,10,0.6);
+  font-style: italic;
+}
+
+.actions-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(10,10,10,0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 16px 0;
+}
+
 .episodes-list {
   display: flex;
   flex-direction: column;
@@ -1471,7 +1784,7 @@ input:checked + .slider:before {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(10,10,10,0.12);
+  border: 3px solid rgba(250,250,250,0.12);
   border-top-color: #FF6B1A;
   border-radius: 50%;
   animation: spin 1s linear infinite;

@@ -37,10 +37,11 @@
     <main class="content-area">
       <!-- Left Panel: Graph -->
       <div class="panel-wrapper left" :style="leftPanelStyle">
-        <GraphPanel 
+        <GraphPanel
           :graphData="graphData"
           :loading="graphLoading"
           :currentPhase="2"
+          :simulationId="currentSimulationId"
           @refresh="refreshGraph"
           @toggle-maximize="toggleMaximize('graph')"
         />

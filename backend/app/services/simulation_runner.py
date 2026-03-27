@@ -336,7 +336,7 @@ class SimulationRunner:
         storage: 'GraphStorage' = None,  # GraphStorage instance (required if enable_graph_memory_update)
         start_round: int = 0,  # Resume from this round (0 = start fresh)
         env_only: bool = False,  # Just load environments for interviews, no simulation
-        enable_cross_platform: bool = False,  # Enable cross-platform awareness between agents
+        enable_cross_platform: bool = True,  # Enable cross-platform awareness between agents
     ) -> SimulationRunState:
         """
         Start simulation

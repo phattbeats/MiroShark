@@ -11,8 +11,10 @@ Core Retrieval Tools (Optimized):
 """
 
 import json
+import os
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..utils.logger import get_logger
 from ..utils.llm_client import LLMClient, create_smart_llm_client
@@ -1085,8 +1087,10 @@ Return the sub-questions as a JSON list."""
         simulation_id: str,
         interview_requirement: str,
         simulation_requirement: str = "",
-        max_agents: int = 5,
-        custom_questions: List[str] = None
+        max_agents: int = 8,
+        custom_questions: List[str] = None,
+        agent_names: List[str] = None,
+        dual_platform: bool = False,
     ) -> InterviewResult:
         """
         [InterviewAgents - Deep Interview]
@@ -1094,6 +1098,11 @@ Return the sub-questions as a JSON list."""
         Call the real OASIS interview API to interview Agents running in the simulation.
         This method does NOT use GraphStorage — it calls SimulationRunner
         and reads agent profiles from disk.
+
+        Args:
+            agent_names: If provided, skip LLM-based selection and use these agents directly.
+            dual_platform: If True, interview on both platforms. If False (default),
+                           interview on the platform where each agent was most active.
         """
         from .simulation_runner import SimulationRunner
 
@@ -1115,13 +1124,20 @@ Return the sub-questions as a JSON list."""
         result.total_agents = len(profiles)
         logger.info(f"Loaded {len(profiles)} Agent profiles")
 
-        # Step 2: Use LLM to select Agents for interview
-        selected_agents, selected_indices, selection_reasoning = self._select_agents_for_interview(
-            profiles=profiles,
-            interview_requirement=interview_requirement,
-            simulation_requirement=simulation_requirement,
-            max_agents=max_agents
-        )
+        # Step 2: Select agents — skip LLM selection if specific names are provided
+        if agent_names:
+            selected_agents, selected_indices, selection_reasoning = self._select_agents_by_name(
+                profiles=profiles,
+                agent_names=agent_names,
+                max_agents=max_agents,
+            )
+        else:
+            selected_agents, selected_indices, selection_reasoning = self._select_agents_for_interview(
+                profiles=profiles,
+                interview_requirement=interview_requirement,
+                simulation_requirement=simulation_requirement,
+                max_agents=max_agents
+            )
 
         result.selected_agents = selected_agents
         result.selection_reasoning = selection_reasoning
@@ -1151,6 +1167,15 @@ Return the sub-questions as a JSON list."""
         )
         optimized_prompt = f"{INTERVIEW_PROMPT_PREFIX}{combined_prompt}"
 
+        # Step 3.5: Determine platform for each agent (single-platform by default)
+        if not dual_platform:
+            agent_platforms = self._determine_agent_platforms(simulation_id, selected_indices)
+            interview_platform = agent_platforms.get("dominant_platform", "twitter")
+            logger.info(f"Single-platform interview mode: using '{interview_platform}' (most active platform)")
+        else:
+            interview_platform = None  # None means dual-platform in the batch API
+            logger.info("Dual-platform interview mode (explicitly requested)")
+
         # Step 4: Call the real interview API (only if env is alive)
         try:
             # Check run state first — skip IPC entirely if simulation is completed/stopped
@@ -1166,12 +1191,13 @@ Return the sub-questions as a JSON list."""
                     "prompt": optimized_prompt
                 })
 
-            logger.info(f"Calling batch interview API (dual platform): {len(interviews_request)} Agents")
+            platform_label = "dual platform" if dual_platform else f"single platform ({interview_platform})"
+            logger.info(f"Calling batch interview API ({platform_label}): {len(interviews_request)} Agents")
 
             api_result = SimulationRunner.interview_agents_batch(
                 simulation_id=simulation_id,
                 interviews=interviews_request,
-                platform=None,
+                platform=interview_platform,
                 timeout=180.0
             )
 
@@ -1192,27 +1218,33 @@ Return the sub-questions as a JSON list."""
             api_data = api_result.get("result", {})
             results_dict = api_data.get("results", {}) if isinstance(api_data, dict) else {}
 
+            import re
+
             for i, agent_idx in enumerate(selected_indices):
                 agent = selected_agents[i]
                 agent_name = agent.get("realname", agent.get("username", f"Agent_{agent_idx}"))
                 agent_role = agent.get("profession", "Unknown")
                 agent_bio = agent.get("bio", "")
 
-                twitter_result = results_dict.get(f"twitter_{agent_idx}", {})
-                reddit_result = results_dict.get(f"reddit_{agent_idx}", {})
+                if dual_platform:
+                    # Dual-platform: collect from both
+                    twitter_result = results_dict.get(f"twitter_{agent_idx}", {})
+                    reddit_result = results_dict.get(f"reddit_{agent_idx}", {})
 
-                twitter_response = twitter_result.get("response", "")
-                reddit_response = reddit_result.get("response", "")
+                    twitter_response = self._clean_tool_call_response(twitter_result.get("response", ""))
+                    reddit_response = self._clean_tool_call_response(reddit_result.get("response", ""))
 
-                twitter_response = self._clean_tool_call_response(twitter_response)
-                reddit_response = self._clean_tool_call_response(reddit_response)
-
-                twitter_text = twitter_response if twitter_response else "(No response from this platform)"
-                reddit_text = reddit_response if reddit_response else "(No response from this platform)"
-                response_text = f"[Twitter Platform Response]\n{twitter_text}\n\n[Reddit Platform Response]\n{reddit_text}"
-
-                import re
-                combined_responses = f"{twitter_response} {reddit_response}"
+                    twitter_text = twitter_response if twitter_response else "(No response from this platform)"
+                    reddit_text = reddit_response if reddit_response else "(No response from this platform)"
+                    response_text = f"[Twitter Platform Response]\n{twitter_text}\n\n[Reddit Platform Response]\n{reddit_text}"
+                    combined_responses = f"{twitter_response} {reddit_response}"
+                else:
+                    # Single-platform: only use the selected platform
+                    platform_result = results_dict.get(f"{interview_platform}_{agent_idx}", {})
+                    platform_response = self._clean_tool_call_response(platform_result.get("response", ""))
+                    platform_text = platform_response if platform_response else "(No response from this platform)"
+                    response_text = f"[{interview_platform.capitalize()} Platform Response]\n{platform_text}"
+                    combined_responses = platform_response
 
                 clean_text = re.sub(r'#{1,6}\s+', '', combined_responses)
                 clean_text = re.sub(r'\{[^}]*tool_name[^}]*\}', '', clean_text)
@@ -1264,7 +1296,8 @@ Return the sub-questions as a JSON list."""
                 interview_requirement=interview_requirement
             )
 
-        logger.info(f"InterviewAgents complete: Interviewed {result.interviewed_count} Agents (dual platform)")
+        platform_label = "dual platform" if dual_platform else f"single platform ({interview_platform})"
+        logger.info(f"InterviewAgents complete: Interviewed {result.interviewed_count} Agents ({platform_label})")
         return result
 
     @staticmethod
@@ -1288,6 +1321,69 @@ Return the sub-questions as a JSON list."""
                 return match.group(1).replace('\\n', '\n').replace('\\"', '"')
         return response
 
+    def _interview_single_agent_llm(
+        self,
+        agent: Dict[str, Any],
+        agent_idx: int,
+        combined_prompt: str,
+    ) -> 'AgentInterview':
+        """
+        Interview a single agent via LLM. Designed to be called in parallel
+        from a ThreadPoolExecutor.
+        """
+        import re
+
+        agent_name = agent.get("realname", agent.get("username", f"Agent_{agent_idx}"))
+        agent_role = agent.get("profession", "Unknown")
+        agent_bio = agent.get("bio", "")
+        agent_persona = agent.get("persona", "")
+
+        profile_desc = f"Name: {agent_name}\nRole: {agent_role}"
+        if agent_bio:
+            profile_desc += f"\nBio: {agent_bio[:500]}"
+        if agent_persona:
+            profile_desc += f"\nPersona: {agent_persona[:500]}"
+
+        prompt = (
+            f"You are role-playing as the following character in a simulation:\n\n"
+            f"{profile_desc}\n\n"
+            f"Stay fully in character. Answer the following interview questions based on "
+            f"your profile, beliefs, and perspective. Be specific and substantive.\n\n"
+            f"{combined_prompt}"
+        )
+
+        try:
+            response_text = self.llm.chat(
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=2048,
+            )
+            if not response_text:
+                response_text = "(No response generated)"
+        except Exception as e:
+            logger.warning(f"Fallback interview failed for {agent_name}: {e}")
+            response_text = f"(Interview generation failed: {e})"
+
+        # Extract key quotes
+        clean_text = re.sub(r'#{1,6}\s+', '', response_text)
+        clean_text = re.sub(r'Question\s*\d+[：:]\s*', '', clean_text)
+        sentences = re.split(r'[.。！？!?]', clean_text)
+        meaningful = [
+            s.strip() for s in sentences
+            if 20 <= len(s.strip()) <= 150
+        ]
+        meaningful.sort(key=len, reverse=True)
+        key_quotes = [s + "." for s in meaningful[:3]]
+
+        return AgentInterview(
+            agent_name=agent_name,
+            agent_role=agent_role,
+            agent_bio=agent_bio[:1000],
+            question=combined_prompt,
+            response=f"[LLM-based Interview]\n{response_text}",
+            key_quotes=key_quotes[:5]
+        )
+
     def _fallback_interview(
         self,
         result: 'InterviewResult',
@@ -1299,64 +1395,46 @@ Return the sub-questions as a JSON list."""
         """
         Fallback: generate interviews using the LLM directly from agent profiles
         when the real OASIS interview API is unavailable or fails.
+
+        Uses ThreadPoolExecutor to run LLM calls concurrently instead of serially.
         """
-        import re
+        logger.info(f"Running LLM-based fallback interview for {len(selected_agents)} agents (parallel)")
 
-        logger.info(f"Running LLM-based fallback interview for {len(selected_agents)} agents")
-
-        for i, agent_idx in enumerate(selected_indices):
-            agent = selected_agents[i]
-            agent_name = agent.get("realname", agent.get("username", f"Agent_{agent_idx}"))
-            agent_role = agent.get("profession", "Unknown")
-            agent_bio = agent.get("bio", "")
-            agent_persona = agent.get("persona", "")
-
-            profile_desc = f"Name: {agent_name}\nRole: {agent_role}"
-            if agent_bio:
-                profile_desc += f"\nBio: {agent_bio[:500]}"
-            if agent_persona:
-                profile_desc += f"\nPersona: {agent_persona[:500]}"
-
-            prompt = (
-                f"You are role-playing as the following character in a simulation:\n\n"
-                f"{profile_desc}\n\n"
-                f"Stay fully in character. Answer the following interview questions based on "
-                f"your profile, beliefs, and perspective. Be specific and substantive.\n\n"
-                f"{combined_prompt}"
-            )
-
-            try:
-                response_text = self.llm.chat(
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.7,
-                    max_tokens=2048,
+        # Run all agent interviews concurrently via thread pool
+        max_workers = min(len(selected_agents), 4)  # Cap concurrency to avoid API rate limits
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_idx = {}
+            for i, agent_idx in enumerate(selected_indices):
+                future = executor.submit(
+                    self._interview_single_agent_llm,
+                    agent=selected_agents[i],
+                    agent_idx=agent_idx,
+                    combined_prompt=combined_prompt,
                 )
-                if not response_text:
-                    response_text = "(No response generated)"
-            except Exception as e:
-                logger.warning(f"Fallback interview failed for {agent_name}: {e}")
-                response_text = f"(Interview generation failed: {e})"
+                future_to_idx[future] = i  # preserve original order
 
-            # Extract key quotes
-            clean_text = re.sub(r'#{1,6}\s+', '', response_text)
-            clean_text = re.sub(r'Question\s*\d+[：:]\s*', '', clean_text)
-            sentences = re.split(r'[.。！？!?]', clean_text)
-            meaningful = [
-                s.strip() for s in sentences
-                if 20 <= len(s.strip()) <= 150
-            ]
-            meaningful.sort(key=len, reverse=True)
-            key_quotes = [s + "." for s in meaningful[:3]]
+            # Collect results, maintaining insertion order
+            interviews_by_order: Dict[int, AgentInterview] = {}
+            for future in as_completed(future_to_idx):
+                order_idx = future_to_idx[future]
+                try:
+                    interviews_by_order[order_idx] = future.result()
+                except Exception as e:
+                    agent = selected_agents[order_idx]
+                    agent_name = agent.get("realname", agent.get("username", f"Agent_{selected_indices[order_idx]}"))
+                    logger.warning(f"Parallel interview thread failed for {agent_name}: {e}")
+                    interviews_by_order[order_idx] = AgentInterview(
+                        agent_name=agent_name,
+                        agent_role=agent.get("profession", "Unknown"),
+                        agent_bio=agent.get("bio", "")[:1000],
+                        question=combined_prompt,
+                        response=f"[LLM-based Interview]\n(Interview generation failed: {e})",
+                        key_quotes=[]
+                    )
 
-            interview = AgentInterview(
-                agent_name=agent_name,
-                agent_role=agent_role,
-                agent_bio=agent_bio[:1000],
-                question=combined_prompt,
-                response=f"[LLM-based Interview]\n{response_text}",
-                key_quotes=key_quotes[:5]
-            )
-            result.interviews.append(interview)
+        # Append in original order
+        for i in sorted(interviews_by_order.keys()):
+            result.interviews.append(interviews_by_order[i])
 
         result.interviewed_count = len(result.interviews)
 
@@ -1366,7 +1444,7 @@ Return the sub-questions as a JSON list."""
                 interview_requirement=interview_requirement
             )
 
-        logger.info(f"Fallback interview complete: {result.interviewed_count} agents")
+        logger.info(f"Fallback interview complete: {result.interviewed_count} agents (parallel)")
         return result
 
     def _load_agent_profiles(self, simulation_id: str) -> List[Dict[str, Any]]:
@@ -1484,6 +1562,103 @@ Please select up to {max_agents} most suitable Agents for interview and explain 
             selected = profiles[:max_agents]
             indices = list(range(min(max_agents, len(profiles))))
             return selected, indices, "Using default selection strategy"
+
+    def _select_agents_by_name(
+        self,
+        profiles: List[Dict[str, Any]],
+        agent_names: List[str],
+        max_agents: int,
+    ) -> tuple:
+        """
+        Select agents by name without an LLM call.
+        Matches against realname and username fields (case-insensitive, substring match).
+        Falls back to LLM selection if no names match.
+        """
+        selected_agents = []
+        selected_indices = []
+        names_lower = [n.lower() for n in agent_names]
+
+        for i, profile in enumerate(profiles):
+            if len(selected_agents) >= max_agents:
+                break
+            realname = (profile.get("realname") or "").lower()
+            username = (profile.get("username") or "").lower()
+            for name_query in names_lower:
+                if name_query in realname or name_query in username:
+                    selected_agents.append(profile)
+                    selected_indices.append(i)
+                    break
+
+        if selected_agents:
+            matched_names = [a.get("realname", a.get("username", "?")) for a in selected_agents]
+            reasoning = f"Directly selected by name: {', '.join(matched_names)}"
+            logger.info(f"Agent name match: {len(selected_agents)} of {len(agent_names)} requested names found")
+            return selected_agents, selected_indices, reasoning
+
+        logger.warning(f"No agents matched requested names {agent_names}, falling back to default selection")
+        selected = profiles[:max_agents]
+        indices = list(range(min(max_agents, len(profiles))))
+        return selected, indices, f"Requested names not found ({agent_names}), using default selection"
+
+    def _determine_agent_platforms(
+        self,
+        simulation_id: str,
+        agent_indices: List[int],
+    ) -> Dict[str, Any]:
+        """
+        Determine which platform each agent was most active on by counting
+        actions in twitter/actions.jsonl and reddit/actions.jsonl.
+
+        Returns a dict with:
+            - per_agent: {agent_idx: "twitter"|"reddit"}
+            - dominant_platform: the platform with more total actions across selected agents
+        """
+        sim_dir = os.path.join(
+            os.path.dirname(__file__),
+            f'../../uploads/simulations/{simulation_id}'
+        )
+
+        agent_set = set(agent_indices)
+        twitter_counts: Dict[int, int] = {idx: 0 for idx in agent_indices}
+        reddit_counts: Dict[int, int] = {idx: 0 for idx in agent_indices}
+
+        for platform_name, counts in [("twitter", twitter_counts), ("reddit", reddit_counts)]:
+            actions_path = os.path.join(sim_dir, platform_name, "actions.jsonl")
+            if not os.path.exists(actions_path):
+                continue
+            try:
+                with open(actions_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            entry = json.loads(line)
+                            aid = entry.get("agent_id")
+                            if aid is not None and aid in agent_set and entry.get("action_type"):
+                                counts[aid] = counts.get(aid, 0) + 1
+                        except (json.JSONDecodeError, KeyError):
+                            continue
+            except Exception as e:
+                logger.warning(f"Failed to read {platform_name} actions for platform detection: {e}")
+
+        per_agent: Dict[int, str] = {}
+        total_twitter = 0
+        total_reddit = 0
+        for idx in agent_indices:
+            tc = twitter_counts.get(idx, 0)
+            rc = reddit_counts.get(idx, 0)
+            total_twitter += tc
+            total_reddit += rc
+            per_agent[idx] = "twitter" if tc >= rc else "reddit"
+
+        dominant = "twitter" if total_twitter >= total_reddit else "reddit"
+        logger.info(f"Platform activity: twitter={total_twitter}, reddit={total_reddit}, dominant={dominant}")
+
+        return {
+            "per_agent": per_agent,
+            "dominant_platform": dominant,
+        }
 
     def _generate_interview_questions(
         self,
@@ -1670,7 +1845,7 @@ Please generate an interview summary."""
 
         return "\n".join(lines)
 
-    def find_causal_path(self, graph_id: str, source: str, target: str) -> str:
+    def find_causal_path(self, graph_id: str, source: str, target: str, max_hops: int = 6) -> str:
         """
         [Causal Path Finder]
 
@@ -1680,12 +1855,12 @@ Please generate an interview summary."""
         logger.info(f"Finding path: {source} → {target}")
 
         try:
-            steps = self.storage.get_shortest_path(graph_id, source, target)
+            steps = self.storage.get_shortest_path(graph_id, source, target, max_hops=max_hops)
         except Exception as e:
             return f"Path search failed: {str(e)}"
 
         if not steps:
-            return f"No path found between '{source}' and '{target}' within 6 hops."
+            return f"No path found between '{source}' and '{target}' within {max_hops} hops."
 
         lines = [f"=== Causal Path: {source} → {target} ({len(steps)} steps) ===", ""]
 

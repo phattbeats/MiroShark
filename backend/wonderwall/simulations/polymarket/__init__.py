@@ -41,7 +41,7 @@ polymarket_simulation = SimulationConfig(
     ],
     platform_kwargs={
         "initial_balance": 1000.0,
-        "initial_liquidity": 100.0,
+        "initial_liquidity": 10000.0,
     },
 )
 

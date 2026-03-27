@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set
 
@@ -67,8 +68,10 @@ class BeliefState:
         confidences = {}
         for topic in topics:
             # Add small noise so agents aren't identical
-            positions[topic] = max(-1.0, min(1.0, base_position + sentiment_bias * 0.2))
-            confidences[topic] = base_confidence
+            position_noise = random.gauss(0, 0.15)
+            confidence_noise = random.gauss(0, 0.05)
+            positions[topic] = max(-1.0, min(1.0, base_position + sentiment_bias * 0.2 + position_noise))
+            confidences[topic] = min(1.0, max(0.1, base_confidence + confidence_noise))
 
         return cls(positions=positions, confidence=confidences)
 
@@ -295,10 +298,13 @@ def _estimate_stance(content: str) -> Optional[float]:
     """Quick heuristic stance estimation from post content.
 
     Returns a float from -1.0 (strongly negative) to 1.0 (strongly positive),
-    or None if no signal detected. This is intentionally simple — just keyword
-    matching — to avoid extra LLM calls.
+    or None only for very short / empty content.  This is intentionally simple
+    — keyword matching with a broad fallback — to avoid extra LLM calls.
     """
     content_lower = content.lower()
+
+    if len(content_lower.strip()) < 3:
+        return None
 
     positive_signals = [
         "support", "agree", "great", "excellent", "beneficial", "important",
@@ -317,10 +323,41 @@ def _estimate_stance(content: str) -> Optional[float]:
     neg_count = sum(1 for w in negative_signals if w in content_lower)
 
     total = pos_count + neg_count
-    if total == 0:
-        return None
+    if total > 0:
+        return (pos_count - neg_count) / total
 
-    return (pos_count - neg_count) / total
+    # Broad fallback: expanded sentiment words so most real content
+    # gets *some* signal rather than being silently dropped.
+    broad_positive = [
+        "love", "like", "happy", "hope", "excited", "better", "best",
+        "awesome", "amazing", "cool", "nice", "interesting", "helpful",
+        "thank", "thanks", "appreciate", "win", "success", "improve",
+        "trust", "confident", "optimis", "encourage", "empower",
+        "brilliant", "fantastic", "incredible", "wonderful",
+        "recommend", "favor", "advantage", "benefit", "gain",
+    ]
+    broad_negative = [
+        "hate", "bad", "sad", "fear", "angry", "worse", "worst",
+        "awful", "horrible", "stupid", "ugly", "annoying", "disappoint",
+        "frustrat", "problem", "issue", "risk", "lose", "loss", "damage",
+        "distrust", "pessimis", "discourage", "alarm",
+        "ridiculous", "absurd", "pathetic", "disaster",
+        "blame", "against", "unfair", "disadvantage", "cost",
+    ]
+
+    bp = sum(1 for w in broad_positive if w in content_lower)
+    bn = sum(1 for w in broad_negative if w in content_lower)
+    broad_total = bp + bn
+
+    if broad_total > 0:
+        # Attenuate broad signal (less confident than primary keywords)
+        return 0.6 * (bp - bn) / broad_total
+
+    # Final fallback: return a mild neutral signal so the post still
+    # participates in belief updates (weighted near zero).  Returning
+    # None would skip the post entirely, which is the root cause of
+    # beliefs never changing when content doesn't match keywords.
+    return 0.0
 
 
 def _content_relates_to_topic(content: str, topic: str) -> bool:

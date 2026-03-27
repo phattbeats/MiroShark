@@ -1,56 +1,6 @@
 <template>
   <div class="simulation-panel">
-    <!-- Top: Platform Status Rows (one per platform) -->
-    <div class="control-bar">
-      <div class="status-group">
-        <!-- X (Twitter) -->
-        <div class="platform-status twitter" :class="{ active: runStatus.twitter_running, completed: runStatus.twitter_completed, selected: filteredPlatform === 'twitter', dimmed: filteredPlatform && filteredPlatform !== 'twitter' }" @click="filterByPlatform('twitter')">
-          <div class="platform-left">
-            <svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            <span class="platform-name">X</span>
-            <span v-if="runStatus.twitter_completed" class="status-badge done">done</span>
-          </div>
-          <div class="platform-stats">
-            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.twitter_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
-            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ twitterElapsedTime }}</span></span>
-            <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.twitter_actions_count || 0 }}</span></span>
-          </div>
-          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">LIKE</span><span class="action-tag">REPOST</span><span class="action-tag">QUOTE</span><span class="action-tag">FOLLOW</span></div>
-        </div>
-
-        <!-- Reddit -->
-        <div class="platform-status reddit" :class="{ active: runStatus.reddit_running, completed: runStatus.reddit_completed, selected: filteredPlatform === 'reddit', dimmed: filteredPlatform && filteredPlatform !== 'reddit' }" @click="filterByPlatform('reddit')">
-          <div class="platform-left">
-            <img src="/reddit.png" class="platform-icon-img" alt="Reddit" />
-            <span class="platform-name">Reddit</span>
-            <span v-if="runStatus.reddit_completed" class="status-badge done">done</span>
-          </div>
-          <div class="platform-stats">
-            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.reddit_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
-            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ redditElapsedTime }}</span></span>
-            <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.reddit_actions_count || 0 }}</span></span>
-          </div>
-          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">COMMENT</span><span class="action-tag">LIKE</span><span class="action-tag">DISLIKE</span><span class="action-tag">SEARCH</span><span class="action-tag">FOLLOW</span></div>
-        </div>
-
-        <!-- Polymarket -->
-        <div class="platform-status polymarket" :class="{ active: runStatus.polymarket_running, completed: runStatus.polymarket_completed, selected: filteredPlatform === 'polymarket', dimmed: filteredPlatform && filteredPlatform !== 'polymarket' }" @click="filterByPlatform('polymarket')">
-          <div class="platform-left">
-            <img src="/pm.png" class="platform-icon-img" alt="Polymarket" />
-            <span class="platform-name">Polymarket</span>
-            <span v-if="runStatus.polymarket_completed" class="status-badge done">done</span>
-          </div>
-          <div class="platform-stats">
-            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.polymarket_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
-            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ polymarketElapsedTime }}</span></span>
-            <span class="stat"><span class="stat-label">TRADES</span><span class="stat-value mono">{{ runStatus.polymarket_actions_count || 0 }}</span></span>
-          </div>
-          <div class="platform-actions-list"><span class="action-tag">BROWSE</span><span class="action-tag">BUY</span><span class="action-tag">SELL</span><span class="action-tag">CREATE</span><span class="action-tag">COMMENT</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions Bar -->
+    <!-- Actions Bar (above platforms) -->
     <div class="actions-bar">
       <!-- Back to Step 2 -->
       <button
@@ -104,6 +54,68 @@
       </button>
     </div>
 
+    <!-- Total Events Summary -->
+    <div class="events-summary">
+      <span class="events-label">TOTAL EVENTS:</span>
+      <span class="events-total">{{ (runStatus.twitter_actions_count || 0) + (runStatus.reddit_actions_count || 0) + (runStatus.polymarket_actions_count || 0) }}</span>
+      <span class="events-divider"></span>
+      <span class="events-platform">X <span class="events-count">{{ runStatus.twitter_actions_count || 0 }}</span></span>
+      <span class="events-slash">/</span>
+      <span class="events-platform">Reddit <span class="events-count">{{ runStatus.reddit_actions_count || 0 }}</span></span>
+      <span class="events-slash">/</span>
+      <span class="events-platform">Polymarket <span class="events-count">{{ runStatus.polymarket_actions_count || 0 }}</span></span>
+    </div>
+
+    <!-- Platform Status Rows -->
+    <div class="control-bar">
+      <div class="status-group">
+        <!-- X (Twitter) -->
+        <div class="platform-status twitter" :class="{ active: runStatus.twitter_running, completed: runStatus.twitter_completed, selected: filteredPlatform === 'twitter', dimmed: filteredPlatform && filteredPlatform !== 'twitter' }" @click="filterByPlatform('twitter')">
+          <div class="platform-left">
+            <svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <span class="platform-name">X</span>
+            <span v-if="runStatus.twitter_completed" class="status-badge done">done</span>
+          </div>
+          <div class="platform-stats">
+            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.twitter_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
+            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ twitterElapsedTime }}</span></span>
+            <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.twitter_actions_count || 0 }}</span></span>
+          </div>
+          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">LIKE</span><span class="action-tag">REPOST</span><span class="action-tag">QUOTE</span><span class="action-tag">FOLLOW</span></div>
+        </div>
+
+        <!-- Reddit -->
+        <div class="platform-status reddit" :class="{ active: runStatus.reddit_running, completed: runStatus.reddit_completed, selected: filteredPlatform === 'reddit', dimmed: filteredPlatform && filteredPlatform !== 'reddit' }" @click="filterByPlatform('reddit')">
+          <div class="platform-left">
+            <img src="/reddit.png" class="platform-icon-img" alt="Reddit" />
+            <span class="platform-name">Reddit</span>
+            <span v-if="runStatus.reddit_completed" class="status-badge done">done</span>
+          </div>
+          <div class="platform-stats">
+            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.reddit_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
+            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ redditElapsedTime }}</span></span>
+            <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.reddit_actions_count || 0 }}</span></span>
+          </div>
+          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">COMMENT</span><span class="action-tag">LIKE</span><span class="action-tag">DISLIKE</span><span class="action-tag">SEARCH</span><span class="action-tag">FOLLOW</span></div>
+        </div>
+
+        <!-- Polymarket -->
+        <div class="platform-status polymarket" :class="{ active: runStatus.polymarket_running, completed: runStatus.polymarket_completed, selected: filteredPlatform === 'polymarket', dimmed: filteredPlatform && filteredPlatform !== 'polymarket' }" @click="filterByPlatform('polymarket')">
+          <div class="platform-left">
+            <img src="/pm.png" class="platform-icon-img" alt="Polymarket" />
+            <span class="platform-name">Polymarket</span>
+            <span v-if="runStatus.polymarket_completed" class="status-badge done">done</span>
+          </div>
+          <div class="platform-stats">
+            <span class="stat"><span class="stat-label">RND</span><span class="stat-value mono">{{ runStatus.polymarket_current_round || 0 }}<span class="stat-total">/{{ runStatus.total_rounds || maxRounds || '-' }}</span></span></span>
+            <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ polymarketElapsedTime }}</span></span>
+            <span class="stat"><span class="stat-label">TRADES</span><span class="stat-value mono">{{ runStatus.polymarket_actions_count || 0 }}</span></span>
+          </div>
+          <div class="platform-actions-list"><span class="action-tag">BROWSE</span><span class="action-tag">BUY</span><span class="action-tag">SELL</span><span class="action-tag">CREATE</span><span class="action-tag">COMMENT</span></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content: Dual Timeline -->
     <div class="main-content-area" ref="scrollContainer" @scroll="onTimelineScroll">
       <!-- Scroll to bottom button -->
@@ -112,19 +124,6 @@
         class="scroll-bottom-btn"
         @click="scrollToBottom"
       >↓</button>
-      <!-- Timeline Header -->
-      <div class="timeline-header" v-if="allActions.length > 0">
-        <div class="timeline-stats">
-          <span class="total-count">TOTAL EVENTS: <span class="mono">{{ allActions.length }}</span></span>
-          <span class="platform-breakdown">
-            <span class="breakdown-item twitter">X <span class="mono">{{ twitterActionsCount }}</span></span>
-            <span class="breakdown-divider">/</span>
-            <span class="breakdown-item reddit">Reddit <span class="mono">{{ redditActionsCount }}</span></span>
-            <span class="breakdown-divider">/</span>
-            <span class="breakdown-item polymarket">Polymarket <span class="mono">{{ polymarketActionsCount }}</span></span>
-          </span>
-        </div>
-      </div>
       
       <!-- Platform Filter Bar -->
       <div v-if="filteredPlatform" class="agent-filter-bar">
@@ -168,10 +167,10 @@
                 </div>
                 
                 <div class="header-meta">
-                  <div class="platform-indicator">
+                  <div class="platform-indicator" :class="action.platform">
                     <svg v-if="action.platform === 'twitter'" viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    <svg v-else-if="action.platform === 'polymarket'" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    <svg v-else viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0zm5.5 14c0 2.485-2.462 4.5-5.5 4.5S6.5 16.485 6.5 14s2.462-4.5 5.5-4.5 5.5 2.015 5.5 4.5z"/></svg>
+                    <img v-else-if="action.platform === 'reddit'" src="/reddit.png" class="platform-logo" alt="Reddit" />
+                    <img v-else-if="action.platform === 'polymarket'" src="/pm.png" class="platform-logo" alt="Polymarket" />
                   </div>
                   <div class="action-badge" :class="getActionTypeClass(action.action_type)">
                     {{ getActionTypeLabel(action.action_type) }}
@@ -317,8 +316,8 @@
                   <div class="trade-info">
                     <span class="trade-direction sell">SELL</span>
                     <span class="trade-detail">{{ formatShares(action.action_args?.shares) }} <strong>{{ action.action_args?.outcome }}</strong> shares</span>
-                    <span class="trade-cost">@ ${{ formatPrice(action.action_args?.price) }}</span>
-                    <span class="trade-total">${{ formatPrice(action.action_args?.cost) }}</span>
+                    <span class="trade-cost">@ ${{ formatPrice(action.action_args?.price || (action.action_args?.usd_received && action.action_args?.shares ? action.action_args.usd_received / action.action_args.shares : null)) }}</span>
+                    <span class="trade-total text-green">${{ formatPrice(action.action_args?.usd_received) }}</span>
                   </div>
                   <div v-if="action.action_args?.market_id" class="market-ref">Market #{{ action.action_args.market_id }}</div>
                 </template>
@@ -1039,9 +1038,9 @@ onUnmounted(() => {
   padding: 6px 16px;
   display: flex;
   align-items: center;
+  justify-content: center;
   border-bottom: 2px solid rgba(10,10,10,0.08);
   z-index: 10;
-  min-height: 44px;
 }
 
 /* --- Actions Bar (buttons) --- */
@@ -1055,15 +1054,55 @@ onUnmounted(() => {
   border-bottom: 2px solid rgba(10,10,10,0.08);
 }
 
+.events-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--color-gray, #F5F5F5);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(10,10,10,0.4);
+  border-bottom: 2px solid rgba(10,10,10,0.08);
+}
+
+.events-label {
+  color: rgba(10,10,10,0.4);
+}
+
+.events-total {
+  color: #FF6B1A;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.events-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(10,10,10,0.12);
+  margin: 0 4px;
+}
+
+.events-platform {
+  color: rgba(10,10,10,0.4);
+}
+
+.events-count {
+  color: #0A0A0A;
+  font-weight: 700;
+}
+
+.events-slash {
+  color: rgba(10,10,10,0.15);
+}
+
 .status-group {
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  width: 100%;
-}
-
-.status-group > .platform-status {
-  flex: 1;
+  gap: 6px;
 }
 
 /* Platform Status Rows */
@@ -1071,8 +1110,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
-  padding: 8px 10px;
+  gap: 2px;
+  padding: 6px 10px;
   background: #FAFAFA;
   border: 2px solid rgba(10,10,10,0.08);
   opacity: 0.7;
@@ -1123,9 +1162,7 @@ onUnmounted(() => {
 }
 
 .platform-actions-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  display: none;
 }
 
 .action-tag {
@@ -1611,9 +1648,28 @@ onUnmounted(() => {
 }
 
 .platform-indicator {
-  color: rgba(10,10,10,0.4);
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.platform-indicator.twitter {
+  background: #0A0A0A;
+  color: #FAFAFA;
+}
+
+.platform-indicator.reddit,
+.platform-indicator.polymarket {
+  background: none;
+}
+
+.platform-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .action-badge {

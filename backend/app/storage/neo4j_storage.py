@@ -744,12 +744,12 @@ class Neo4jStorage(GraphStorage):
         """Find shortest path between two named entities."""
         def _read(tx):
             result = tx.run(
-                """
-                MATCH (a:Entity {graph_id: $gid}), (b:Entity {graph_id: $gid})
+                f"""
+                MATCH (a:Entity {{graph_id: $gid}}), (b:Entity {{graph_id: $gid}})
                 WHERE toLower(a.name) CONTAINS toLower($src)
                   AND toLower(b.name) CONTAINS toLower($tgt)
                 WITH a, b LIMIT 1
-                MATCH p = shortestPath((a)-[:RELATION*1..6]-(b))
+                MATCH p = shortestPath((a)-[:RELATION*1..{max_hops}]-(b))
                 UNWIND relationships(p) AS r
                 WITH r, startNode(r) AS sn, endNode(r) AS en
                 RETURN sn.name AS source, r.name AS relation, r.fact AS fact, en.name AS target

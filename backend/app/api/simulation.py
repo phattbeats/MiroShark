@@ -1566,7 +1566,7 @@ def start_simulation():
                 "error": f"Invalid platform type: {platform}, options: twitter/reddit/polymarket/parallel"
             }), 400
 
-        enable_cross_platform = data.get('enable_cross_platform', False)
+        enable_cross_platform = data.get('enable_cross_platform', True)
 
         # Check if simulation is ready
         manager = SimulationManager()

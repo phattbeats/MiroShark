@@ -170,6 +170,14 @@
                 <span class="btn-text">Agent Setup</span>
               </button>
               <button
+                class="modal-btn btn-simrun"
+                @click="goToSimulationRun"
+              >
+                <span class="btn-step">Step3</span>
+                <span class="btn-icon">◆</span>
+                <span class="btn-text">Simulation Run</span>
+              </button>
+              <button
                 class="modal-btn btn-report"
                 @click="goToReport"
                 :disabled="!selectedProject.report_id"
@@ -178,10 +186,19 @@
                 <span class="btn-icon">◆</span>
                 <span class="btn-text">Analysis Report</span>
               </button>
+              <button
+                class="modal-btn btn-interaction"
+                @click="goToInteraction"
+                :disabled="!selectedProject.report_id"
+              >
+                <span class="btn-step">Step5</span>
+                <span class="btn-icon">◈</span>
+                <span class="btn-text">Deep Interaction</span>
+              </button>
             </div>
             <!-- Non-replayable Hint -->
             <div class="modal-playback-hint">
-              <span class="hint-text">Step3 "Start Simulation" and Step5 "Deep Interaction" must be launched during runtime and do not support history replay</span>
+              <span class="hint-text">Select a step to replay from the simulation history</span>
             </div>
           </div>
         </div>
@@ -423,11 +440,33 @@ const goToSimulation = () => {
   }
 }
 
+// Navigate to simulation run page (Step 3)
+const goToSimulationRun = () => {
+  if (selectedProject.value?.simulation_id) {
+    router.push({
+      name: 'SimulationRun',
+      params: { simulationId: selectedProject.value.simulation_id }
+    })
+    closeModal()
+  }
+}
+
 // Navigate to analysis report page (Report)
 const goToReport = () => {
   if (selectedProject.value?.report_id) {
     router.push({
       name: 'Report',
+      params: { reportId: selectedProject.value.report_id }
+    })
+    closeModal()
+  }
+}
+
+// Navigate to deep interaction page
+const goToInteraction = () => {
+  if (selectedProject.value?.report_id) {
+    router.push({
+      name: 'Interaction',
       params: { reportId: selectedProject.value.report_id }
     })
     closeModal()
@@ -1277,8 +1316,9 @@ onUnmounted(() => {
 
 /* Navigation buttons */
 .modal-actions {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 11px;
   padding: 22px 34px;
   background: #FAFAFA;
 }
@@ -1335,7 +1375,9 @@ onUnmounted(() => {
 
 .modal-btn.btn-project .btn-icon { color: #FF6B1A; }
 .modal-btn.btn-simulation .btn-icon { color: #FFB347; }
+.modal-btn.btn-simrun .btn-icon { color: #FF6B1A; }
 .modal-btn.btn-report .btn-icon { color: #43C165; }
+.modal-btn.btn-interaction .btn-icon { color: #FF6B1A; }
 
 .modal-btn:hover:not(:disabled) .btn-text {
   color: #0A0A0A;

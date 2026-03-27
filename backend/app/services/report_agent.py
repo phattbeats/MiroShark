@@ -1076,7 +1076,9 @@ class ReportAgent:
                 "description": TOOL_DESC_INTERVIEW_AGENTS,
                 "parameters": {
                     "interview_topic": "Interview topic or requirement description (e.g., 'understand students' views on the dormitory formaldehyde incident')",
-                    "max_agents": "Maximum number of Agents to interview (optional, default 5, max 10)"
+                    "max_agents": "Maximum number of Agents to interview (optional, default 8, max 15)",
+                    "agent_names": "Optional list of specific agent names to interview (skips LLM selection when provided)",
+                    "dual_platform": "Whether to interview on both platforms (optional, default false — interviews on most active platform only)"
                 }
             },
             "analyze_trajectory": {
@@ -1175,17 +1177,25 @@ class ReportAgent:
                 return result.to_text()
             
             elif tool_name == "interview_agents":
-                # In-depth interview - call real OASIS interview API to get simulation Agent responses (dual platform)
+                # In-depth interview - call real OASIS interview API to get simulation Agent responses
                 interview_topic = parameters.get("interview_topic", parameters.get("query", ""))
-                max_agents = parameters.get("max_agents", 5)
+                max_agents = parameters.get("max_agents", 8)
                 if isinstance(max_agents, str):
                     max_agents = int(max_agents)
-                max_agents = min(max_agents, 10)
+                max_agents = min(max_agents, 15)
+                agent_names = parameters.get("agent_names", None)
+                if isinstance(agent_names, str):
+                    agent_names = [n.strip() for n in agent_names.split(",") if n.strip()]
+                dual_platform = parameters.get("dual_platform", False)
+                if isinstance(dual_platform, str):
+                    dual_platform = dual_platform.lower() in ("true", "1", "yes")
                 result = self.graph_tools.interview_agents(
                     simulation_id=self.simulation_id,
                     interview_requirement=interview_topic,
                     simulation_requirement=self.simulation_requirement,
-                    max_agents=max_agents
+                    max_agents=max_agents,
+                    agent_names=agent_names,
+                    dual_platform=dual_platform,
                 )
                 return result.to_text()
             
@@ -1449,11 +1459,82 @@ class ReportAgent:
             total_actions += len(actions)
 
         if total_actions == 0:
-            lines.append(f"\nNo simulation data found in: {sim_dir}")
-            lines.append("Available directories:")
+            # Recursively search for any .jsonl files that may contain action data
+            found_jsonl = []
             if os.path.exists(sim_dir):
-                for item in os.listdir(sim_dir):
-                    lines.append(f"  - {item}")
+                from pathlib import Path
+                sim_path = Path(sim_dir)
+                # Prefer actions.jsonl files, then fall back to any .jsonl
+                found_jsonl = list(sim_path.rglob("actions.jsonl"))
+                if not found_jsonl:
+                    found_jsonl = list(sim_path.rglob("*.jsonl"))
+
+            if found_jsonl:
+                # Try to load actions from discovered files
+                for jsonl_file in found_jsonl:
+                    try:
+                        with open(jsonl_file, 'r', encoding='utf-8') as f:
+                            all_entries = [json.loads(l) for l in f if l.strip()]
+                        actions = [a for a in all_entries if 'action_type' in a]
+
+                        if round_filter is not None:
+                            actions = [a for a in actions if a.get('round_num') == round_filter]
+                        if query_filter:
+                            actions = [
+                                a for a in actions
+                                if query_filter in json.dumps(a.get('action_args', {})).lower()
+                                or query_filter in (a.get('agent_name', '') or '').lower()
+                            ]
+
+                        if not actions:
+                            continue
+
+                        # Derive a label from the file path relative to sim_dir
+                        rel_path = str(jsonl_file.relative_to(sim_path))
+                        lines.append(f"\n**[{rel_path}]** — {len(actions)} actions")
+
+                        from collections import Counter
+                        types = Counter(a['action_type'] for a in actions)
+                        lines.append(f"  Breakdown: {', '.join(f'{t}: {c}' for t, c in types.most_common())}")
+
+                        content_actions = [
+                            a for a in actions
+                            if a.get('action_type') in (
+                                'CREATE_POST', 'CREATE_COMMENT', 'QUOTE_POST',
+                                'create_post', 'create_comment',
+                                'BUY_SHARES', 'SELL_SHARES', 'COMMENT_ON_MARKET',
+                            )
+                        ]
+
+                        for a in content_actions[:15]:
+                            agent = a.get('agent_name', f"Agent_{a.get('agent_id', '?')}")
+                            atype = a.get('action_type', '')
+                            args = a.get('action_args', {})
+                            rnd = a.get('round_num', '?')
+
+                            content = args.get('content', '') or args.get('quote_content', '')
+                            if content:
+                                lines.append(f"  [R{rnd}] {agent} ({atype}): \"{content[:250]}\"")
+                            elif atype in ('BUY_SHARES', 'SELL_SHARES'):
+                                outcome = args.get('outcome', '?')
+                                amount = args.get('amount_usd', args.get('num_shares', '?'))
+                                mid = args.get('market_id', '?')
+                                lines.append(f"  [R{rnd}] {agent} {atype}: market#{mid} {outcome} ${amount}")
+
+                        total_actions += len(actions)
+                    except Exception:
+                        continue
+
+            # If still no actions after recursive search, return a clear error
+            if total_actions == 0:
+                lines.append(f"\n[ERROR] No simulation action data found. The simulation may not have completed successfully.")
+                lines.append(f"Searched directory: {sim_dir}")
+                if found_jsonl:
+                    lines.append(f"Found {len(found_jsonl)} .jsonl file(s) but none contained matching action data.")
+                elif os.path.exists(sim_dir):
+                    lines.append("No .jsonl files found anywhere in the simulation directory.")
+                else:
+                    lines.append("The simulation directory does not exist.")
 
         return "\n".join(lines)
 

@@ -51,7 +51,7 @@ class PolymarketPlatform(BasePlatform):
         sandbox_clock: Clock | None = None,
         start_time: datetime | None = None,
         initial_balance: float = 1000.0,
-        initial_liquidity: float = 100.0,
+        initial_liquidity: float = 10000.0,
     ):
         self.initial_balance = initial_balance
         self.initial_liquidity = initial_liquidity
@@ -153,6 +153,12 @@ class PolymarketPlatform(BasePlatform):
             return {"success": False,
                     "error": f"Invalid outcome '{outcome}'. "
                     f"Choose '{outcome_a}' or '{outcome_b}'"}
+
+        # Cap trade size at 2% of total pool to prevent price manipulation
+        pool_total = reserve_a + reserve_b
+        max_trade = pool_total * 0.02
+        if amount_usd > max_trade:
+            amount_usd = max_trade
 
         # Execute trade via AMM
         trade = quote_buy(reserve_a, reserve_b, outcome, amount_usd,
@@ -276,7 +282,8 @@ class PolymarketPlatform(BasePlatform):
         self._record_trace(
             agent_id, "sell_shares",
             {"market_id": market_id, "outcome": outcome,
-             "shares": num_shares, "usd_received": usd_received},
+             "shares": num_shares, "price": trade.effective_price,
+             "usd_received": usd_received},
             current_time,
         )
 

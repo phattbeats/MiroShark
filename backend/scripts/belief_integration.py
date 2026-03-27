@@ -75,6 +75,7 @@ class BeliefTracker:
             belief_states=self.belief_states,
             active_agent_ids=active_ids,
             round_num=round_num,
+            actual_actions=actual_actions,
         )
         self.trajectory.add_snapshot(snapshot)
 

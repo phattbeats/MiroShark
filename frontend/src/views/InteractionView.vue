@@ -9,13 +9,13 @@
       <div class="header-center">
         <div class="view-switcher">
           <button 
-            v-for="mode in ['graph', 'split', 'workbench']" 
+            v-for="mode in ['graph', 'workbench']"
             :key="mode"
             class="switch-btn"
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: 'Graph', split: 'Split', workbench: 'Workbench' }[mode] }}
+            {{ { graph: 'Graph', workbench: 'Workbench' }[mode] }}
           </button>
         </div>
       </div>
@@ -37,11 +37,12 @@
     <main class="content-area">
       <!-- Left Panel: Graph -->
       <div class="panel-wrapper left" :style="leftPanelStyle">
-        <GraphPanel 
+        <GraphPanel
           :graphData="graphData"
           :loading="graphLoading"
           :currentPhase="5"
           :isSimulating="false"
+          :simulationId="simulationId"
           @refresh="refreshGraph"
           @toggle-maximize="toggleMaximize('graph')"
         />
@@ -78,7 +79,7 @@ const props = defineProps({
   reportId: String
 })
 
-// Layout State - default to workbench view
+// Layout State - default to workbench (no split on report/interaction)
 const viewMode = ref('workbench')
 
 // Data State
@@ -131,7 +132,7 @@ const updateStatus = (status) => {
 // --- Layout Methods ---
 const toggleMaximize = (target) => {
   if (viewMode.value === target) {
-    viewMode.value = 'split'
+    viewMode.value = 'workbench'
   } else {
     viewMode.value = target
   }
