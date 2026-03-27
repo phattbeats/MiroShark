@@ -1,0 +1,660 @@
+{
+  "topics": [
+    "crypto regulation",
+    "prediction market legitimacy",
+    "Polymarket transparency",
+    "media influence on markets"
+  ],
+  "total_rounds": 8,
+  "snapshots": [
+    {
+      "round_num": 0,
+      "timestamp": "2026-03-26T22:23:48.079449",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 4,
+      "belief_positions": {
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 1,
+      "timestamp": "2026-03-26T22:23:51.254055",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        },
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 2,
+      "timestamp": "2026-03-26T22:23:58.337404",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 5,
+      "belief_positions": {
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        },
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        },
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 3,
+      "timestamp": "2026-03-26T22:24:03.159866",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        },
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 4,
+      "timestamp": "2026-03-26T22:24:07.746996",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        },
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 5,
+      "timestamp": "2026-03-26T22:24:12.272647",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 5,
+      "belief_positions": {
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        },
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 6,
+      "timestamp": "2026-03-26T22:24:16.963047",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 5,
+      "belief_positions": {
+        "3": {
+          "crypto regulation": -0.06,
+          "prediction market legitimacy": -0.06,
+          "Polymarket transparency": -0.06,
+          "media influence on markets": -0.06
+        },
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        },
+        "1": {
+          "crypto regulation": 0.74,
+          "prediction market legitimacy": 0.74,
+          "Polymarket transparency": 0.74,
+          "media influence on markets": 0.74
+        },
+        "2": {
+          "crypto regulation": 0.08000000000000002,
+          "prediction market legitimacy": 0.08000000000000002,
+          "Polymarket transparency": 0.08000000000000002,
+          "media influence on markets": 0.08000000000000002
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    },
+    {
+      "round_num": 7,
+      "timestamp": "2026-03-26T22:24:19.806287",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 3,
+      "belief_positions": {
+        "4": {
+          "crypto regulation": 0.7,
+          "prediction market legitimacy": 0.7,
+          "Polymarket transparency": 0.7,
+          "media influence on markets": 0.7
+        },
+        "0": {
+          "crypto regulation": -0.72,
+          "prediction market legitimacy": -0.72,
+          "Polymarket transparency": -0.72,
+          "media influence on markets": -0.72
+        },
+        "5": {
+          "crypto regulation": 0.72,
+          "prediction market legitimacy": 0.72,
+          "Polymarket transparency": 0.72,
+          "media influence on markets": 0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "crypto regulation": 0.243,
+        "prediction market legitimacy": 0.243,
+        "Polymarket transparency": 0.243,
+        "media influence on markets": 0.243
+      }
+    }
+  ],
+  "belief_trajectories": {
+    "crypto regulation": [
+      {
+        "round": 0,
+        "mean": 0.5599999999999999,
+        "min": 0.08000000000000002,
+        "max": 0.74,
+        "spread": 0.6599999999999999,
+        "count": 4
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.152,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 5,
+        "mean": 0.144,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 5
+      },
+      {
+        "round": 6,
+        "mean": 0.148,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 7,
+        "mean": 0.2333333333333333,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 3
+      }
+    ],
+    "prediction market legitimacy": [
+      {
+        "round": 0,
+        "mean": 0.5599999999999999,
+        "min": 0.08000000000000002,
+        "max": 0.74,
+        "spread": 0.6599999999999999,
+        "count": 4
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.152,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 5,
+        "mean": 0.144,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 5
+      },
+      {
+        "round": 6,
+        "mean": 0.148,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 7,
+        "mean": 0.2333333333333333,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 3
+      }
+    ],
+    "Polymarket transparency": [
+      {
+        "round": 0,
+        "mean": 0.5599999999999999,
+        "min": 0.08000000000000002,
+        "max": 0.74,
+        "spread": 0.6599999999999999,
+        "count": 4
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.152,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 5,
+        "mean": 0.144,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 5
+      },
+      {
+        "round": 6,
+        "mean": 0.148,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 7,
+        "mean": 0.2333333333333333,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 3
+      }
+    ],
+    "media influence on markets": [
+      {
+        "round": 0,
+        "mean": 0.5599999999999999,
+        "min": 0.08000000000000002,
+        "max": 0.74,
+        "spread": 0.6599999999999999,
+        "count": 4
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.152,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 5,
+        "mean": 0.144,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 5
+      },
+      {
+        "round": 6,
+        "mean": 0.148,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 5
+      },
+      {
+        "round": 7,
+        "mean": 0.2333333333333333,
+        "min": -0.72,
+        "max": 0.72,
+        "spread": 1.44,
+        "count": 3
+      }
+    ]
+  },
+  "opinion_convergence": {
+    "crypto regulation": -0.78,
+    "prediction market legitimacy": -0.78,
+    "Polymarket transparency": -0.78,
+    "media influence on markets": -0.78
+  },
+  "turning_points": []
+}

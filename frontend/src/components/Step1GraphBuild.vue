@@ -151,7 +151,7 @@
             <span class="step-title">Build Complete</span>
           </div>
           <div class="step-status">
-            <span v-if="currentPhase >= 2" class="badge accent">In Progress</span>
+            <span v-if="currentPhase >= 2" class="badge accent">Ready to launch</span>
           </div>
         </div>
 

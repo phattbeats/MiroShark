@@ -1,0 +1,377 @@
+{
+  "entity_types": [
+    {
+      "name": "CryptoFounder",
+      "description": "A founder in the cryptocurrency space who builds blockchain-based platforms",
+      "attributes": [
+        {
+          "name": "full_name",
+          "type": "text",
+          "description": "Full legal name of the founder"
+        },
+        {
+          "name": "age",
+          "type": "text",
+          "description": "Current age of the founder"
+        },
+        {
+          "name": "affiliation",
+          "type": "text",
+          "description": "Primary project or company founded"
+        }
+      ],
+      "examples": [
+        "Shayne Coplan",
+        "Vitalik Buterin"
+      ]
+    },
+    {
+      "name": "PredictionMarketUser",
+      "description": "An individual who actively trades on prediction markets like Polymarket",
+      "attributes": [
+        {
+          "name": "username",
+          "type": "text",
+          "description": "Public trading handle or account name"
+        },
+        {
+          "name": "trading_volume",
+          "type": "text",
+          "description": "Total amount wagered in USD"
+        },
+        {
+          "name": "strategy",
+          "type": "text",
+          "description": "Trading approach (e.g., data-driven, speculative)"
+        }
+      ],
+      "examples": [
+        "Théo (French whale)",
+        "Zvi Mowshowitz"
+      ]
+    },
+    {
+      "name": "RegulatoryOfficial",
+      "description": "Government official involved in regulating financial or crypto markets",
+      "attributes": [
+        {
+          "name": "full_name",
+          "type": "text",
+          "description": "Full legal name"
+        },
+        {
+          "name": "agency",
+          "type": "text",
+          "description": "Regulatory body they represent"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "description": "Official position or rank"
+        }
+      ],
+      "examples": [
+        "Vincent McGonagle",
+        "J. Christopher Giancarlo"
+      ]
+    },
+    {
+      "name": "MediaOutlet",
+      "description": "News organization that reports on crypto, finance, or politics",
+      "attributes": [
+        {
+          "name": "org_name",
+          "type": "text",
+          "description": "Official name of the media organization"
+        },
+        {
+          "name": "focus_area",
+          "type": "text",
+          "description": "Primary coverage domain (e.g., finance, tech)"
+        },
+        {
+          "name": "platform_type",
+          "type": "text",
+          "description": "Format (e.g., print, digital, TV)"
+        }
+      ],
+      "examples": [
+        "Bloomberg",
+        "The Wall Street Journal"
+      ]
+    },
+    {
+      "name": "HedgeFund",
+      "description": "Institutional investment fund that uses alternative data for trading",
+      "attributes": [
+        {
+          "name": "org_name",
+          "type": "text",
+          "description": "Official fund name"
+        },
+        {
+          "name": "aum",
+          "type": "text",
+          "description": "Assets under management"
+        },
+        {
+          "name": "data_sources",
+          "type": "text",
+          "description": "Types of data used for decision-making"
+        }
+      ],
+      "examples": [
+        "Point72 Ventures",
+        "JP Morgan"
+      ]
+    },
+    {
+      "name": "VentureCapitalFirm",
+      "description": "Investment firm that funds early-stage tech and crypto startups",
+      "attributes": [
+        {
+          "name": "org_name",
+          "type": "text",
+          "description": "Official firm name"
+        },
+        {
+          "name": "notable_investments",
+          "type": "text",
+          "description": "Key portfolio companies"
+        },
+        {
+          "name": "investment_stage",
+          "type": "text",
+          "description": "Preferred funding round (e.g., seed, Series A)"
+        }
+      ],
+      "examples": [
+        "Founders Fund",
+        "Polychain Capital"
+      ]
+    },
+    {
+      "name": "ElectionForecaster",
+      "description": "Expert in predicting election outcomes using data models",
+      "attributes": [
+        {
+          "name": "full_name",
+          "type": "text",
+          "description": "Full legal name"
+        },
+        {
+          "name": "methodology",
+          "type": "text",
+          "description": "Prediction approach (e.g., polling, markets)"
+        },
+        {
+          "name": "affiliation",
+          "type": "text",
+          "description": "Organization or platform associated with"
+        }
+      ],
+      "examples": [
+        "Nate Silver",
+        "Robert Leshner"
+      ]
+    },
+    {
+      "name": "CryptoInfluencer",
+      "description": "Public figure with influence in the cryptocurrency community",
+      "attributes": [
+        {
+          "name": "full_name",
+          "type": "text",
+          "description": "Full legal name"
+        },
+        {
+          "name": "platform",
+          "type": "text",
+          "description": "Primary social media platform used"
+        },
+        {
+          "name": "follower_count",
+          "type": "text",
+          "description": "Number of followers on main platform"
+        }
+      ],
+      "examples": [
+        "Naval Ravikant",
+        "Balaji Srinivasan"
+      ]
+    },
+    {
+      "name": "Person",
+      "description": "Any individual person not fitting more specific types",
+      "attributes": [
+        {
+          "name": "full_name",
+          "type": "text",
+          "description": "Full legal name"
+        },
+        {
+          "name": "occupation",
+          "type": "text",
+          "description": "Current job or role"
+        },
+        {
+          "name": "location",
+          "type": "text",
+          "description": "Geographic location"
+        }
+      ],
+      "examples": [
+        "Passerby commenter",
+        "Anonymous Reddit user"
+      ]
+    },
+    {
+      "name": "Organization",
+      "description": "Any organization not fitting more specific types",
+      "attributes": [
+        {
+          "name": "org_name",
+          "type": "text",
+          "description": "Official organization name"
+        },
+        {
+          "name": "industry",
+          "type": "text",
+          "description": "Sector or field of operation"
+        },
+        {
+          "name": "headquarters",
+          "type": "text",
+          "description": "Main office location"
+        }
+      ],
+      "examples": [
+        "OceanGate",
+        "UMA Protocol"
+      ]
+    }
+  ],
+  "edge_types": [
+    {
+      "name": "INVESTS_IN",
+      "description": "One entity provides capital to another",
+      "source_targets": [
+        {
+          "source": "VentureCapitalFirm",
+          "target": "CryptoFounder"
+        },
+        {
+          "source": "HedgeFund",
+          "target": "CryptoFounder"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "REPORTS_ON",
+      "description": "Media covers or analyzes an event or entity",
+      "source_targets": [
+        {
+          "source": "MediaOutlet",
+          "target": "PredictionMarketUser"
+        },
+        {
+          "source": "MediaOutlet",
+          "target": "CryptoFounder"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "REGULATES",
+      "description": "Government body oversees an organization or market",
+      "source_targets": [
+        {
+          "source": "RegulatoryOfficial",
+          "target": "CryptoFounder"
+        },
+        {
+          "source": "RegulatoryOfficial",
+          "target": "Organization"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "SUPPORTS",
+      "description": "Public endorsement or advocacy for a person or idea",
+      "source_targets": [
+        {
+          "source": "CryptoInfluencer",
+          "target": "CryptoFounder"
+        },
+        {
+          "source": "ElectionForecaster",
+          "target": "PredictionMarketUser"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "TRADING_ON",
+      "description": "User actively participates in a market",
+      "source_targets": [
+        {
+          "source": "PredictionMarketUser",
+          "target": "CryptoFounder"
+        },
+        {
+          "source": "HedgeFund",
+          "target": "CryptoFounder"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "COLLABORATES_WITH",
+      "description": "Two entities work together on a project or initiative",
+      "source_targets": [
+        {
+          "source": "CryptoFounder",
+          "target": "ElectionForecaster"
+        },
+        {
+          "source": "MediaOutlet",
+          "target": "HedgeFund"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "CRITICIZES",
+      "description": "Negative public commentary about an entity or action",
+      "source_targets": [
+        {
+          "source": "MediaOutlet",
+          "target": "PredictionMarketUser"
+        },
+        {
+          "source": "Person",
+          "target": "CryptoFounder"
+        }
+      ],
+      "attributes": []
+    },
+    {
+      "name": "AFFILIATED_WITH",
+      "description": "Formal or informal association between entities",
+      "source_targets": [
+        {
+          "source": "RegulatoryOfficial",
+          "target": "Organization"
+        },
+        {
+          "source": "CryptoInfluencer",
+          "target": "VentureCapitalFirm"
+        }
+      ],
+      "attributes": []
+    }
+  ],
+  "analysis_summary": "The article details Polymarket's rise from a bathroom startup to a $9B-valued prediction empire, highlighting key actors: founders, regulators, investors, media, and traders. Public reaction spans admiration, controversy, and skepticism, especially around election accuracy, ethical betting, and regulatory clashes. The simulation must model interactions among crypto natives, institutional players, media narratives, and public sentiment across social platforms."
+}

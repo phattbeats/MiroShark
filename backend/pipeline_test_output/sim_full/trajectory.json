@@ -1,0 +1,532 @@
+{
+  "topics": [
+    "Twitter Reddit",
+    "Polymarket",
+    "Polymarket's",
+    "Focus",
+    "Polymarket's rise"
+  ],
+  "total_rounds": 5,
+  "snapshots": [
+    {
+      "round_num": 0,
+      "timestamp": "2026-03-26T20:55:31.291034",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 1,
+      "timestamp": "2026-03-26T20:55:35.590732",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 2,
+      "timestamp": "2026-03-26T20:55:51.762689",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 3,
+      "timestamp": "2026-03-26T20:58:57.768147",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 4,
+      "timestamp": "2026-03-26T20:59:03.897179",
+      "total_posts_created": 0,
+      "total_engagements": 0,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    }
+  ],
+  "belief_trajectories": {
+    "Twitter Reddit": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket's": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Focus": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket's rise": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 3,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 4,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ]
+  },
+  "opinion_convergence": {
+    "Twitter Reddit": 0.0,
+    "Polymarket": 0.0,
+    "Polymarket's": 0.0,
+    "Focus": 0.0,
+    "Polymarket's rise": 0.0
+  },
+  "turning_points": []
+}

@@ -27,6 +27,15 @@ dependencies = [
     # "camel-oasis==0.2.5",  # replaced by bundled Wonderwall
     "camel-ai==0.2.78",
 
+    # Wonderwall runtime dependencies (used by recsys, agent_graph, agents_generator)
+    # These are hard imports that crash on startup if missing.
+    "numpy>=1.26.0",
+    "pandas>=2.0.0",
+    "scikit-learn>=1.3.0",
+    "torch>=2.0.0",
+    "sentence-transformers>=2.2.0",
+    "igraph>=0.11.0",
+
     # File processing
     "PyMuPDF>=1.24.0",
     # Encoding detection (supports non-UTF-8 encoded text files)

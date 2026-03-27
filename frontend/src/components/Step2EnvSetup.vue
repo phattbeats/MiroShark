@@ -203,6 +203,14 @@
                     </div>
                   </div>
                   
+                  <!-- Profile Info (from generated profiles) -->
+                  <div v-if="getAgentProfile(agent.agent_id)" class="agent-profile-info">
+                    <span class="profile-profession-tag">{{ getAgentProfile(agent.agent_id).profession || 'Unknown' }}</span>
+                    <span v-if="getAgentProfile(agent.agent_id).country" class="profile-country-tag">{{ getAgentProfile(agent.agent_id).country }}</span>
+                    <span v-if="getAgentProfile(agent.agent_id).mbti" class="profile-mbti-tag">{{ getAgentProfile(agent.agent_id).mbti }}</span>
+                    <p class="profile-bio-snippet">{{ (getAgentProfile(agent.agent_id).bio || '').slice(0, 120) }}{{ (getAgentProfile(agent.agent_id).bio || '').length > 120 ? '...' : '' }}</p>
+                  </div>
+
                   <!-- Active Timeline -->
                   <div class="agent-timeline">
                     <span class="timeline-label">Active Hours</span>
@@ -321,6 +329,29 @@
                     <div class="param-row">
                       <span class="param-label">Echo Chamber Intensity</span>
                       <span class="param-value">{{ simulationConfig.reddit_config.echo_chamber_strength }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="simulationConfig.enable_polymarket" class="platform-card">
+                  <div class="platform-card-header">
+                    <span class="platform-name">Platform 3: Prediction Market</span>
+                  </div>
+                  <div class="platform-params">
+                    <div class="param-row">
+                      <span class="param-label">Market Maker</span>
+                      <span class="param-value">Constant-Product AMM</span>
+                    </div>
+                    <div class="param-row">
+                      <span class="param-label">Initial Liquidity</span>
+                      <span class="param-value">$100 per outcome</span>
+                    </div>
+                    <div class="param-row">
+                      <span class="param-label">Trading Actions</span>
+                      <span class="param-value">Buy/Sell YES & NO shares</span>
+                    </div>
+                    <div class="param-row">
+                      <span class="param-label">Market-Media Bridge</span>
+                      <span class="param-value">Enabled (prices feed social media)</span>
                     </div>
                   </div>
                 </div>
@@ -716,6 +747,14 @@ const displayProfiles = computed(() => {
   }
   return profiles.value.slice(0, 6)
 })
+
+// Get full profile by agent_id
+const getAgentProfile = (agentId) => {
+  if (profiles.value && profiles.value.length > agentId && agentId >= 0) {
+    return profiles.value[agentId]
+  }
+  return null
+}
 
 // Get username by agent_id
 const getAgentUsername = (agentId) => {
@@ -1659,6 +1698,37 @@ onUnmounted(() => {
 .stance-observer {
   background: #FEF3C7;
   color: #D97706;
+}
+
+/* Agent Profile Info */
+.agent-profile-info {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.profile-profession-tag,
+.profile-country-tag,
+.profile-mbti-tag {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border: 1px solid #E5E5E5;
+  color: #666;
+  letter-spacing: 0.5px;
+}
+
+.profile-profession-tag { border-color: var(--color-orange, #FF6B1A); color: var(--color-orange, #FF6B1A); }
+.profile-mbti-tag { border-color: var(--color-green, #43C165); color: var(--color-green, #43C165); }
+
+.profile-bio-snippet {
+  width: 100%;
+  font-size: 0.75rem;
+  color: #999;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 /* Agent Timeline */

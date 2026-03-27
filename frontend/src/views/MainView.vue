@@ -87,7 +87,7 @@ const route = useRoute()
 const router = useRouter()
 
 // Layout State
-const viewMode = ref('split') // graph | split | workbench
+const viewMode = ref('workbench') // graph | split | workbench
 
 // Step State
 const currentStep = ref(1) // 1: Graph Construction, 2: Agent Setup, 3: Start Simulation, 4: Report Generation, 5: Deep Interaction

@@ -1,0 +1,475 @@
+From a bathroom office to a $9 billion prediction empire
+Polymarket is the most consequential prediction market ever built — a platform that went
+from zero volume in June 2020 to $9 billion in 2024 trading volume,
+effectively
+called the US presidential election hours before networks, and attracted a $2 billion
+investment from the parent company of the New York Stock Exchange.
+The
+story of how a 22-year-old NYU dropout built this from his bathroom-turned-office during
+COVID lockdowns is one of the stranger founder narratives in crypto. It involves a $1.4
+million federal fine,
+an FBI raid, a mysterious French whale who bet $80 million
+on Trump, and a strategic pivot that nearly killed the company before it became
+unavoidable.
+A college dropout, an Ethereum ICO, and a pandemic
+Shayne Coplan was born in 1998
+on Manhattan's Upper West Side.
+At 14, he cold-emailed the SEC about creating an electronic stock exchange.
+At 16, he spent $150 buying Ethereum at $0.30 per token during the 2014
+ICO — reportedly one of the youngest participants.
+He dropped out of NYU's
+computer science program
+during his freshman year,
+founded a failed
+DeFi project called TokenUnion, then another called Union.market.
+By early
+2020, he was selling personal belongings to cover rent on his Lower East Side apartment.
+Then COVID hit. Coplan watched misinformation flood social media and saw an
+opportunity.
+Influenced by Friedrich Hayek's theories on decentralized
+knowledge
+and Robin Hanson's concept of "futarchy" (governance by betting
+markets),
+he coded Polymarket from his bathroom.
+The core
+thesis was simple: if people had to put real money behind their predictions about COVID
+outcomes, the resulting prices would be more accurate than pundits, polls, or public health
+agencies.
+He had written to Hanson in early 2019 expressing his ambition to
+"bring prediction markets to life." Hanson was reportedly skeptical.
+The platform launched in June 2020
+under the corporate name
+Blockratize, Inc.
+The critical early technology decisions shaped everything that
+followed. Coplan deployed on Polygon (an Ethereum Layer 2) using USDC stablecoin as
+the base currency,
+with the Gnosis Conditional Token Framework for
+market mechanics
+and UMA Protocol's optimistic oracle for
+decentralized resolution.
+Each market posed a binary yes/no question, with
+shares priced between $0 and $1
+— a 70-cent "Yes" share meant a 70% implied
+probability.
+The Polygon/USDC combination gave Polymarket a decisive edge
+over predecessors like Augur,
+which required running Ethereum nodes,
+paying enormous gas fees, and navigating a confusing native token system.
+Polymarket charged zero trading fees from day one, a deliberate choice to
+bootstrap liquidity.
+Sacra +2
+Wikipedia +4
+Britannica
+Wikipedia
+DataWallet
+Wikipedia
+Yahoo Finance
+DataWallet +2
+Everipedia
+HELLO! +2
+ChainCatcher
+IQ.wiki +2
+Britannica
+ChainCatcher
+Chainthink
+BBN Times
+Substack +3
+FinancialContent +2
+Medium
+GitHub
+Grayscale +2
+Polymarket
+MarketsWiki
+Sacra
+Sacra
+Substack
+
+COVID markets, the 2020 election, and a $4 million seed round
+Polymarket's first markets were about COVID-19: vaccine timelines, case count thresholds,
+lockdown durations.
+One early market asked whether a federal
+emergency use authorization would be granted for a COVID vaccine before 2021 — traders
+correctly predicted
+yes.
+These markets attracted the
+LessWrong rationalist community (forecaster Zvi Mowshowitz actively collaborated with
+Polymarket on market design), crypto-native DeFi users comfortable with wallets and
+stablecoins, and a growing audience frustrated with conflicting pandemic information.
+Polymarket positioned itself as a "truth machine"
+— the tagline was "trade
+your beliefs."
+The second wave of early traction came from the 2020 presidential election.
+Trump vs. Biden markets brought political bettors and news junkies to the platform.
+On November 3, 2020 (Election Day), daily trading volume hit $1.297
+million
+— a massive number for a platform that had existed for only five
+months. Polymarket correctly signaled Biden's victory weeks before the race was officially
+called,
+establishing early credibility.
+By October 2020, the platform had accumulated just over $1 million in cumulative trading
+volume
+when it closed a $4 million seed round led by Polychain Capital.
+The angel roster read like a crypto all-star team: Naval Ravikant
+(AngelList), Balaji Srinivasan (former Coinbase CTO),
+Robert Leshner
+(Compound founder), Stani Kulechov (Aave founder), Kain Warwick (Synthetix), and
+Meltem Demirors (CoinShares).
+The go-to-market strategy was entirely news-
+cycle driven: create markets around trending events, rely on organic sharing via crypto
+Twitter, and let the zero-fee model attract liquidity. The team DMed crypto influencers,
+posted in subreddits, and kept the number of active markets deliberately small to
+concentrate the thin user base around a handful of liquid markets.
+A quietly raised $25 million Series A led by General Catalyst closed
+around
+December 31, 2021,
+with participation from
+Polychain and Airbnb co-
+founder Joe Gebbia. The round was not widely publicized,
+likely because by then,
+federal regulators were already asking questions.
+The CFTC settlement that nearly killed the platform
+On January 3, 2022, the CFTC announced its first major DeFi enforcement action.
+Polymarket had been offering off-exchange event-based binary options — classified as
+"swaps" under the Commodity Exchange Act — without registering as a Designated
+Contract Market. The settlement required a $1.4 million civil monetary penalty
+(reduced due to "substantial cooperation"),
+the wind-
+down of all non-compliant markets,
+and a cease-and-desist order. Acting
+Enforcement Director Vincent McGonagle stated: "All derivatives markets must operate
+within the bounds of the law regardless of the technology used."
+Product Market Fit
+Substack
+Polymarket
+Medium
+Product Market Fit
+CoinDesk
+CoinDesk
+Blockworks
+Blockworks
+Crypto Times +3
+Blockchainandthelaw
+DLA Piper
+Commodity Futures Tradin…
+Blockchainandthelaw
+
+The immediate consequence was severe: Polymarket geo-blocked all US users,
+cutting off its largest market.
+For a startup that had just raised $25
+million to scale domestically, this was potentially fatal. The platform had offered more than
+900 separate event markets since inception,
+and now its core
+audience was locked out. Trading volume cratered through 2022.
+Coplan's response was a strategic pivot executed in three parts. First, in May 2022, he hired
+former CFTC Chairman J. Christopher Giancarlo
+— nicknamed "CryptoDad" —
+as chairman of the advisory board,
+signaling long-term intent to re-
+enter the US legally.
+Second, Polymarket shifted its focus to international users,
+with Germany, Canada, and the UK becoming primary markets.
+Third, the team
+executed a critical technical migration: in late 2022, they transitioned from an Automated
+Market Maker (AMM) model to a hybrid Central Limit Order Book (CLOB)
+— off-
+chain order matching for speed, on-chain settlement for transparency.
+This upgrade attracted professional market makers, improved capital efficiency, reduced
+slippage on large trades, and enabled limit orders.
+It transformed Polymarket from
+a DeFi novelty into something that functioned like a real exchange.
+Despite all this, 2023 was a year of modest volumes. The platform averaged approximately
+$6.7 million per month, closing the year at roughly $73 million in total annual volume
+with about 2,300 new accounts joining monthly.
+There were only about 60
+active markets by mid-2023.
+Compared to what was coming, this was a rounding
+error.
+The Titan submersible and Polymarket's first viral moment
+The event that put Polymarket into mainstream consciousness for the first time was not an
+election or a crypto event — it was a tragedy. When the OceanGate Titan submersible went
+missing
+on June 18, 2023,
+Polymarket quickly launched a
+market:
+"Will the missing submarine be found by June 23?"
+The market attracted over $300,000 in wagers
+and became the site's most
+popular market at the time.
+When debris was discovered indicating a catastrophic implosion, a resolution dispute
+erupted: did finding "pieces" count as "finding" the submarine? The dispute escalated to
+UMA
+token holders for a vote — a live demonstration of decentralized oracle
+mechanics.
+Meanwhile, a tweet criticizing the bet — "What stage of capitalism
+does betting on someone else's death belong to?" — went viral with over 150,000 likes.
+Polymarket's official Twitter account had been actively promoting the market
+and replying to viral tweets about the search,
+drawing intense criticism from
+Gizmodo, Mother Jones, and others.
+Google searches for "Polymarket" hit an all-time high
+during this episode. It was
+exactly the kind of attention that is simultaneously damaging and invaluable — the
+platform became known, even if the first impression was controversial. The incident also
+stress-tested the UMA dispute resolution system publicly for the first time at scale.
+Quartz
+Commodity Futures Tradin…
+Sacra
+Phemex
+Phemex
+Sacra +4
+Medium
+Decrypt
+Decrypt
+DL News
+Decrypt
+DL News
+
+The 2024 election explosion, in concrete numbers
+The 2024 US presidential election cycle transformed Polymarket from a niche crypto
+platform into a global information utility. The numbers tell the story more clearly than any
+narrative:
+January 2024: $54 million monthly volume,
+roughly 4,000 active traders
+May 2024: $59.2 million, 12,800 traders — already a monthly record at the time
+August 2024: $472.9 million from 63,616 wallets,
+a 10x jump in three
+months
+September 2024: $503–533 million, 90,037 active users
+October 2024: $2.28–2.5 billion,
+over 235,000 active traders
+November 2024: $2.63 billion — the all-time monthly high, with 314,500 monthly
+active traders
+Total 2024 trading volume reached approximately $9 billion
+— a 123x increase
+over 2023's $73 million.
+The "Presidential Election Winner 2024"
+market alone attracted $3.7 billion in wagers,
+the largest prediction market
+contract in history by at least an order of magnitude. Election-related markets accounted
+for 76–91% of total platform volume
+in October.
+Several catalysts drove the acceleration. A $45 million Series B led by Founders Fund
+(Peter Thiel) closed in May 2024,
+with Vitalik Buterin (Ethereum's co-founder)
+investing personally
+— the announcement generated significant crypto media
+coverage. In July 2024, Biden's withdrawal from the race caused a massive spike in
+Democratic nominee markets.
+That same month, Nate Silver (founder of
+FiveThirtyEight and America's most famous election forecaster) joined as an advisor,
+lending enormous credibility.
+MoonPay integration enabled credit card
+deposits, finally lowering the barrier for non-crypto users.
+On August 29, 2024,
+Bloomberg Terminal began displaying Polymarket election data alongside traditional
+polling
+— Coplan tweeted "Entering mainstream news and finance
+before our eyes."
+The crucial shift was mainstream media adoption. The Washington Post, Bloomberg, the
+New York Times, CNN, and NBC all began routinely citing Polymarket odds as an
+alternative to polls.
+The Trump-vs-Harris probability chart became, in the words of
+one investor, "repeated millions of times in mainstream media."
+JP Morgan and
+major hedge funds reportedly used Polymarket data through non-US subsidiaries.
+Trump's own campaign team tracked the odds from Mar-a-Lago on election
+night.
+The Block
+Unchained
+The Defiant
+KuCoin
+KuCoin
+The Defiant
+The Block
+Sacra +2
+Sacra
+Polymarket +4
+KuCoin
+KuCoin
+Crunchbase
+KuCoin +3
+Wikipedia +2
+KuCoin
+KuCoin
+Blockhead
+KuCoin
+DL News
+Fortune
+
+The French whale who bet $80 million on Trump
+The most dramatic subplot of the 2024 election was the emergence of a mysterious trader.
+In mid-October, the Wall Street Journal reported that four accounts had collectively
+wagered $30 million on Trump, sparking speculation about market manipulation.
+Polymarket's investigation confirmed all accounts belonged to a single French trader
+— a man identified only as "Théo," described as having "extensive trading
+experience and a financial services background."
+Théo's strategy was sophisticated. On October 15, he contacted YouGov to commission
+private polling in three swing states using the "neighbor polling" technique — asking
+respondents who they thought their neighbors would vote for, which revealed a hidden
+Trump advantage.
+Before even seeing those results, he had already bet $30
+million. After the polls confirmed his thesis, he liquidated virtually all his assets and went
+all in across 11 crypto accounts,
+placing hundreds of small trades to avoid
+moving prices — 450+ bets in a single 10-hour period.
+His total wager reached
+approximately $80 million.
+He held roughly 25% of all Trump Electoral
+College contracts and over 40% of Trump popular vote contracts.
+When Trump won, Théo's net profit was approximately $78.7–85 million,
+making him the biggest winner on Polymarket's leaderboard. "I have absolutely no political
+agenda," he told the Journal.
+"I'm just making money."
+France's
+gambling regulator subsequently investigated, and Polymarket
+proactively
+blocked French users.
+Election night and the FBI raid
+On November 5, 2024, Polymarket effectively called the election. By 12:51 AM EST, the
+platform indicated a 97% probability of Trump winning — hours before any major
+television network made the call (roughly 6 AM).
+In the final weeks, Polymarket
+had consistently shown Trump at 58–62% odds while polls called it a toss-up.
+A subsequent academic paper (Cutting et al., 2025) found that
+Polymarket outperformed polls, particularly in swing states.
+Eight days later, at 6 AM on November 13, 2024, FBI agents raided Shayne Coplan's SoHo
+apartment, seizing his phone and electronic devices.
+The investigation
+concerned whether Polymarket had allowed US-based users to bet despite the 2022 CFTC
+settlement
+— VPN circumvention was widespread, and estimates
+suggested roughly 55% of users were actually US-based. Coplan was not arrested
+or charged.
+His response on X: "new phone, who dis?"
+Polymarket called it "obvious political retribution by the outgoing administration."
+Coinbase CEO Brian Armstrong tweeted "What the f*** is wrong with
+this administration."
+On July 15, 2025, both the DOJ and CFTC formally ended
+their investigations
+without bringing new charges.
+After the election, sports and the road to $9 billion valuation
+Fortune
+Fortune
+The Free Press
+The Free Press
+Fortune
+Sherwood News
+Fortune
+Sherwood News
+CryptoSlate
+FinancialContent +2
+arXiv
+Wikipedia +2
+ABC News
+CBS News
+NBC News
+NBC News
+Al Jazeera
+CBS News
+Wikipedia +3
+
+The post-election crash was immediate — volume dropped 84% overnight, daily active
+users fell 53%,
+and open interest plummeted from $510 million to $120 million.
+But the platform did not collapse. Sports markets emerged as the new growth
+engine,
+with over $700 million wagered on Super Bowl 2025 and $359 million on
+Champions League.
+By January 2025, monthly volume had stabilized around $1.2
+billion
+— still 16x higher than the pre-election baseline.
+The funding trajectory accelerated through previously undisclosed rounds: $55 million at a
+$350 million valuation (Blockchain Capital, late 2024) and $150 million at $1.2 billion
+(Founders Fund, early 2025,
+with Point72 Ventures
+from Steve
+Cohen
+and Ribbit
+Capital).
+In July 2025,
+Polymarket acquired QCX LLC, a CFTC-licensed exchange, for $112 million
+to enable legal US market reentry.
+The CFTC granted an
+Amended Order of Designation in November 2025,
+and US access was
+unblocked on December 2, 2025
+— nearly four years after the original ban.
+The capstone came on October 7, 2025, when Intercontinental Exchange
+(the
+parent company of the New York Stock Exchange) invested up to $2 billion at a
+$9 billion post-money valuation.
+Total 2025 trading volume reached
+approximately $21.5 billion
+across 95+ million transactions,
+with
+monthly active traders peaking at 477,850 in October 2025.
+Coplan, then 27,
+appeared on Bloomberg's billionaires index
+with an estimated net
+worth of $1 billion based on his roughly 11% ownership stake.
+The
+platform that had nearly died after a $1.4 million CFTC fine was now valued more than
+many traditional exchanges.
+The strategic arc that made it work
+Looking across the full timeline, several decisions stand out as inflection points. The
+Polygon/USDC technology stack solved the UX problems that killed Augur and Omen —
+near-zero gas costs, fast settlement, and intuitive dollar-denominated pricing.
+The zero-fee model sacrificed revenue for years but built liquidity and user habit.
+The curated market approach (Polymarket creates all markets rather than allowing
+permissionless creation)
+maintained quality and prevented the spam that
+plagued decentralized competitors.
+The AMM-to-CLOB migration in late 2022
+attracted
+professional market makers and enabled institutional-scale trading. And
+the decision to geo-block US users and comply fully with the CFTC, rather than fight or go
+fully underground, preserved optionality for the legal reentry that eventually happened.
+The competitive landscape validated these choices. Augur launched earlier on Ethereum
+but died from unusable UX.
+PredictIt had a regulatory safe harbor but capped
+traders at $850 per market and lost its CFTC no-action relief in 2022.
+Kalshi took
+the opposite approach — full US regulatory compliance from day one
+— and
+built a viable competitor,
+but with lower volumes until 2025.
+By 2025, Polymarket and Kalshi had formed a de facto duopoly
+with
+combined volume exceeding $44 billion.
+The prediction market concept that had
+DL News
+DL News
+Manifold
+Yahoo Finance
+Privsource
+Bitcoin Magazine
+PR Newswire +3
+Crypto Times +3
+Wikipedia +3
+CoinLaw +2
+BBN Times
+Sacra
+Paragraph
+Phemex
+RotoGrinders
+
+been an academic curiosity since Robin Hanson's papers in the 1990s had become a
+mainstream financial product — and the dropout who built it from his bathroom had
+become the youngest self-made billionaire tracked by Bloomberg.
+Conclusion
+Polymarket's trajectory reveals three non-obvious insights. First, regulatory near-death
+experiences can be strategic advantages — the CFTC settlement forced an international
+pivot and compliance infrastructure that ultimately enabled a larger reentry.
+Second,
+controversial virality works — the Titan submersible backlash, the French whale drama,
+and the FBI raid all generated attention that converted into users. Third, prediction
+markets are event-driven businesses with power-law dynamics — the platform did $73
+million across all of 2023, then $3.7 billion on a single election question. The challenge
+going forward is whether sports, crypto markets, and geopolitical events can sustain the
+volume that elections create, or whether Polymarket remains a platform that explodes
+every four years and treads water in between.
+The $21.5 billion in 2025 volume
+— driven largely by sports expansion — suggests the former, but the platform
+has only existed through one full election cycle. The next test comes in 2028.
+IQ.wiki
+Sacra

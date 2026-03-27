@@ -15,13 +15,13 @@
             <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ twitterElapsedTime }}</span></span>
             <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.twitter_actions_count || 0 }}</span></span>
           </div>
-          <div class="platform-actions-list">POST / LIKE / REPOST / QUOTE / FOLLOW</div>
+          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">LIKE</span><span class="action-tag">REPOST</span><span class="action-tag">QUOTE</span><span class="action-tag">FOLLOW</span></div>
         </div>
 
         <!-- Reddit -->
         <div class="platform-status reddit" :class="{ active: runStatus.reddit_running, completed: runStatus.reddit_completed, selected: filteredPlatform === 'reddit', dimmed: filteredPlatform && filteredPlatform !== 'reddit' }" @click="filterByPlatform('reddit')">
           <div class="platform-left">
-            <svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0zm5.5 14c0 2.485-2.462 4.5-5.5 4.5S6.5 16.485 6.5 14s2.462-4.5 5.5-4.5 5.5 2.015 5.5 4.5zM8.5 12.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm7 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+            <img src="/reddit.png" class="platform-icon-img" alt="Reddit" />
             <span class="platform-name">Reddit</span>
             <span v-if="runStatus.reddit_completed" class="status-badge done">done</span>
           </div>
@@ -30,13 +30,13 @@
             <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ redditElapsedTime }}</span></span>
             <span class="stat"><span class="stat-label">ACTS</span><span class="stat-value mono">{{ runStatus.reddit_actions_count || 0 }}</span></span>
           </div>
-          <div class="platform-actions-list">POST / COMMENT / LIKE / DISLIKE / SEARCH / FOLLOW</div>
+          <div class="platform-actions-list"><span class="action-tag">POST</span><span class="action-tag">COMMENT</span><span class="action-tag">LIKE</span><span class="action-tag">DISLIKE</span><span class="action-tag">SEARCH</span><span class="action-tag">FOLLOW</span></div>
         </div>
 
         <!-- Polymarket -->
         <div class="platform-status polymarket" :class="{ active: runStatus.polymarket_running, completed: runStatus.polymarket_completed, selected: filteredPlatform === 'polymarket', dimmed: filteredPlatform && filteredPlatform !== 'polymarket' }" @click="filterByPlatform('polymarket')">
           <div class="platform-left">
-            <svg class="platform-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <img src="/pm.png" class="platform-icon-img" alt="Polymarket" />
             <span class="platform-name">Polymarket</span>
             <span v-if="runStatus.polymarket_completed" class="status-badge done">done</span>
           </div>
@@ -45,7 +45,7 @@
             <span class="stat"><span class="stat-label">TIME</span><span class="stat-value mono">{{ polymarketElapsedTime }}</span></span>
             <span class="stat"><span class="stat-label">TRADES</span><span class="stat-value mono">{{ runStatus.polymarket_actions_count || 0 }}</span></span>
           </div>
-          <div class="platform-actions-list">BROWSE / BUY / SELL / CREATE / COMMENT</div>
+          <div class="platform-actions-list"><span class="action-tag">BROWSE</span><span class="action-tag">BUY</span><span class="action-tag">SELL</span><span class="action-tag">CREATE</span><span class="action-tag">COMMENT</span></div>
         </div>
       </div>
     </div>
@@ -70,14 +70,14 @@
         {{ isStopping ? 'Pausing...' : 'Pause' }}
       </button>
 
-      <!-- Restart from scratch -->
+      <!-- Restart (when stopped, completed, or failed) -->
       <button
-        v-if="phase === 2"
+        v-if="phase === 2 || runStatus.runner_status === 'failed'"
         class="action-btn secondary"
         :disabled="isStarting"
         @click="handleRestart"
       >
-        Restart
+        {{ runStatus.runner_status === 'failed' ? 'Restart (failed)' : 'Restart' }}
       </button>
 
       <!-- Resume (when paused/stopped/failed with partial data) -->
@@ -1057,17 +1057,22 @@ onUnmounted(() => {
 
 .status-group {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  gap: 8px;
   width: 100%;
+}
+
+.status-group > .platform-status {
+  flex: 1;
 }
 
 /* Platform Status Rows */
 .platform-status {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 10px;
   border-radius: 3px;
   background: #FAFAFA;
   border: 1px solid #EAEAEA;
@@ -1120,10 +1125,24 @@ onUnmounted(() => {
 }
 
 .platform-actions-list {
-  font-size: 8px;
-  color: #999;
-  letter-spacing: 0.03em;
-  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.action-tag {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border: 1px solid rgba(10,10,10,0.12);
+  color: rgba(10,10,10,0.5);
+}
+
+.platform-status.active .action-tag {
+  border-color: rgba(10,10,10,0.2);
+  color: rgba(10,10,10,0.7);
 }
 
 .status-badge.done {
@@ -1211,18 +1230,23 @@ onUnmounted(() => {
 }
 
 .platform-status.twitter .platform-icon { color: #000; }
-.platform-status.reddit .platform-icon { color: #FF4500; }
-.platform-status.polymarket .platform-icon { color: #4A90D9; }
+
+.platform-icon-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
 
 .platform-stats {
   display: flex;
+  flex-direction: row;
   gap: 8px;
 }
 
 .stat {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 4px;
 }
 
 .stat-label {

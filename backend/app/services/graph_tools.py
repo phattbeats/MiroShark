@@ -1585,3 +1585,156 @@ Please generate an interview summary."""
         except Exception as e:
             logger.warning(f"Failed to generate interview summary: {e}")
             return f"Interviewed {len(interviews)} interviewees, including: " + ", ".join([i.agent_name for i in interviews])
+
+    # ================================================================
+    # Graph Reasoning Tools (structural analysis, not just retrieval)
+    # ================================================================
+
+    def analyze_graph_structure(self, graph_id: str, query: str = "") -> str:
+        """
+        [Graph Structure Analysis]
+
+        Runs degree centrality, community detection, and bridge entity identification.
+        Returns a structured analysis of the graph's topology — who is central,
+        what clusters exist, and which entities connect disparate groups.
+        """
+        logger.info(f"Analyzing graph structure for {graph_id}")
+
+        lines = ["=== Graph Structure Analysis ===", ""]
+
+        # 1. Degree centrality
+        try:
+            top_entities = self.storage.get_degree_centrality(graph_id, limit=15)
+            if top_entities:
+                lines.append("**Most Connected Entities (Degree Centrality):**")
+                for i, entity in enumerate(top_entities[:10], 1):
+                    types_str = ", ".join(entity.get("types", []))
+                    lines.append(
+                        f"  {i}. {entity['name']} ({types_str}) — {entity['degree']} connections"
+                    )
+                    if entity.get("summary"):
+                        lines.append(f"     {entity['summary'][:120]}")
+                lines.append("")
+        except Exception as e:
+            logger.warning(f"Centrality query failed: {e}")
+            lines.append("(Centrality analysis unavailable)")
+            lines.append("")
+
+        # 2. Community detection
+        try:
+            communities = self.storage.get_entity_communities(graph_id)
+            if communities:
+                lines.append(f"**Communities Detected: {len(communities)}**")
+                for i, community in enumerate(communities[:5], 1):
+                    names = [n["name"] for n in community[:8]]
+                    types = set()
+                    for n in community:
+                        types.update(n.get("types", []))
+                    names_str = ", ".join(names)
+                    if len(community) > 8:
+                        names_str += f", ... (+{len(community) - 8} more)"
+                    lines.append(
+                        f"  Cluster {i} ({len(community)} entities, types: {', '.join(types)}):"
+                    )
+                    lines.append(f"    {names_str}")
+                lines.append("")
+
+                # Identify isolated vs interconnected structure
+                if len(communities) == 1:
+                    lines.append("  → All entities form ONE connected component (densely interconnected)")
+                elif len(communities) <= 3:
+                    lines.append(f"  → {len(communities)} distinct clusters — look for bridge entities that connect them")
+                else:
+                    lines.append(f"  → {len(communities)} clusters — fragmented graph, possible information silos")
+                lines.append("")
+        except Exception as e:
+            logger.warning(f"Community detection failed: {e}")
+            lines.append("(Community detection unavailable)")
+            lines.append("")
+
+        # 3. Bridge entities
+        try:
+            bridges = self.storage.get_bridge_entities(graph_id, limit=5)
+            if bridges:
+                lines.append("**Bridge Entities (Connectors Between Clusters):**")
+                for entity in bridges:
+                    types_str = ", ".join(entity.get("types", []))
+                    lines.append(
+                        f"  - {entity['name']} ({types_str}) — "
+                        f"{entity['degree']} connections, bridge score: {entity.get('bridge_score', 'N/A')}"
+                    )
+                lines.append("  → These entities control information flow between groups")
+                lines.append("")
+        except Exception as e:
+            logger.debug(f"Bridge entity query failed: {e}")
+
+        return "\n".join(lines)
+
+    def find_causal_path(self, graph_id: str, source: str, target: str) -> str:
+        """
+        [Causal Path Finder]
+
+        Traces the shortest relationship path between two entities.
+        Each step is annotated with the edge fact, revealing the causal chain.
+        """
+        logger.info(f"Finding path: {source} → {target}")
+
+        try:
+            steps = self.storage.get_shortest_path(graph_id, source, target)
+        except Exception as e:
+            return f"Path search failed: {str(e)}"
+
+        if not steps:
+            return f"No path found between '{source}' and '{target}' within 6 hops."
+
+        lines = [f"=== Causal Path: {source} → {target} ({len(steps)} steps) ===", ""]
+
+        for i, step in enumerate(steps, 1):
+            fact = step.get("fact", "")
+            relation = step.get("relation", "related to")
+            lines.append(
+                f"  Step {i}: {step['source']} --[{relation}]--> {step['target']}"
+            )
+            if fact:
+                lines.append(f"    Fact: \"{fact}\"")
+        lines.append("")
+        lines.append("This path shows how these two entities are connected through the knowledge graph.")
+
+        return "\n".join(lines)
+
+    def detect_contradictions(self, graph_id: str) -> str:
+        """
+        [Contradiction Detector]
+
+        Finds entity pairs connected by edges with opposing sentiments.
+        Contradictions reveal tension points, evolving relationships, or conflicting perspectives.
+        """
+        logger.info(f"Detecting contradictions in graph {graph_id}")
+
+        try:
+            contradictions = self.storage.detect_contradictions(graph_id, limit=15)
+        except Exception as e:
+            return f"Contradiction detection failed: {str(e)}"
+
+        if not contradictions:
+            return "No clear contradictions detected in the graph. All relationships appear internally consistent."
+
+        lines = [f"=== Contradictions Detected: {len(contradictions)} ===", ""]
+
+        for i, c in enumerate(contradictions[:10], 1):
+            lines.append(
+                f"**{i}. {c['source_name']} ↔ {c['target_name']}** "
+                f"({c['contradiction_type']})"
+            )
+            for j, edge in enumerate(c["edges"]):
+                sentiment = c["sentiments"][j] if j < len(c["sentiments"]) else "?"
+                fact = edge.get("fact", "")
+                lines.append(f"  [{sentiment.upper()}] \"{fact[:200]}\"")
+            lines.append("")
+
+        lines.append(
+            "These contradictions may indicate: evolving relationships, "
+            "conflicting perspectives from different sources, or temporal shifts in stance."
+        )
+
+        return "\n".join(lines)

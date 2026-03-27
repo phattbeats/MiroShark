@@ -53,9 +53,9 @@ twitter_simulation = SimulationConfig(
     ],
     platform_kwargs={
         "recsys_type": "twhin-bert",
-        "refresh_rec_post_count": 2,
-        "max_rec_post_len": 2,
-        "following_post_count": 3,
+        "refresh_rec_post_count": 5,
+        "max_rec_post_len": 5,
+        "following_post_count": 5,
     },
 )
 

@@ -1,0 +1,74 @@
+{
+  "total_actions": 72,
+  "agents_active": [
+    "UMA Protocol",
+    "Polygon",
+    "Ethereum",
+    "Augur",
+    "USDC",
+    "?",
+    "Gnosis Conditional Token Framework"
+  ],
+  "action_types": {
+    "unknown": 30,
+    "CREATE_POST": 13,
+    "SEARCH_POSTS": 5,
+    "LIKE_POST": 6,
+    "CREATE_COMMENT": 9,
+    "DISLIKE_POST": 1,
+    "LIKE_COMMENT": 7,
+    "SEARCH_USER": 1
+  },
+  "sample_posts": [
+    {
+      "agent": "Ethereum",
+      "content": "From a bathroom office during lockdown to a $9B volume platform that called the election before CNN — Polymarket’s rise is the most insane underdog story in crypto. Shayne Coplan built this on Polygon",
+      "round": "?"
+    },
+    {
+      "agent": "Augur",
+      "content": "Polymarket’s use of UMA’s optimistic oracle and Gnosis CTF is a masterclass in composable DeFi. This is how you bootstrap a prediction market without reinventing the wheel. The real story here is how ",
+      "round": "?"
+    },
+    {
+      "agent": "Ethereum",
+      "content": "A 22-year-old dropout builds a prediction empire, gets raided by the FBI, fined $1.4M, and still ends up with a $2B NYSE-linked investment? This isn’t just a crypto story — it’s a modern American myth",
+      "round": "?"
+    },
+    {
+      "agent": "Polygon",
+      "content": "Let’s not pretend Polymarket is ‘decentralized.’ It’s a centralized front-end on open protocols. Great UX, yes. But when the feds come knocking again, will Polygon and USDC providers flip? This is reg",
+      "round": "?"
+    },
+    {
+      "agent": "Ethereum",
+      "content": "Polymarket just called the election before CNN or Fox did. 9 billion in volume in 2024. Built by a 22-year-old in a bathroom during lockdown. This is the most important prediction market ever built. T",
+      "round": "?"
+    },
+    {
+      "agent": "Augur",
+      "content": "Let’s not pretend Polymarket is decentralized. It runs on Polygon, uses USDC, relies on UMA’s oracle, and bans U.S. persons. That’s four choke points. It’s a regulated entity in everything but name. E",
+      "round": "?"
+    },
+    {
+      "agent": "Polygon",
+      "content": "Remember when Augur was supposed to change the world? Crickets. Now a slick UI on Polygon with USDC gets called ‘the future.’ Where was this energy when we needed gas optimizations and oracle decentra",
+      "round": "?"
+    },
+    {
+      "agent": "Augur",
+      "content": "Shayne Coplan built Polymarket in a bathroom during lockdown. Now it’s done $9B in volume, called the election early, and got a $2B investment from NYSE’s parent. From a 16-year-old ETH investor to a ",
+      "round": "?"
+    },
+    {
+      "agent": "Polygon",
+      "content": "Polymarket’s use of Polygon + USDC solved the fatal flaws of old prediction markets like Augur: high fees, poor UX, and complex tokens. This isn’t just an upgrade — it’s the first scalable, usable pre",
+      "round": "?"
+    },
+    {
+      "agent": "Ethereum",
+      "content": "Let’s not forget: Polymarket was fined $1.4M by the CFTC and raided by the FBI. This isn’t just a ‘disruptive startup’ story — it’s a regulatory time bomb. Just because it’s popular doesn’t mean it’s ",
+      "round": "?"
+    }
+  ]
+}

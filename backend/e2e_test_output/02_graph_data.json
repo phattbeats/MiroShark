@@ -1,0 +1,3259 @@
+{
+  "edge_count": 108,
+  "edges": [
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:28.538514+00:00",
+      "episode_ids": [
+        "d41359e9-162e-4774-921b-585efc823b55"
+      ],
+      "episodes": [
+        "d41359e9-162e-4774-921b-585efc823b55"
+      ],
+      "expired_at": null,
+      "fact": "The parent company of the New York Stock Exchange invested $2 billion in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "New York Stock Exchange",
+      "source_node_uuid": "6e9e4e75-8d4b-4982-b425-62d96b0e2dbe",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e92c8c78-50de-443a-a03b-f021545352ee",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan tweeted that Polymarket's inclusion on the Bloomberg Terminal marked its entry into mainstream news and finance.",
+      "fact_type": "COMMENTS_ON",
+      "invalid_at": null,
+      "name": "COMMENTS_ON",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Bloomberg",
+      "target_node_uuid": "e3a93846-f2c5-42fc-b03f-9329d71e655c",
+      "uuid": "7ea12725-58ee-4621-a34a-ebb0678a0716",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan is the founder of Polymarket.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "c76a4631-1f3f-41e1-9a57-e1dfcf5b7e95",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan hired J. Christopher Giancarlo as chairman of Polymarket's advisory board in May 2022.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "J. Christopher Giancarlo",
+      "target_node_uuid": "112ae8f4-7de0-4247-a800-75daa653ae59",
+      "uuid": "a1902caa-1bf1-4839-a1f9-0d8a8ab5e7dd",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan is the founder of Polymarket and led its strategic pivot in 2022.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "879265ef-085d-41c8-8288-c05db0370332",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "episode_ids": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "episodes": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan was influenced by Robin Hanson's concept of futarchy when creating Polymarket.",
+      "fact_type": "INFLUENCED_BY",
+      "invalid_at": null,
+      "name": "INFLUENCED_BY",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Robin Hanson",
+      "target_node_uuid": "0064ae63-5029-484f-97ba-23d4d1902872",
+      "uuid": "2c75aba3-dd5e-4ad1-bc4a-e5ce9848d110",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "episode_ids": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "episodes": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan founded Polymarket and coded it from his bathroom.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "6a7a3297-5b1b-4c26-b3ea-c9eca7c01c74",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "episode_ids": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "episodes": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan was influenced by Friedrich Hayek's theories on decentralized knowledge when building Polymarket.",
+      "fact_type": "INFLUENCED_BY",
+      "invalid_at": null,
+      "name": "INFLUENCED_BY",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Friedrich Hayek",
+      "target_node_uuid": "e249f37f-b195-4394-9721-f580f92b513e",
+      "uuid": "f61c6465-09c6-4a76-88a7-bf4c3cc0ce17",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:28.538799+00:00",
+      "episode_ids": [
+        "e9eb9b7e-2f4b-411d-bab1-b9796e4be636"
+      ],
+      "episodes": [
+        "e9eb9b7e-2f4b-411d-bab1-b9796e4be636"
+      ],
+      "expired_at": null,
+      "fact": "At age 14, Shayne Coplan cold-emailed the SEC about creating an electronic stock exchange.",
+      "fact_type": "COMMENTS_ON",
+      "invalid_at": null,
+      "name": "COMMENTS_ON",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "SEC",
+      "target_node_uuid": "929de8ae-cf0e-4713-bfa3-8947ec41f83c",
+      "uuid": "7fa20b9a-e358-4ebb-b79b-c28b12adab9a",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:28.538799+00:00",
+      "episode_ids": [
+        "e9eb9b7e-2f4b-411d-bab1-b9796e4be636"
+      ],
+      "episodes": [
+        "e9eb9b7e-2f4b-411d-bab1-b9796e4be636"
+      ],
+      "expired_at": null,
+      "fact": "At age 16, Shayne Coplan spent $150 buying Ethereum at $0.30 per token during the 2014 ICO.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Shayne Coplan",
+      "source_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "target_node_name": "Ethereum",
+      "target_node_uuid": "e5c37e92-6207-4e75-955f-4bca238bd667",
+      "uuid": "728b2741-07da-4900-a169-f262fe0e98f9",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket provided odds on the Trump-vs-Harris election, which included Kamala Harris as a candidate.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Harris",
+      "target_node_uuid": "f0305ba6-1114-4407-a860-7deac824cb47",
+      "uuid": "4b77a804-5d03-4181-b5b8-c2d25bd8dc04",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "episode_ids": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "episodes": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "expired_at": null,
+      "fact": "By 2025, Polymarket and Kalshi had formed a de facto duopoly in the prediction market space.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Kalshi",
+      "target_node_uuid": "eaa83c72-36c6-45c0-b120-49c9c8e81551",
+      "uuid": "1a362717-462d-4c1c-abb4-3eb30513f87b",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "episode_ids": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "episodes": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket was initially built on the Ethereum blockchain.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Ethereum",
+      "target_node_uuid": "e5c37e92-6207-4e75-955f-4bca238bd667",
+      "uuid": "4567bbee-224c-45da-ab84-2c3bacdf575a",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket acquired QCX LLC for $112 million in July 2025.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "QCX LLC",
+      "target_node_uuid": "15dc2afe-6eeb-46d0-91c7-0b5021fce9ac",
+      "uuid": "dece6d50-451d-4c0e-8d71-bf49f19f8b4d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket called the investigation by the DOJ 'obvious political retribution by the outgoing administration.'",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "DOJ",
+      "target_node_uuid": "e2623902-44ef-4eab-84dd-ef0e0e5a3d10",
+      "uuid": "0335e908-bc77-4cfd-83ed-6fc3f91c1bef",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket called the investigation by the CFTC 'obvious political retribution by the outgoing administration.'",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "CFTC",
+      "target_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "uuid": "dd433f36-b680-464f-b1c2-1e7d2c409a13",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114573+00:00",
+      "episode_ids": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "episodes": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan is the founder of Polymarket and affiliated with the organization.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "f24b11ba-1215-48c1-a6f3-7244dfcf655d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009253+00:00",
+      "episode_ids": [
+        "a04114cc-69da-47f1-9343-c1132ec28e19"
+      ],
+      "episodes": [
+        "a04114cc-69da-47f1-9343-c1132ec28e19"
+      ],
+      "expired_at": null,
+      "fact": "Shayne Coplan is the founder of Polymarket.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "f7221048-b599-4f70-9545-64735f700cc5",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.008869+00:00",
+      "episode_ids": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "episodes": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "expired_at": null,
+      "fact": "Théo is listed on Polymarket's leaderboard as the biggest winner.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Théo",
+      "target_node_uuid": "b5883e97-768a-4406-bb68-25161c88cfdb",
+      "uuid": "b6291324-8f4a-4fcd-8749-32ea39123af7",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009100+00:00",
+      "episode_ids": [
+        "d558c346-cfa3-4dc2-819e-b27e0d01fa44"
+      ],
+      "episodes": [
+        "d558c346-cfa3-4dc2-819e-b27e0d01fa44"
+      ],
+      "expired_at": null,
+      "fact": "On November 5, 2024, Polymarket indicated a 97% probability of Trump winning the U.S. presidential election by 12:51 AM EST, effectively forecasting the outcome before major television networks.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "2024 U.S. presidential election",
+      "target_node_uuid": "6cda178d-7aa5-420c-adb4-5b7c4f38af1d",
+      "uuid": "4e75d4bd-acd9-4d26-9bb7-59f16188598a",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009100+00:00",
+      "episode_ids": [
+        "d558c346-cfa3-4dc2-819e-b27e0d01fa44"
+      ],
+      "episodes": [
+        "d558c346-cfa3-4dc2-819e-b27e0d01fa44"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket proactively blocked French users, indicating self-regulatory action likely due to legal or compliance concerns in France.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "French users",
+      "target_node_uuid": "b7eaac34-a914-42c6-80f2-539b942959f2",
+      "uuid": "d425b30d-0ed1-4c2d-987a-9ada687591dc",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:12.389382+00:00",
+      "episode_ids": [
+        "85fa68b6-e993-4059-ae7c-3ac4c50def23"
+      ],
+      "episodes": [
+        "85fa68b6-e993-4059-ae7c-3ac4c50def23"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket's investigation confirmed that all accounts involved in the suspicious activity belonged to Théo.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Théo",
+      "target_node_uuid": "b5883e97-768a-4406-bb68-25161c88cfdb",
+      "uuid": "d8e72e18-658a-4bb9-aad4-aff47f33e68b",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "The French whale placed an $80 million bet on Trump via the Polymarket platform.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "French whale",
+      "target_node_uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f",
+      "uuid": "67bb80c1-7f97-4e7d-a595-1f46ef496e13",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket provided odds on the Trump-vs-Harris election, which were widely cited in media and by investors.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Trump",
+      "target_node_uuid": "60a10777-8892-491c-94ea-83e14bca7d65",
+      "uuid": "58ce8b26-3fb0-4980-b6a3-48d1c8d87344",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "episode_ids": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "episodes": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket is presented as having a decisive edge over Augur by eliminating the need to run Ethereum nodes, reducing gas fees, and avoiding a confusing native token system.",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Augur",
+      "target_node_uuid": "a591a9bb-e338-429f-8b60-b38ba6aaebcd",
+      "uuid": "f66079bd-14e9-4e71-894e-1fc5bcbdfc3b",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "episode_ids": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "episodes": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket uses the Polygon blockchain to facilitate low-cost and fast transactions.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Polygon",
+      "target_node_uuid": "1eecb19a-2d89-4297-9f34-74a4159e33a1",
+      "uuid": "242f1e2e-2cd6-479a-8bd3-93008442d874",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "episode_ids": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "episodes": [
+        "8cd14141-9e5d-498f-a8e0-07b3bc34a040"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket uses USDC as its primary trading currency for stability and ease of use.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "USDC",
+      "target_node_uuid": "e102aa19-5149-4768-9dff-1079bca74246",
+      "uuid": "b0f88ddf-c0f3-4c9e-87ee-1be7e750517f",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.148108+00:00",
+      "episode_ids": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "episodes": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket correctly signaled Joe Biden's victory in the 2020 U.S. presidential election weeks before the race was officially called.",
+      "fact_type": "SIGNALS",
+      "invalid_at": null,
+      "name": "SIGNALS",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Biden",
+      "target_node_uuid": "a840eb23-2e24-4e7c-be0e-f7d132b6db24",
+      "uuid": "4923987f-b4dc-48cc-8458-cce27da8810c",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.148108+00:00",
+      "episode_ids": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "episodes": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket hosted prediction markets on Donald Trump's 2020 presidential election outcome.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Trump",
+      "target_node_uuid": "60a10777-8892-491c-94ea-83e14bca7d65",
+      "uuid": "560ac291-2d17-4558-a594-cd41faa86b36",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.148108+00:00",
+      "episode_ids": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "episodes": [
+        "d7734d22-7cb1-41e1-beac-2e88a91292a6"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket hosted prediction markets on Joe Biden's 2020 presidential election outcome.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Biden",
+      "target_node_uuid": "a840eb23-2e24-4e7c-be0e-f7d132b6db24",
+      "uuid": "7bc091f8-69c4-4b8a-951d-6a0df3bcdd8d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket shifted its focus to international users, with Germany becoming a primary market.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Germany",
+      "target_node_uuid": "b766f83a-efab-4815-a5cb-f417c875f3fe",
+      "uuid": "d4ca0fe5-747d-4ff4-ad9f-cb519aa2ad30",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket shifted its focus to international users, with Canada becoming a primary market.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Canada",
+      "target_node_uuid": "39865dce-26c4-4ad3-afbb-18b537e471a9",
+      "uuid": "1fc58fbe-786c-45d8-9b8e-50d7bbc819a2",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket shifted its focus to international users, with the UK becoming a primary market.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "UK",
+      "target_node_uuid": "74ea9e8c-bf64-455e-ad56-18c9be6c67da",
+      "uuid": "a7ccd692-0a25-4fbd-ac53-1ea33e0375b7",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket hired J. Christopher Giancarlo as chairman of its advisory board in May 2022.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "J. Christopher Giancarlo",
+      "target_node_uuid": "112ae8f4-7de0-4247-a800-75daa653ae59",
+      "uuid": "17d04ecc-07bd-4f06-806c-1d9d66b03d11",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624681+00:00",
+      "episode_ids": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "episodes": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "expired_at": null,
+      "fact": "Mother Jones criticized Polymarket's promotion of a viral prediction market.",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Mother Jones",
+      "target_node_uuid": "8d7c9edd-0a60-412a-8e32-58f2afa9c8bd",
+      "uuid": "4ddb753b-510f-4375-8bce-1f992d606978",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624681+00:00",
+      "episode_ids": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "episodes": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "expired_at": null,
+      "fact": "Gizmodo criticized Polymarket's promotion of a viral prediction market.",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Gizmodo",
+      "target_node_uuid": "51cb4ad0-41c4-4cc1-8b2d-58e37cce66d5",
+      "uuid": "d5ba52f8-3f85-4bc4-bfeb-7c6e2d79d643",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:28.641095+00:00",
+      "episode_ids": [
+        "42acbc4a-52f0-41b8-8aa2-115ff6dd5924"
+      ],
+      "episodes": [
+        "42acbc4a-52f0-41b8-8aa2-115ff6dd5924"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket launched a prediction market on whether the missing submarine would be found by June 23, attracting over $300,000 in wagers.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e7452b6d-2188-48e6-9b4b-6f3bddca565b",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624681+00:00",
+      "episode_ids": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "episodes": [
+        "48f641a7-b1ff-414c-bb20-6f044b0020d1"
+      ],
+      "expired_at": null,
+      "fact": "Polymarket's official Twitter account was actively promoting the prediction market and replying to viral tweets.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Polymarket",
+      "source_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "42687d59-4fec-432c-9516-473034f97a1e",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "episode_ids": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "episodes": [
+        "03fef013-b13c-4b4e-b442-585731085725"
+      ],
+      "expired_at": null,
+      "fact": "Robin Hanson's idea of futarchy influenced the core design and thesis of Polymarket.",
+      "fact_type": "INFLUENCED_BY",
+      "invalid_at": null,
+      "name": "INFLUENCED_BY",
+      "source_node_name": "Robin Hanson",
+      "source_node_uuid": "0064ae63-5029-484f-97ba-23d4d1902872",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "a9328d96-67b1-4d4f-b4d9-a798f1aaaf96",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.147813+00:00",
+      "episode_ids": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "episodes": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "expired_at": null,
+      "fact": "Zvi Mowshowitz collaborated with Polymarket on market design, suggesting a formal or informal affiliation.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Zvi Mowshowitz",
+      "source_node_uuid": "9527ee20-914c-499b-a0bf-1e3e6cc833e1",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "783a2afe-c014-4cb0-be0c-6947eba0e830",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.147813+00:00",
+      "episode_ids": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "episodes": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "expired_at": null,
+      "fact": "Zvi Mowshowitz actively collaborated with Polymarket on market design, indicating engagement with the platform.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Zvi Mowshowitz",
+      "source_node_uuid": "9527ee20-914c-499b-a0bf-1e3e6cc833e1",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "3e5e853b-5804-4994-a33b-c3c3e68ddcd6",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:52:53.147813+00:00",
+      "episode_ids": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "episodes": [
+        "3a68a67e-d092-4cd7-87f1-0ac40b530289"
+      ],
+      "expired_at": null,
+      "fact": "Zvi Mowshowitz is part of the LessWrong rationalist community.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "LessWrong",
+      "source_node_uuid": "1d843a74-3b6d-42b4-8dde-56d86036ff39",
+      "target_node_name": "Zvi Mowshowitz",
+      "target_node_uuid": "9527ee20-914c-499b-a0bf-1e3e6cc833e1",
+      "uuid": "ab4cd3fd-cc85-48c9-8450-ff38bbab3e11",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "Trump's campaign team tracked Polymarket odds from Mar-a-Lago on election night.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Trump",
+      "source_node_uuid": "60a10777-8892-491c-94ea-83e14bca7d65",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "ace9c227-864b-432a-9d87-fde3ff59fff7",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "episode_ids": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "episodes": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "expired_at": null,
+      "fact": "General Catalyst led a $25 million Series A investment in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "General Catalyst",
+      "source_node_uuid": "5b8f2fac-b413-46a2-9389-5068eaf928d0",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "35035146-3ca0-488b-894c-2bf73e429e67",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "episode_ids": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "episodes": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "expired_at": null,
+      "fact": "Polychain participated in Polymarket's $25 million Series A funding round.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Polychain",
+      "source_node_uuid": "45eff113-4339-4e84-9218-5237c2a56b05",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "01f7ea06-b80e-4e46-b1b9-8e1786216fbb",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "episode_ids": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "episodes": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "expired_at": null,
+      "fact": "Joe Gebbia, Airbnb co-founder, participated in Polymarket's Series A funding round.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Joe Gebbia",
+      "source_node_uuid": "692c6109-d57b-426c-a2f2-d03d9d841f4a",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "9c9a8dcb-0bf3-4bf1-a9c8-7dd000aaea19",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T03:00:04.871385+00:00",
+      "episode_ids": [
+        "e7366b98-700a-4e1c-a4ca-81465c356b55"
+      ],
+      "episodes": [
+        "e7366b98-700a-4e1c-a4ca-81465c356b55"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC regulates Polymarket and entered into a settlement with the company.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "29eb280a-91ed-49d4-8d54-e229a6514f33",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.922286+00:00",
+      "episode_ids": [
+        "7cf5a9ff-a49a-4e59-bcd6-3993b833950d"
+      ],
+      "episodes": [
+        "7cf5a9ff-a49a-4e59-bcd6-3993b833950d"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC granted an Amended Order of Designation enabling the legal US market reentry of Intercontinental Exchange in November 2025.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Intercontinental Exchange",
+      "target_node_uuid": "45c23269-7917-4c0a-80d9-bf4a1462c02e",
+      "uuid": "fac36db3-1210-4eda-a2a8-ac4af0384b95",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC investigated Polymarket but formally ended the investigation on July 15, 2025, without bringing new charges.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e94cd821-eb07-4138-95b5-a0549f47b722",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC conducted an investigation into Shayne Coplan and Polymarket but ended it without bringing new charges on July 15, 2025.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "2c3ddb43-e181-4fff-a6a3-9f0e4886d399",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114573+00:00",
+      "episode_ids": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "episodes": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC's investigation into Polymarket involved Shayne Coplan as its founder.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "407e53be-8ce5-4c5c-9d1b-3ae030574034",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114573+00:00",
+      "episode_ids": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "episodes": [
+        "e53372eb-b63e-4176-97b3-5fe68d9f6c2a"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC regulated Polymarket and had a 2022 settlement concerning its operations.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "1e9fb679-1c47-46cd-aa63-d6f218ce3d34",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.429956+00:00",
+      "episode_ids": [
+        "4207973a-8a63-41b5-89f8-2f3d4513d491"
+      ],
+      "episodes": [
+        "4207973a-8a63-41b5-89f8-2f3d4513d491"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC took enforcement action against Polymarket for offering off-exchange event-based binary options without proper registration.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "83453013-c1a5-4bc6-8827-d402977ca8d5",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.429956+00:00",
+      "episode_ids": [
+        "4207973a-8a63-41b5-89f8-2f3d4513d491"
+      ],
+      "episodes": [
+        "4207973a-8a63-41b5-89f8-2f3d4513d491"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC required Polymarket to pay a civil penalty, wind down non-compliant markets, and cease further violations.",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "1c8514be-d514-4fbf-b568-55c20cadbc15",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "episode_ids": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "episodes": [
+        "7d71173d-aa2d-46f8-afac-c5390662d4de"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC took enforcement action against Polymarket, signaling regulatory oversight.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "CFTC",
+      "source_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "ef342c91-1e6b-424d-9b62-d300b110ed9e",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Polychain Capital led a $4 million seed round in Polymarket in October 2020.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Polychain Capital",
+      "source_node_uuid": "ecc4d625-8533-4498-bbc8-cfecc05fadf0",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "76c0979f-e0d5-420c-90cf-dded93490c7d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Naval Ravikant was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Naval Ravikant",
+      "source_node_uuid": "870c8be4-ffee-45a0-ab96-7b6e5302313b",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "c2eff92c-2412-46d3-9a9c-140270990613",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Balaji Srinivasan was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Balaji Srinivasan",
+      "source_node_uuid": "0664df6d-ae13-41d4-9adb-75a6bb42fa9d",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "f81dd0ba-fe39-4224-8406-3d12728fca73",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Robert Leshner was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Robert Leshner",
+      "source_node_uuid": "4b71b8e4-8e70-42e2-9a35-c6f680138cb8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "ab217a79-d9ff-4fea-a03a-64bdbca30083",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Stani Kulechov was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Stani Kulechov",
+      "source_node_uuid": "fa0b3783-9c00-4756-b9ae-e16e0773c43e",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e0132bee-5d1a-4a41-848d-d96fb105dc20",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Kain Warwick was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Kain Warwick",
+      "source_node_uuid": "14499498-c2d5-4763-aa15-d4cc15284502",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "1357c8a0-4ad3-4d8d-a5af-d8a279a1dcab",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "episode_ids": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "episodes": [
+        "e3014a77-2329-4363-829c-142deedc3a70"
+      ],
+      "expired_at": null,
+      "fact": "Meltem Demirors was part of the angel investor group that invested in Polymarket.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Meltem Demirors",
+      "source_node_uuid": "4639ae22-d0dd-4543-bb4f-41dc4c9ff983",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "6b27c891-5d57-447c-92b3-1bb9b66cdb67",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "episode_ids": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "episodes": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "expired_at": null,
+      "fact": "The Commodity Futures Trading Commission issued a cease-and-desist order to Polymarket, indicating regulatory oversight.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "Commodity Futures Trading Commission",
+      "source_node_uuid": "f20c4cba-ba25-4c03-b271-d423291fece4",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "4f525f4d-ae90-468f-9ef9-b592e48ee399",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430382+00:00",
+      "episode_ids": [
+        "51729a4a-59a4-4578-a04b-1796e2f54a3a"
+      ],
+      "episodes": [
+        "51729a4a-59a4-4578-a04b-1796e2f54a3a"
+      ],
+      "expired_at": null,
+      "fact": "The Commodity Futures Trading Commission took regulatory action against Polymarket, leading to the geo-blocking of US users.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "Commodity Futures Trading Commission",
+      "source_node_uuid": "f20c4cba-ba25-4c03-b271-d423291fece4",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "66a6177a-752d-411f-a92c-cff503c13ab4",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "episode_ids": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "episodes": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "expired_at": null,
+      "fact": "Vincent McGonagle is the Acting Enforcement Director at the Commodity Futures Trading Commission.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Vincent McGonagle",
+      "source_node_uuid": "bba25a72-9a29-452b-8eda-29b4127e5e17",
+      "target_node_name": "Commodity Futures Trading Commission",
+      "target_node_uuid": "f20c4cba-ba25-4c03-b271-d423291fece4",
+      "uuid": "57a6562a-f8aa-4051-94bd-04a436755196",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "episode_ids": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "episodes": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "expired_at": null,
+      "fact": "CoinDesk has published news about Polymarket and its regulatory challenges.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "CoinDesk",
+      "source_node_uuid": "532768bf-a720-4899-ac21-7e2f289e4017",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "9340e85f-f3df-49f7-99c4-34fac2aafb4e",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "episode_ids": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "episodes": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "expired_at": null,
+      "fact": "Blockworks has reported on Polymarket's operations and regulatory issues.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Blockworks",
+      "source_node_uuid": "41ceb701-33e3-44a0-84d7-5e16ec66ab5a",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "24e03638-6b16-4af2-b1e9-4d9254ba9ea5",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "episode_ids": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "episodes": [
+        "fd2694d6-a7e3-41ec-8cf8-41a42bbb178d"
+      ],
+      "expired_at": null,
+      "fact": "Blockchainandthelaw has covered legal developments involving Polymarket.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Blockchainandthelaw",
+      "source_node_uuid": "156c4b26-1716-43ee-a2af-781e91606e5d",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "9cca6164-a641-43f1-b71a-1867873896ee",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "episode_ids": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "episodes": [
+        "a6c7deb4-bb14-4db6-a412-6b5706911237"
+      ],
+      "expired_at": null,
+      "fact": "J. Christopher Giancarlo is the former Chairman of the CFTC.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "J. Christopher Giancarlo",
+      "source_node_uuid": "112ae8f4-7de0-4247-a800-75daa653ae59",
+      "target_node_name": "CFTC",
+      "target_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "uuid": "68300956-e778-488f-9cbd-e2cedf0c1950",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624431+00:00",
+      "episode_ids": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "episodes": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "expired_at": null,
+      "fact": "Gizmodo reported on Polymarket, contributing to its public controversy.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Gizmodo",
+      "source_node_uuid": "51cb4ad0-41c4-4cc1-8b2d-58e37cce66d5",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "94ee63b7-11ac-46ec-afa9-2b2592c8f0b4",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624431+00:00",
+      "episode_ids": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "episodes": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "expired_at": null,
+      "fact": "Mother Jones reported on Polymarket, adding to the criticism during the incident.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Mother Jones",
+      "source_node_uuid": "8d7c9edd-0a60-412a-8e32-58f2afa9c8bd",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "96a82ee3-5b83-4520-af31-8b2ae7ef7ab2",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:40.624431+00:00",
+      "episode_ids": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "episodes": [
+        "c3457683-e732-4193-bee2-bbdcd9ae29f4"
+      ],
+      "expired_at": null,
+      "fact": "UMA's dispute resolution system was used by Polymarket during the incident.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "UMA",
+      "source_node_uuid": "68a60898-27a6-407a-bf3e-ccc52be87e27",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "6842909b-201b-4801-b7df-6eca2bd129ab",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "episode_ids": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "episodes": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "expired_at": null,
+      "fact": "The 2024 US presidential election cycle led to increased trading activity on Polymarket, transforming it into a global information utility.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "2024 US presidential election",
+      "source_node_uuid": "8c312898-d587-48b8-b70f-48f462b8a340",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "b33f724d-048d-46e2-b46e-ad46c9e4bdac",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "episode_ids": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "episodes": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "expired_at": null,
+      "fact": "Decrypt reported on Polymarket's growth during the 2024 US presidential election cycle.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Decrypt",
+      "source_node_uuid": "8754c76b-c99a-4d13-8dcf-4268031de400",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "f8df3180-c9c1-406f-b7ca-5e808cd3a811",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "DL News reported on the mysterious French trader who placed an $80 million bet on Trump.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "DL News",
+      "source_node_uuid": "dff355a3-1408-435e-81bb-2d452ec90ab8",
+      "target_node_name": "French whale",
+      "target_node_uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f",
+      "uuid": "c1cd8d6a-bd11-40c4-a098-1106f210d52d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "episode_ids": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "episodes": [
+        "68faafe0-5a14-415c-8e25-88113f59ff44"
+      ],
+      "expired_at": null,
+      "fact": "DL News covered the rise of Polymarket as a result of the 2024 US presidential election.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "DL News",
+      "source_node_uuid": "dff355a3-1408-435e-81bb-2d452ec90ab8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "395c45e2-b9ba-4aca-bc61-3af293f70847",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522057+00:00",
+      "episode_ids": [
+        "9c31330f-3746-41d8-8ec6-c312b81ab1c2"
+      ],
+      "episodes": [
+        "9c31330f-3746-41d8-8ec6-c312b81ab1c2"
+      ],
+      "expired_at": null,
+      "fact": "Nate Silver is the founder of FiveThirtyEight.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Nate Silver",
+      "source_node_uuid": "d213621f-41e9-453b-8ce7-eca355402202",
+      "target_node_name": "FiveThirtyEight",
+      "target_node_uuid": "0b90dce9-6d11-4cf4-8174-35e18cf20448",
+      "uuid": "0f50be17-80eb-45b1-959a-a62f9769d6d0",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "Bloomberg began displaying Polymarket election data on its Terminal as of August 29, 2024.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Bloomberg",
+      "source_node_uuid": "e3a93846-f2c5-42fc-b03f-9329d71e655c",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "7febca5f-69be-4531-8dce-4a4ddc4b3dc8",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "CNN began routinely citing Polymarket odds as an alternative to traditional polls.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "CNN",
+      "source_node_uuid": "64b57219-b8a0-49d8-a50e-d5fb95c6afb0",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e832a4ec-067b-4594-8a49-4bd1c980eead",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "NBC began routinely citing Polymarket odds as an alternative to traditional polls.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "NBC",
+      "source_node_uuid": "e728b7f6-734a-42f4-9e6b-e8247515bab8",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e935cff2-f804-40fd-b802-aa888a17147d",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "The Washington Post began routinely citing Polymarket odds as an alternative to traditional polls.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "The Washington Post",
+      "source_node_uuid": "f72e8004-8ee2-47f3-9fef-e57202d86de3",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "171a932a-6d18-4638-a3fc-e51f6ab2a244",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "episode_ids": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "episodes": [
+        "b725fb0e-0560-47e0-9ee7-02d9d01addc4"
+      ],
+      "expired_at": null,
+      "fact": "The New York Times began routinely citing Polymarket odds as an alternative to traditional polls.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "The New York Times",
+      "source_node_uuid": "ac64a6e3-0060-490a-9457-4d1752abe2cc",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "8ae89f81-8374-4cce-a753-c7ada61c7735",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "JP Morgan reportedly used Polymarket data through its non-US subsidiaries for financial analysis.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "JP Morgan",
+      "source_node_uuid": "7746e2a3-2fc1-4e3e-b506-4ab4ee6304bc",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "7eca43bc-3a4e-4bce-abd8-6ca117d3de06",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "Major hedge funds reportedly used Polymarket data through non-US subsidiaries for financial decision-making.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "major hedge funds",
+      "source_node_uuid": "155ef917-47cb-4723-857a-7af890a0a3c0",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "26d9ad5d-b917-4c6c-92e7-c5130bc50c91",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "episode_ids": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "episodes": [
+        "1b1f5247-f438-466a-980c-0cdc5495667b"
+      ],
+      "expired_at": null,
+      "fact": "Mainstream media repeatedly reported the Trump-vs-Harris probability chart from Polymarket, spreading it millions of times.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "mainstream media",
+      "source_node_uuid": "7bba8426-3313-4fdd-a397-29d33f653f9e",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "5cfba2b5-0318-4fb5-9236-3a21c66f3676",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "Fortune covered the emergence of the French whale as a key figure in the 2024 election prediction markets.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Fortune",
+      "source_node_uuid": "1aa8b87a-c3b7-4dd7-8ef9-f1b27fb09b8f",
+      "target_node_name": "French whale",
+      "target_node_uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f",
+      "uuid": "7a3be9e8-9d1b-4fb2-a6ec-e1bb2133d526",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "Crunchbase provides information about KuCoin as a cryptocurrency exchange.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Crunchbase",
+      "source_node_uuid": "e1caeaf9-80b5-4b8b-83e8-37262a13f56b",
+      "target_node_name": "KuCoin",
+      "target_node_uuid": "1d24c727-304e-4022-820c-cacba27279fb",
+      "uuid": "70c1da3a-da06-4788-af8b-d9824a2c7ce3",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "Wikipedia contains an entry about KuCoin, describing its role in the crypto industry.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Wikipedia",
+      "source_node_uuid": "360ae3fd-6c2c-4e24-a787-85535b2fcc2d",
+      "target_node_name": "KuCoin",
+      "target_node_uuid": "1d24c727-304e-4022-820c-cacba27279fb",
+      "uuid": "89e2c6e2-9268-4b5b-aa1b-4e8d6ced4b6b",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "Sacra published research related to KuCoin's market activity.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "Sacra",
+      "source_node_uuid": "d2e5500c-1e9e-475a-9f75-5ec0aef8f93c",
+      "target_node_name": "KuCoin",
+      "target_node_uuid": "1d24c727-304e-4022-820c-cacba27279fb",
+      "uuid": "9942a940-f265-4026-b55d-eb0bcf54ce78",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "The Block reported on the French whale who bet $80 million on Trump.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "The Block",
+      "source_node_uuid": "b30cd5ae-98d4-443c-b2be-d8437701f91e",
+      "target_node_name": "French whale",
+      "target_node_uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f",
+      "uuid": "7f6f49c9-8681-499f-90d3-419e23fa84da",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "episode_ids": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "episodes": [
+        "f5b205ca-892d-4011-9237-5061219886f0"
+      ],
+      "expired_at": null,
+      "fact": "The Defiant covered the story of the French whale's large bet on Trump.",
+      "fact_type": "REPORTS_ON",
+      "invalid_at": null,
+      "name": "REPORTS_ON",
+      "source_node_name": "The Defiant",
+      "source_node_uuid": "eab545c0-7c7c-4333-aa58-b36058a29721",
+      "target_node_name": "French whale",
+      "target_node_uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f",
+      "uuid": "aa7e45e6-39df-4506-841d-59ff654f8098",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.008869+00:00",
+      "episode_ids": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "episodes": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "expired_at": null,
+      "fact": "Théo traded on Polymarket by purchasing over 40% of Trump popular vote contracts.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Théo",
+      "source_node_uuid": "b5883e97-768a-4406-bb68-25161c88cfdb",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "fbde92a1-b1bc-43bb-bd69-272af7a6313e",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:12.389382+00:00",
+      "episode_ids": [
+        "85fa68b6-e993-4059-ae7c-3ac4c50def23"
+      ],
+      "episodes": [
+        "85fa68b6-e993-4059-ae7c-3ac4c50def23"
+      ],
+      "expired_at": null,
+      "fact": "Théo used Polymarket as a platform for his prediction market trading activities.",
+      "fact_type": "TRADES_ON",
+      "invalid_at": null,
+      "name": "TRADES_ON",
+      "source_node_name": "Théo",
+      "source_node_uuid": "b5883e97-768a-4406-bb68-25161c88cfdb",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "b2ec7ab9-c6c1-4768-8b2c-2f6f44ab1660",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.008869+00:00",
+      "episode_ids": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "episodes": [
+        "eff54183-439e-441e-9b90-929e9b8b2be1"
+      ],
+      "expired_at": null,
+      "fact": "France's gambling regulator investigated Polymarket, prompting it to block French users.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "France's gambling regulator",
+      "source_node_uuid": "8af6ad34-42b7-413f-8f3d-7c82ea3de913",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e2c71aba-5fc1-44bd-bf95-ccc599ec0c8f",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009253+00:00",
+      "episode_ids": [
+        "a04114cc-69da-47f1-9343-c1132ec28e19"
+      ],
+      "episodes": [
+        "a04114cc-69da-47f1-9343-c1132ec28e19"
+      ],
+      "expired_at": null,
+      "fact": "FBI agents raided Shayne Coplan's apartment, seizing his phone and electronic devices.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "FBI",
+      "source_node_uuid": "27f53fae-6419-49f6-8ee0-4e9e1c05e07f",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "02b4efbc-31e0-4db4-8caf-c577759ec9cd",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "The DOJ conducted an investigation into Shayne Coplan, the founder of Polymarket, but ended it without charges on July 15, 2025.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "DOJ",
+      "source_node_uuid": "e2623902-44ef-4eab-84dd-ef0e0e5a3d10",
+      "target_node_name": "Shayne Coplan",
+      "target_node_uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac",
+      "uuid": "b121c2d5-8ab1-40f2-bcfb-849635f40229",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "The DOJ investigated Polymarket but formally ended the investigation on July 15, 2025, without bringing new charges.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "DOJ",
+      "source_node_uuid": "e2623902-44ef-4eab-84dd-ef0e0e5a3d10",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "38572402-840b-431b-92b0-a66708035060",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "Brian Armstrong criticized the administration's actions, saying 'What the f*** is wrong with this administration' in response to the investigation.",
+      "fact_type": "OPPOSES",
+      "invalid_at": null,
+      "name": "OPPOSES",
+      "source_node_name": "Brian Armstrong",
+      "source_node_uuid": "ece84417-1c5f-4035-af20-e888010ac299",
+      "target_node_name": "DOJ",
+      "target_node_uuid": "e2623902-44ef-4eab-84dd-ef0e0e5a3d10",
+      "uuid": "a45cb4af-a6d7-42cc-9814-0104f1bdd736",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "episode_ids": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "episodes": [
+        "36373012-db81-41fe-8386-e64df0df90ed"
+      ],
+      "expired_at": null,
+      "fact": "Brian Armstrong is the CEO of Coinbase.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Brian Armstrong",
+      "source_node_uuid": "ece84417-1c5f-4035-af20-e888010ac299",
+      "target_node_name": "Coinbase",
+      "target_node_uuid": "5d79b3eb-aa75-4b98-9c46-d0356a9fbec9",
+      "uuid": "958bd2ef-e3cd-483d-8e70-47f60f11a955",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.922286+00:00",
+      "episode_ids": [
+        "7cf5a9ff-a49a-4e59-bcd6-3993b833950d"
+      ],
+      "episodes": [
+        "7cf5a9ff-a49a-4e59-bcd6-3993b833950d"
+      ],
+      "expired_at": null,
+      "fact": "Intercontinental Exchange is the parent company of the New York Stock Exchange.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Intercontinental Exchange",
+      "source_node_uuid": "45c23269-7917-4c0a-80d9-bf4a1462c02e",
+      "target_node_name": "New York Stock Exchange",
+      "target_node_uuid": "6e9e4e75-8d4b-4982-b425-62d96b0e2dbe",
+      "uuid": "e0cf4c53-7591-4f4c-8c64-62456efe59e8",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "QCX LLC is a CFTC-licensed exchange, indicating the CFTC has regulatory oversight over it.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "QCX LLC",
+      "source_node_uuid": "15dc2afe-6eeb-46d0-91c7-0b5021fce9ac",
+      "target_node_name": "CFTC",
+      "target_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "uuid": "c3aecd5a-a0e8-40c0-8e80-5b1feba75473",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Blockchain Capital invested $55 million in Polymarket at a $350 million valuation in late 2024.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Blockchain Capital",
+      "source_node_uuid": "0fef8981-fd24-4ab9-a73b-57235464e8be",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "0bb8a563-96ad-41b8-83d1-78ebc5ced518",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Founders Fund led a $150 million investment in Polymarket at a $1.2 billion valuation in early 2025.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Founders Fund",
+      "source_node_uuid": "26c4d162-a3bf-4358-9885-5b1ce3655387",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "e0fae87c-fc0b-4b1d-b089-a2cbe403e8e3",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Point72 Ventures, affiliated with Steve Cohen, participated in Polymarket's $150 million funding round in early 2025.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Point72 Ventures",
+      "source_node_uuid": "c1b4c8a5-3f3b-4a62-88fe-15c8874f3743",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "2582762e-0c3f-46fd-b7b9-b56cfcff2311",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Steve Cohen is affiliated with Point72 Ventures, which invested in Polymarket.",
+      "fact_type": "AFFILIATED_WITH",
+      "invalid_at": null,
+      "name": "AFFILIATED_WITH",
+      "source_node_name": "Steve Cohen",
+      "source_node_uuid": "0116a455-f488-4ffd-aabe-2fba735d9ba8",
+      "target_node_name": "Point72 Ventures",
+      "target_node_uuid": "c1b4c8a5-3f3b-4a62-88fe-15c8874f3743",
+      "uuid": "ba478aa8-b251-4e87-965c-b8b86a270882",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "episode_ids": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "episodes": [
+        "8286396e-67d5-4360-96af-c00ad36157ff"
+      ],
+      "expired_at": null,
+      "fact": "Ribbit Capital participated in Polymarket's $150 million funding round in early 2025.",
+      "fact_type": "INVESTS_IN",
+      "invalid_at": null,
+      "name": "INVESTS_IN",
+      "source_node_name": "Ribbit Capital",
+      "source_node_uuid": "e1872d91-a6b7-4690-a867-2427fd2d8a9f",
+      "target_node_name": "Polymarket",
+      "target_node_uuid": "86f704bc-745d-4e42-988e-073f2014c679",
+      "uuid": "bd850f99-d7d2-4c3e-b72f-e4f6e8795a5c",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "episode_ids": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "episodes": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "expired_at": null,
+      "fact": "The CFTC regulated PredictIt and granted it no-action relief until revoking it in 2022.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "PredictIt",
+      "source_node_uuid": "689c138e-1fab-4d74-8d83-233f47880ace",
+      "target_node_name": "CFTC",
+      "target_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "uuid": "8e8b53c9-34b9-455e-81d5-7a01e6a1cbcf",
+      "valid_at": null
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "episode_ids": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "episodes": [
+        "d6dae46b-416c-469c-b513-165c3b8845d8"
+      ],
+      "expired_at": null,
+      "fact": "Kalshi operates under full regulatory compliance with the CFTC from its launch.",
+      "fact_type": "REGULATES",
+      "invalid_at": null,
+      "name": "REGULATES",
+      "source_node_name": "Kalshi",
+      "source_node_uuid": "eaa83c72-36c6-45c0-b120-49c9c8e81551",
+      "target_node_name": "CFTC",
+      "target_node_uuid": "e7179183-7595-4497-baaa-b4d626c68ca8",
+      "uuid": "988d8e92-e126-47ea-97b1-2cdc7283d854",
+      "valid_at": null
+    }
+  ],
+  "graph_id": "9663bbda-3f7c-48e7-865a-6bb54e4f13d1",
+  "node_count": 78,
+  "nodes": [
+    {
+      "attributes": {
+        "org_name": "New York Stock Exchange",
+        "sector": "financial markets",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:51:28.538713+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "New York Stock Exchange",
+      "summary": "The New York Stock Exchange is a major financial market for trading securities.",
+      "uuid": "6e9e4e75-8d4b-4982-b425-62d96b0e2dbe"
+    },
+    {
+      "attributes": {
+        "age": 26,
+        "background": "Founder of Polymarket",
+        "full_name": "Shayne Coplan"
+      },
+      "created_at": "2026-03-27T02:51:28.538799+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Shayne Coplan",
+      "summary": "Shayne Coplan (CryptoFounder)",
+      "uuid": "65c7f8a8-bd1d-4ddd-83ac-fcbe863c68ac"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "United States",
+        "org_name": "SEC",
+        "regulatory_action": "Regulates securities markets"
+      },
+      "created_at": "2026-03-27T02:51:28.538799+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "SEC",
+      "summary": "SEC (GovernmentAgency)",
+      "uuid": "929de8ae-cf0e-4713-bfa3-8947ec41f83c"
+    },
+    {
+      "attributes": {
+        "sector": "blockchain platform"
+      },
+      "created_at": "2026-03-27T02:51:28.538799+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Ethereum",
+      "summary": "Ethereum (Organization)",
+      "uuid": "e5c37e92-6207-4e75-955f-4bca238bd667"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:51:28.538514+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Polymarket",
+      "summary": "Polymarket is a prediction market platform that grew from zero trading volume in June 2020 to $9 billion in trading volume by 2024.",
+      "uuid": "86f704bc-745d-4e42-988e-073f2014c679"
+    },
+    {
+      "attributes": {
+        "full_name": "Friedrich Hayek",
+        "location": "Austria",
+        "role": "economist"
+      },
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Friedrich Hayek",
+      "summary": "Friedrich Hayek was an economist known for his theories on decentralized knowledge.",
+      "uuid": "e249f37f-b195-4394-9721-f580f92b513e"
+    },
+    {
+      "attributes": {
+        "full_name": "Robin Hanson",
+        "methodology": "futarchy (governance by betting markets)",
+        "platform_affiliation": "George Mason University"
+      },
+      "created_at": "2026-03-27T02:51:50.841906+00:00",
+      "labels": [
+        "ElectionForecaster"
+      ],
+      "name": "Robin Hanson",
+      "summary": "Robin Hanson is an economist and professor who proposed the concept of futarchy, which influenced the design of Polymarket.",
+      "uuid": "0064ae63-5029-484f-97ba-23d4d1902872"
+    },
+    {
+      "attributes": {
+        "sector": "prediction markets"
+      },
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Augur",
+      "summary": "Augur is a decentralized prediction market platform that required users to run Ethereum nodes, pay high gas fees, and use a native token.",
+      "uuid": "a591a9bb-e338-429f-8b60-b38ba6aaebcd"
+    },
+    {
+      "attributes": {
+        "sector": "blockchain infrastructure"
+      },
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Polygon",
+      "summary": "Polygon is a blockchain platform used by Polymarket to reduce transaction costs and improve scalability.",
+      "uuid": "1eecb19a-2d89-4297-9f34-74a4159e33a1"
+    },
+    {
+      "attributes": {
+        "sector": "digital currency"
+      },
+      "created_at": "2026-03-27T02:52:07.683640+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "USDC",
+      "summary": "USDC is a stablecoin used on Polymarket for trading, providing price stability and ease of use.",
+      "uuid": "e102aa19-5149-4768-9dff-1079bca74246"
+    },
+    {
+      "attributes": {
+        "background": "LessWrong rationalist community"
+      },
+      "created_at": "2026-03-27T02:52:53.147813+00:00",
+      "labels": [
+        "PredictionMarketTrader"
+      ],
+      "name": "Zvi Mowshowitz",
+      "summary": "Zvi Mowshowitz is a forecaster who actively collaborated with Polymarket on market design.",
+      "uuid": "9527ee20-914c-499b-a0bf-1e3e6cc833e1"
+    },
+    {
+      "attributes": {
+        "sector": "rationalist community"
+      },
+      "created_at": "2026-03-27T02:52:53.147813+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "LessWrong",
+      "summary": "LessWrong is a rationalist community that includes forecasters and thinkers interested in decision-making and prediction.",
+      "uuid": "1d843a74-3b6d-42b4-8dde-56d86036ff39"
+    },
+    {
+      "attributes": {
+        "full_name": "Joe Biden",
+        "location": "United States",
+        "role": "presidential candidate"
+      },
+      "created_at": "2026-03-27T02:52:53.148108+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Biden",
+      "summary": "Joe Biden was a presidential candidate in the 2020 U.S. election and was correctly predicted to win by Polymarket.",
+      "uuid": "a840eb23-2e24-4e7c-be0e-f7d132b6db24"
+    },
+    {
+      "attributes": {
+        "full_name": "Donald Trump",
+        "location": "Mar-a-Lago",
+        "role": "presidential candidate"
+      },
+      "created_at": "2026-03-27T02:52:53.148108+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Trump",
+      "summary": "Donald Trump was a presidential candidate in the 2020 U.S. election and competed against Joe Biden on Polymarket prediction markets.",
+      "uuid": "60a10777-8892-491c-94ea-83e14bca7d65"
+    },
+    {
+      "attributes": {
+        "sector": "venture capital"
+      },
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "General Catalyst",
+      "summary": "General Catalyst is a venture capital firm that led Polymarket's Series A funding round.",
+      "uuid": "5b8f2fac-b413-46a2-9389-5068eaf928d0"
+    },
+    {
+      "attributes": {
+        "sector": "crypto investment"
+      },
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Polychain",
+      "summary": "Polychain is a crypto-focused investment firm that participated in Polymarket's funding round.",
+      "uuid": "45eff113-4339-4e84-9218-5237c2a56b05"
+    },
+    {
+      "attributes": {
+        "role": "Airbnb co-founder"
+      },
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Joe Gebbia",
+      "summary": "Joe Gebbia is the co-founder of Airbnb who participated in Polymarket's Series A round.",
+      "uuid": "692c6109-d57b-426c-a2f2-d03d9d841f4a"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "United States",
+        "org_name": "CFTC",
+        "regulatory_action": "settlement"
+      },
+      "created_at": "2026-03-27T02:53:36.297382+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "CFTC",
+      "summary": "The CFTC is the U.S. Commodity Futures Trading Commission, which took enforcement action against Polymarket.",
+      "uuid": "e7179183-7595-4497-baaa-b4d626c68ca8"
+    },
+    {
+      "attributes": {
+        "sector": "crypto investment"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Polychain Capital",
+      "summary": "Polychain Capital is a cryptocurrency investment firm that led Polymarket's seed round.",
+      "uuid": "ecc4d625-8533-4498-bbc8-cfecc05fadf0"
+    },
+    {
+      "attributes": {
+        "follower_count": "high",
+        "platform": "AngelList",
+        "stance": "pro-crypto"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoInfluencer"
+      ],
+      "name": "Naval Ravikant",
+      "summary": "Naval Ravikant is a well-known angel investor and co-founder of AngelList.",
+      "uuid": "870c8be4-ffee-45a0-ab96-7b6e5302313b"
+    },
+    {
+      "attributes": {
+        "background": "former CTO of Coinbase",
+        "full_name": "Balaji Srinivasan"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Balaji Srinivasan",
+      "summary": "Balaji Srinivasan is a prominent figure in the crypto space and former CTO of Coinbase.",
+      "uuid": "0664df6d-ae13-41d4-9adb-75a6bb42fa9d"
+    },
+    {
+      "attributes": {
+        "background": "founder of Compound",
+        "full_name": "Robert Leshner"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Robert Leshner",
+      "summary": "Robert Leshner is the founder of Compound, a decentralized finance protocol.",
+      "uuid": "4b71b8e4-8e70-42e2-9a35-c6f680138cb8"
+    },
+    {
+      "attributes": {
+        "background": "founder of Aave",
+        "full_name": "Stani Kulechov"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Stani Kulechov",
+      "summary": "Stani Kulechov is the founder of Aave, a decentralized lending platform.",
+      "uuid": "fa0b3783-9c00-4756-b9ae-e16e0773c43e"
+    },
+    {
+      "attributes": {
+        "background": "founder of Synthetix",
+        "full_name": "Kain Warwick"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Kain Warwick",
+      "summary": "Kain Warwick is the founder of Synthetix, a synthetic asset protocol on Ethereum.",
+      "uuid": "14499498-c2d5-4763-aa15-d4cc15284502"
+    },
+    {
+      "attributes": {
+        "affiliation": "CoinShares",
+        "follower_count": "high",
+        "full_name": "Meltem Demirors",
+        "platform": "Twitter",
+        "stance": "pro-crypto"
+      },
+      "created_at": "2026-03-27T02:53:36.297094+00:00",
+      "labels": [
+        "CryptoInfluencer"
+      ],
+      "name": "Meltem Demirors",
+      "summary": "Meltem Demirors is the Chief Strategy Officer at CoinShares and a vocal crypto advocate.",
+      "uuid": "4639ae22-d0dd-4543-bb4f-41dc4c9ff983"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "United States",
+        "org_name": "Commodity Futures Trading Commission",
+        "regulatory_action": "issued cease-and-desist order"
+      },
+      "created_at": "2026-03-27T02:54:36.430382+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "Commodity Futures Trading Commission",
+      "summary": "Commodity Futures Trading Commission (GovernmentAgency)",
+      "uuid": "f20c4cba-ba25-4c03-b271-d423291fece4"
+    },
+    {
+      "attributes": {
+        "agency": "Commodity Futures Trading Commission",
+        "full_name": "Vincent McGonagle",
+        "position": "Acting Enforcement Director"
+      },
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "labels": [
+        "RegulatoryOfficial"
+      ],
+      "name": "Vincent McGonagle",
+      "summary": "Vincent McGonagle (RegulatoryOfficial)",
+      "uuid": "bba25a72-9a29-452b-8eda-29b4127e5e17"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "cryptocurrency and blockchain",
+        "influence_level": "high",
+        "org_name": "CoinDesk"
+      },
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "CoinDesk",
+      "summary": "CoinDesk (MediaOutlet)",
+      "uuid": "532768bf-a720-4899-ac21-7e2f289e4017"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "crypto and financial markets",
+        "influence_level": "high",
+        "org_name": "Blockworks"
+      },
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Blockworks",
+      "summary": "Blockworks (MediaOutlet)",
+      "uuid": "41ceb701-33e3-44a0-84d7-5e16ec66ab5a"
+    },
+    {
+      "attributes": {
+        "org_name": "DLA Piper",
+        "sector": "legal services",
+        "size": "global law firm"
+      },
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "DLA Piper",
+      "summary": "DLA Piper (Organization)",
+      "uuid": "5c1e8653-5762-4225-ad4d-a4392b63fdc2"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "legal aspects of blockchain and crypto",
+        "influence_level": "medium",
+        "org_name": "Blockchainandthelaw"
+      },
+      "created_at": "2026-03-27T02:54:36.430162+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Blockchainandthelaw",
+      "summary": "Blockchainandthelaw (MediaOutlet)",
+      "uuid": "156c4b26-1716-43ee-a2af-781e91606e5d"
+    },
+    {
+      "attributes": {
+        "agency": "CFTC",
+        "full_name": "J. Christopher Giancarlo",
+        "position": "Chairman"
+      },
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "labels": [
+        "RegulatoryOfficial"
+      ],
+      "name": "J. Christopher Giancarlo",
+      "summary": "J. Christopher Giancarlo is the former Chairman of the CFTC, nicknamed 'CryptoDad', who was hired as chairman of Polymarket's advisory board in May 2022.",
+      "uuid": "112ae8f4-7de0-4247-a800-75daa653ae59"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "labels": [],
+      "name": "Germany",
+      "summary": "Germany (Entity)",
+      "uuid": "b766f83a-efab-4815-a5cb-f417c875f3fe"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "labels": [],
+      "name": "Canada",
+      "summary": "Canada (Entity)",
+      "uuid": "39865dce-26c4-4ad3-afbb-18b537e471a9"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:55:17.701749+00:00",
+      "labels": [],
+      "name": "UK",
+      "summary": "UK (Entity)",
+      "uuid": "74ea9e8c-bf64-455e-ad56-18c9be6c67da"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "technology and culture",
+        "influence_level": "moderate"
+      },
+      "created_at": "2026-03-27T02:55:40.624681+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Gizmodo",
+      "summary": "Gizmodo is a media outlet that criticized Polymarket's actions.",
+      "uuid": "51cb4ad0-41c4-4cc1-8b2d-58e37cce66d5"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "politics and social issues",
+        "influence_level": "high"
+      },
+      "created_at": "2026-03-27T02:55:40.624681+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Mother Jones",
+      "summary": "Mother Jones is a media outlet that criticized Polymarket's actions.",
+      "uuid": "8d7c9edd-0a60-412a-8e32-58f2afa9c8bd"
+    },
+    {
+      "attributes": {
+        "sector": "decentralized finance"
+      },
+      "created_at": "2026-03-27T02:55:40.624431+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "UMA",
+      "summary": "UMA is an organization providing dispute resolution systems used by Polymarket.",
+      "uuid": "68a60898-27a6-407a-bf3e-ccc52be87e27"
+    },
+    {
+      "attributes": {
+        "sector": "politics"
+      },
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "2024 US presidential election",
+      "summary": "The 2024 US presidential election cycle significantly increased the usage and visibility of Polymarket.",
+      "uuid": "8c312898-d587-48b8-b70f-48f462b8a340"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "crypto",
+        "influence_level": "medium",
+        "org_name": "Decrypt"
+      },
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Decrypt",
+      "summary": "Decrypt is a media outlet that reports on cryptocurrency and related developments.",
+      "uuid": "8754c76b-c99a-4d13-8dcf-4268031de400"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "crypto and fintech",
+        "influence_level": "medium",
+        "org_name": "DL News"
+      },
+      "created_at": "2026-03-27T02:55:56.991964+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "DL News",
+      "summary": "DL News is a news organization covering cryptocurrency and financial markets.",
+      "uuid": "dff355a3-1408-435e-81bb-2d452ec90ab8"
+    },
+    {
+      "attributes": {
+        "methodology": "data-driven election forecasting",
+        "platform_affiliation": "FiveThirtyEight",
+        "public_profile": "high"
+      },
+      "created_at": "2026-03-27T02:56:04.522057+00:00",
+      "labels": [
+        "ElectionForecaster"
+      ],
+      "name": "Nate Silver",
+      "summary": "Nate Silver is the founder of FiveThirtyEight and a renowned election forecaster.",
+      "uuid": "d213621f-41e9-453b-8ce7-eca355402202"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "politics and data journalism",
+        "influence_level": "high",
+        "org_name": "FiveThirtyEight"
+      },
+      "created_at": "2026-03-27T02:56:04.522057+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "FiveThirtyEight",
+      "summary": "FiveThirtyEight is a media outlet known for data-driven coverage of politics and elections.",
+      "uuid": "0b90dce9-6d11-4cf4-8174-35e18cf20448"
+    },
+    {
+      "attributes": {
+        "org_name": "MoonPay",
+        "sector": "fintech",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:56:04.522057+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "MoonPay",
+      "summary": "MoonPay is a fintech organization enabling cryptocurrency transactions via credit cards.",
+      "uuid": "fdf16cee-a185-4c88-99ad-b759e8da09d5"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "finance and news",
+        "influence_level": "high",
+        "org_name": "Bloomberg"
+      },
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Bloomberg",
+      "summary": "Bloomberg is a major financial news organization that reports on global markets and economics.",
+      "uuid": "e3a93846-f2c5-42fc-b03f-9329d71e655c"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "24-hour news and politics",
+        "influence_level": "high",
+        "org_name": "CNN"
+      },
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "CNN",
+      "summary": "CNN is a major cable and digital news network that covers U.S. elections and political developments.",
+      "uuid": "64b57219-b8a0-49d8-a50e-d5fb95c6afb0"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "broadcast news and politics",
+        "influence_level": "high",
+        "org_name": "NBC"
+      },
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "NBC",
+      "summary": "NBC is a national broadcast network that reports on elections and political events.",
+      "uuid": "e728b7f6-734a-42f4-9e6b-e8247515bab8"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "labels": [],
+      "name": "The Washington Post",
+      "summary": "The Washington Post (Entity)",
+      "uuid": "f72e8004-8ee2-47f3-9fef-e57202d86de3"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:04.522456+00:00",
+      "labels": [],
+      "name": "The New York Times",
+      "summary": "The New York Times (Entity)",
+      "uuid": "ac64a6e3-0060-490a-9457-4d1752abe2cc"
+    },
+    {
+      "attributes": {
+        "full_name": "Kamala Harris",
+        "role": "presidential candidate"
+      },
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Harris",
+      "summary": "Kamala Harris is a presidential candidate who was featured in Polymarket's Trump-vs-Harris probability chart.",
+      "uuid": "f0305ba6-1114-4407-a860-7deac824cb47"
+    },
+    {
+      "attributes": {
+        "sector": "finance",
+        "size": "major"
+      },
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "JP Morgan",
+      "summary": "JP Morgan is a major financial institution that reportedly used Polymarket data through its non-US subsidiaries.",
+      "uuid": "7746e2a3-2fc1-4e3e-b506-4ab4ee6304bc"
+    },
+    {
+      "attributes": {
+        "sector": "finance",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "major hedge funds",
+      "summary": "Major hedge funds reportedly used Polymarket data through non-US subsidiaries for financial decision-making.",
+      "uuid": "155ef917-47cb-4723-857a-7af890a0a3c0"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "politics and elections",
+        "influence_level": "high",
+        "org_name": "mainstream media"
+      },
+      "created_at": "2026-03-27T02:56:38.858691+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "mainstream media",
+      "summary": "Mainstream media repeatedly reported on the Trump-vs-Harris probability chart from Polymarket.",
+      "uuid": "7bba8426-3313-4fdd-a397-29d33f653f9e"
+    },
+    {
+      "attributes": {
+        "sector": "cryptocurrency exchange",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "KuCoin",
+      "summary": "KuCoin (Organization)",
+      "uuid": "1d24c727-304e-4022-820c-cacba27279fb"
+    },
+    {
+      "attributes": {
+        "coverage_focus": "business and finance",
+        "influence_level": "high",
+        "org_name": "Fortune"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "MediaOutlet"
+      ],
+      "name": "Fortune",
+      "summary": "Fortune (MediaOutlet)",
+      "uuid": "1aa8b87a-c3b7-4dd7-8ef9-f1b27fb09b8f"
+    },
+    {
+      "attributes": {
+        "sector": "business data platform",
+        "size": "medium"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Crunchbase",
+      "summary": "Crunchbase (Organization)",
+      "uuid": "e1caeaf9-80b5-4b8b-83e8-37262a13f56b"
+    },
+    {
+      "attributes": {
+        "sector": "online encyclopedia",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Wikipedia",
+      "summary": "Wikipedia (Organization)",
+      "uuid": "360ae3fd-6c2c-4e24-a787-85535b2fcc2d"
+    },
+    {
+      "attributes": {
+        "sector": "research firm",
+        "size": "small"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Sacra",
+      "summary": "Sacra (Organization)",
+      "uuid": "d2e5500c-1e9e-475a-9f75-5ec0aef8f93c"
+    },
+    {
+      "attributes": {
+        "nationality": "French",
+        "profit_record": "unknown",
+        "trading_strategy": "large-stake betting on political outcomes"
+      },
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [
+        "PredictionMarketTrader"
+      ],
+      "name": "French whale",
+      "summary": "French whale (PredictionMarketTrader)",
+      "uuid": "25aa917b-0de2-4a55-b8c4-f9ce10bb5e3f"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [],
+      "name": "The Block",
+      "summary": "The Block (Entity)",
+      "uuid": "b30cd5ae-98d4-443c-b2be-d8437701f91e"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:56:38.859011+00:00",
+      "labels": [],
+      "name": "The Defiant",
+      "summary": "The Defiant (Entity)",
+      "uuid": "eab545c0-7c7c-4333-aa58-b36058a29721"
+    },
+    {
+      "attributes": {
+        "nationality": "French",
+        "profit_record": "approximately $78.7–85 million net profit",
+        "trading_strategy": "betting on Trump winning and high volume of contracts"
+      },
+      "created_at": "2026-03-27T02:58:12.389382+00:00",
+      "labels": [
+        "PredictionMarketTrader"
+      ],
+      "name": "Théo",
+      "summary": "Théo is a French prediction market trader with extensive trading experience and a financial services background.",
+      "uuid": "b5883e97-768a-4406-bb68-25161c88cfdb"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009100+00:00",
+      "labels": [],
+      "name": "French users",
+      "summary": "French users (Entity)",
+      "uuid": "b7eaac34-a914-42c6-80f2-539b942959f2"
+    },
+    {
+      "attributes": {},
+      "created_at": "2026-03-27T02:58:23.009100+00:00",
+      "labels": [],
+      "name": "2024 U.S. presidential election",
+      "summary": "2024 U.S. presidential election (Entity)",
+      "uuid": "6cda178d-7aa5-420c-adb4-5b7c4f38af1d"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "France",
+        "regulatory_action": "investigated Polymarket"
+      },
+      "created_at": "2026-03-27T02:58:23.008869+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "France's gambling regulator",
+      "summary": "France's gambling regulator (GovernmentAgency)",
+      "uuid": "8af6ad34-42b7-413f-8f3d-7c82ea3de913"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "United States",
+        "org_name": "FBI",
+        "regulatory_action": "raid"
+      },
+      "created_at": "2026-03-27T02:58:23.009253+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "FBI",
+      "summary": "The FBI is a U.S. federal law enforcement agency that conducted a raid on Shayne Coplan's apartment.",
+      "uuid": "27f53fae-6419-49f6-8ee0-4e9e1c05e07f"
+    },
+    {
+      "attributes": {
+        "jurisdiction": "United States",
+        "org_name": "Department of Justice",
+        "regulatory_action": "conducted investigation"
+      },
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "labels": [
+        "GovernmentAgency"
+      ],
+      "name": "DOJ",
+      "summary": "The DOJ, or Department of Justice, is a U.S. federal agency that investigated Polymarket and its founder.",
+      "uuid": "e2623902-44ef-4eab-84dd-ef0e0e5a3d10"
+    },
+    {
+      "attributes": {
+        "background": "CEO of Coinbase",
+        "full_name": "Brian Armstrong"
+      },
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "labels": [
+        "CryptoFounder"
+      ],
+      "name": "Brian Armstrong",
+      "summary": "Brian Armstrong is the CEO of Coinbase, a major cryptocurrency exchange.",
+      "uuid": "ece84417-1c5f-4035-af20-e888010ac299"
+    },
+    {
+      "attributes": {
+        "org_name": "Coinbase",
+        "sector": "cryptocurrency",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:58:46.114933+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Coinbase",
+      "summary": "Coinbase is a U.S.-based cryptocurrency exchange platform.",
+      "uuid": "5d79b3eb-aa75-4b98-9c46-d0356a9fbec9"
+    },
+    {
+      "attributes": {
+        "org_name": "Intercontinental Exchange",
+        "sector": "financial services",
+        "size": "large"
+      },
+      "created_at": "2026-03-27T02:59:27.922286+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Intercontinental Exchange",
+      "summary": "Intercontinental Exchange (Organization)",
+      "uuid": "45c23269-7917-4c0a-80d9-bf4a1462c02e"
+    },
+    {
+      "attributes": {
+        "sector": "financial exchange"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "QCX LLC",
+      "summary": "QCX LLC is a CFTC-licensed exchange acquired by Polymarket in July 2025.",
+      "uuid": "15dc2afe-6eeb-46d0-91c7-0b5021fce9ac"
+    },
+    {
+      "attributes": {
+        "sector": "venture capital"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Blockchain Capital",
+      "summary": "Blockchain Capital is a venture capital firm that invested $55 million in Polymarket in late 2024.",
+      "uuid": "0fef8981-fd24-4ab9-a73b-57235464e8be"
+    },
+    {
+      "attributes": {
+        "sector": "venture capital"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Founders Fund",
+      "summary": "Founders Fund is a venture capital firm that led a $150 million investment in Polymarket in early 2025.",
+      "uuid": "26c4d162-a3bf-4358-9885-5b1ce3655387"
+    },
+    {
+      "attributes": {
+        "sector": "venture capital"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Point72 Ventures",
+      "summary": "Point72 Ventures, affiliated with Steve Cohen, participated in Polymarket's funding round in early 2025.",
+      "uuid": "c1b4c8a5-3f3b-4a62-88fe-15c8874f3743"
+    },
+    {
+      "attributes": {
+        "location": "United States",
+        "role": "investor"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Person"
+      ],
+      "name": "Steve Cohen",
+      "summary": "Steve Cohen is the founder of Point72 Ventures and backed Polymarket through his venture arm.",
+      "uuid": "0116a455-f488-4ffd-aabe-2fba735d9ba8"
+    },
+    {
+      "attributes": {
+        "sector": "venture capital"
+      },
+      "created_at": "2026-03-27T02:59:27.921857+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Ribbit Capital",
+      "summary": "Ribbit Capital is a venture capital firm that participated in Polymarket's $150 million funding round in early 2025.",
+      "uuid": "e1872d91-a6b7-4690-a867-2427fd2d8a9f"
+    },
+    {
+      "attributes": {
+        "sector": "prediction market"
+      },
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "PredictIt",
+      "summary": "PredictIt is a prediction market platform that operated under CFTC no-action relief until 2022.",
+      "uuid": "689c138e-1fab-4d74-8d83-233f47880ace"
+    },
+    {
+      "attributes": {
+        "sector": "prediction market"
+      },
+      "created_at": "2026-03-27T02:59:45.634694+00:00",
+      "labels": [
+        "Organization"
+      ],
+      "name": "Kalshi",
+      "summary": "Kalshi is a fully U.S. regulated prediction market platform that achieved compliance from inception.",
+      "uuid": "eaa83c72-36c6-45c0-b120-49c9c8e81551"
+    }
+  ]
+}

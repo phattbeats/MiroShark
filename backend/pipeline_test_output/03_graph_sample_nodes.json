@@ -1,0 +1,131 @@
+[
+  {
+    "uuid": "db9ae1e3-537d-4d51-86fc-c2d3abdde01f",
+    "name": "New York Stock Exchange",
+    "labels": [
+      "Organization"
+    ],
+    "summary": "New York Stock Exchange (Organization)",
+    "attributes": {
+      "industry": "financial exchange",
+      "headquarters": null
+    },
+    "created_at": "2026-03-26T23:58:25.506648+00:00"
+  },
+  {
+    "uuid": "f971a8fa-6832-46f3-9f46-7c4b398edd45",
+    "name": "NYU dropout",
+    "labels": [
+      "Person"
+    ],
+    "summary": "NYU dropout (Person)",
+    "attributes": {
+      "occupation": "crypto founder",
+      "location": "United States"
+    },
+    "created_at": "2026-03-26T23:58:25.506648+00:00"
+  },
+  {
+    "uuid": "c52a71da-0391-48de-89a8-1bf0347ddee7",
+    "name": "Polymarket",
+    "labels": [
+      "Organization"
+    ],
+    "summary": "Polymarket (Organization)",
+    "attributes": {
+      "industry": "prediction markets",
+      "headquarters": null
+    },
+    "created_at": "2026-03-26T23:58:25.506403+00:00"
+  },
+  {
+    "uuid": "c5795e99-5388-4208-805c-ecc6587cb119",
+    "name": "US presidential election",
+    "labels": [],
+    "summary": "US presidential election (Entity)",
+    "attributes": {},
+    "created_at": "2026-03-26T23:58:25.506403+00:00"
+  },
+  {
+    "uuid": "c7b8f359-5cfe-43e2-b2f0-0d3587debe8c",
+    "name": "Shayne Coplan",
+    "labels": [
+      "CryptoFounder"
+    ],
+    "summary": "Shayne Coplan (CryptoFounder)",
+    "attributes": {
+      "full_name": "Shayne Coplan",
+      "age": 25,
+      "affiliation": null
+    },
+    "created_at": "2026-03-26T23:58:25.506754+00:00"
+  },
+  {
+    "uuid": "bfe16290-0637-438b-8ca8-c2209962e741",
+    "name": "Hanson",
+    "labels": [
+      "Person"
+    ],
+    "summary": "Hanson (Person)",
+    "attributes": {
+      "full_name": "Robin Hanson",
+      "occupation": "Economist",
+      "location": "United States"
+    },
+    "created_at": "2026-03-26T23:58:44.687745+00:00"
+  },
+  {
+    "uuid": "d6e49056-4966-448c-bcd0-909f412e47cb",
+    "name": "Blockratize, Inc.",
+    "labels": [
+      "Organization"
+    ],
+    "summary": "Blockratize, Inc. (Organization)",
+    "attributes": {
+      "industry": "technology",
+      "headquarters": null
+    },
+    "created_at": "2026-03-26T23:58:44.687745+00:00"
+  },
+  {
+    "uuid": "b0bdf9b4-4e6d-416d-8b7b-ea3f8040a6de",
+    "name": "Hayek",
+    "labels": [
+      "Person"
+    ],
+    "summary": "Hayek (Person)",
+    "attributes": {
+      "full_name": "Friedrich Hayek",
+      "occupation": "economist",
+      "location": "Austria"
+    },
+    "created_at": "2026-03-26T23:58:44.687612+00:00"
+  },
+  {
+    "uuid": "59f67cba-22c2-4bed-b7e5-3d9be35ae60f",
+    "name": "Robin Hanson",
+    "labels": [
+      "ElectionForecaster"
+    ],
+    "summary": "Robin Hanson (ElectionForecaster)",
+    "attributes": {
+      "methodology": "futarchy",
+      "affiliation": "George Mason University"
+    },
+    "created_at": "2026-03-26T23:58:44.687612+00:00"
+  },
+  {
+    "uuid": "19bd2f83-9b41-4814-978a-6a098cffaf20",
+    "name": "CO",
+    "labels": [
+      "Person"
+    ],
+    "summary": "CO (Person)",
+    "attributes": {
+      "full_name": "Cameron Coplan",
+      "occupation": "CryptoFounder",
+      "location": "New York"
+    },
+    "created_at": "2026-03-26T23:58:44.687360+00:00"
+  }
+]

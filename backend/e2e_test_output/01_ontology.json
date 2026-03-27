@@ -1,0 +1,418 @@
+{
+  "analysis_summary": "The article details Polymarket's rise from a bathroom startup to a $9B-valued prediction platform, highlighting key actors: founders, traders, regulators, media, and investors. Public opinion dynamics center on crypto enthusiasm, regulatory tension, ethical debates (e.g., Titan sub bets), and mainstream adoption. The simulation must model interactions across Twitter, Reddit, and Polymarket, capturing sentiment from enthusiasts, skeptics, officials, and media.",
+  "files": [
+    {
+      "filename": "From Bathroom Office to $9 Billion Prediction Empire_ The Rise of Polymarket.pdf",
+      "size": 566233
+    }
+  ],
+  "ontology": {
+    "edge_types": [
+      {
+        "attributes": [],
+        "description": "One entity posts a public comment about another entity or topic",
+        "name": "COMMENTS_ON",
+        "source_targets": [
+          {
+            "source": "Person",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "RegulatoryOfficial",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "MediaOutlet",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Financial backing provided by an investor to a platform or company",
+        "name": "INVESTS_IN",
+        "source_targets": [
+          {
+            "source": "CryptoInvestor",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "GovernmentAgency",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Official oversight or enforcement action by a government body",
+        "name": "REGULATES",
+        "source_targets": [
+          {
+            "source": "GovernmentAgency",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Media coverage or analysis published by a news outlet",
+        "name": "REPORTS_ON",
+        "source_targets": [
+          {
+            "source": "MediaOutlet",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "MediaOutlet",
+            "target": "PredictionMarketTrader"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "An individual or entity actively participates in betting on a platform",
+        "name": "TRADES_ON",
+        "source_targets": [
+          {
+            "source": "PredictionMarketTrader",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "CryptoFounder",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Public or strategic endorsement of a platform's return to regulated markets",
+        "name": "SUPPORTS_LEGAL_REENTRY",
+        "source_targets": [
+          {
+            "source": "RegulatoryOfficial",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "ElectionForecaster",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Public expression of disapproval or ethical concern",
+        "name": "CRITICIZES",
+        "source_targets": [
+          {
+            "source": "MediaOutlet",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "Person",
+            "target": "CryptoPlatform"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Formal or informal association between individuals and organizations",
+        "name": "AFFILIATED_WITH",
+        "source_targets": [
+          {
+            "source": "CryptoFounder",
+            "target": "Organization"
+          },
+          {
+            "source": "ElectionForecaster",
+            "target": "MediaOutlet"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Direct reply or reaction to a public statement or event",
+        "name": "RESPONDS_TO",
+        "source_targets": [
+          {
+            "source": "CryptoPlatform",
+            "target": "RegulatoryOfficial"
+          },
+          {
+            "source": "CryptoFounder",
+            "target": "MediaOutlet"
+          }
+        ]
+      },
+      {
+        "attributes": [],
+        "description": "Use of prediction market odds as input or reference in analysis",
+        "name": "CITES_AS_DATA_SOURCE",
+        "source_targets": [
+          {
+            "source": "MediaOutlet",
+            "target": "CryptoPlatform"
+          },
+          {
+            "source": "ElectionForecaster",
+            "target": "CryptoPlatform"
+          }
+        ]
+      }
+    ],
+    "entity_types": [
+      {
+        "attributes": [
+          {
+            "description": "Full legal name of the founder",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "Current age of the founder",
+            "name": "age",
+            "type": "text"
+          },
+          {
+            "description": "Primary company or project they founded",
+            "name": "affiliation",
+            "type": "text"
+          }
+        ],
+        "description": "A founder in the cryptocurrency or blockchain space, often with technical and entrepreneurial bac...",
+        "examples": [
+          "Shayne Coplan",
+          "Balaji Srinivasan"
+        ],
+        "name": "CryptoFounder"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Full name or known alias of the trader",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "Describes their approach to betting (e.g., data-driven, speculative)",
+            "name": "trading_strategy",
+            "type": "text"
+          },
+          {
+            "description": "Summary of large or famous wagers placed",
+            "name": "notable_bets",
+            "type": "text"
+          }
+        ],
+        "description": "An individual who actively trades on prediction markets, often with sophisticated strategies",
+        "examples": [
+          "Théo (French whale)",
+          "Zvi Mowshowitz"
+        ],
+        "name": "PredictionMarketTrader"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Full name of the official",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "Official title or role in regulatory agency",
+            "name": "position",
+            "type": "text"
+          },
+          {
+            "description": "Name of the regulatory body they represent",
+            "name": "agency",
+            "type": "text"
+          }
+        ],
+        "description": "Government or regulatory body representative involved in crypto or financial oversight",
+        "examples": [
+          "Vincent McGonagle",
+          "J. Christopher Giancarlo"
+        ],
+        "name": "RegulatoryOfficial"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Official name of the media organization",
+            "name": "org_name",
+            "type": "text"
+          },
+          {
+            "description": "Primary coverage domain (e.g., politics, crypto, general news)",
+            "name": "focus_area",
+            "type": "text"
+          },
+          {
+            "description": "Assessment of reach and credibility (e.g., national, global)",
+            "name": "influence_level",
+            "type": "text"
+          }
+        ],
+        "description": "News organization that reports on crypto, politics, or financial technology",
+        "examples": [
+          "Bloomberg",
+          "The Washington Post"
+        ],
+        "name": "MediaOutlet"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Name of the investor or investment firm",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "Types of projects or stages they typically fund",
+            "name": "investment_focus",
+            "type": "text"
+          },
+          {
+            "description": "List of high-profile investments made",
+            "name": "notable_investments",
+            "type": "text"
+          }
+        ],
+        "description": "Individual or firm that invests in cryptocurrency startups or protocols",
+        "examples": [
+          "Naval Ravikant",
+          "Founders Fund"
+        ],
+        "name": "CryptoInvestor"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Full name of the forecaster",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "Approach used (e.g., polling aggregation, prediction markets)",
+            "name": "methodology",
+            "type": "text"
+          },
+          {
+            "description": "Organization or platform they are associated with",
+            "name": "affiliation",
+            "type": "text"
+          }
+        ],
+        "description": "Expert in political forecasting, often using statistical models or market data",
+        "examples": [
+          "Nate Silver",
+          "FiveThirtyEight team"
+        ],
+        "name": "ElectionForecaster"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Official name of the agency",
+            "name": "org_name",
+            "type": "text"
+          },
+          {
+            "description": "Geographic or legal scope of authority",
+            "name": "jurisdiction",
+            "type": "text"
+          },
+          {
+            "description": "Primary area of oversight (e.g., derivatives, securities)",
+            "name": "regulatory_focus",
+            "type": "text"
+          }
+        ],
+        "description": "Official body responsible for regulating financial or technological markets",
+        "examples": [
+          "CFTC",
+          "DOJ"
+        ],
+        "name": "GovernmentAgency"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Name of the platform",
+            "name": "platform_name",
+            "type": "text"
+          },
+          {
+            "description": "Underlying tech (e.g., Polygon, USDC)",
+            "name": "technology_stack",
+            "type": "text"
+          },
+          {
+            "description": "Primary market type (e.g., elections, sports)",
+            "name": "market_focus",
+            "type": "text"
+          }
+        ],
+        "description": "Blockchain-based platform facilitating trading, predictions, or financial services",
+        "examples": [
+          "Polymarket",
+          "Augur"
+        ],
+        "name": "CryptoPlatform"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Full name of the individual",
+            "name": "full_name",
+            "type": "text"
+          },
+          {
+            "description": "General role or occupation",
+            "name": "role",
+            "type": "text"
+          },
+          {
+            "description": "Geographic location if known",
+            "name": "location",
+            "type": "text"
+          }
+        ],
+        "description": "Any individual person who does not fit into more specific entity types",
+        "examples": [
+          "A Reddit user",
+          "A Polymarket commenter"
+        ],
+        "name": "Person"
+      },
+      {
+        "attributes": [
+          {
+            "description": "Official name of the organization",
+            "name": "org_name",
+            "type": "text"
+          },
+          {
+            "description": "Category (e.g., NGO, startup, consortium)",
+            "name": "type",
+            "type": "text"
+          },
+          {
+            "description": "Brief overview of purpose and activities",
+            "name": "description",
+            "type": "text"
+          }
+        ],
+        "description": "Any organization that does not fit into more specific entity types",
+        "examples": [
+          "LessWrong community",
+          "OceanGate Inc."
+        ],
+        "name": "Organization"
+      }
+    ]
+  },
+  "project_id": "proj_abe8407ed8a1",
+  "project_name": "E2E API Test",
+  "total_text_length": 19127
+}

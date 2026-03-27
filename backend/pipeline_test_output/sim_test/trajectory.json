@@ -1,0 +1,398 @@
+{
+  "topics": [
+    "Twitter Reddit",
+    "Polymarket",
+    "Polymarket's",
+    "Focus",
+    "Polymarket's rise"
+  ],
+  "total_rounds": 3,
+  "snapshots": [
+    {
+      "round_num": 0,
+      "timestamp": "2026-03-26T20:32:56.072210",
+      "total_posts_created": 3,
+      "total_engagements": 7,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [
+        {
+          "post_id": 2,
+          "user_id": 1,
+          "content": "Polymarket’s use of Polygon + USDC solved the fatal flaws of old prediction markets like Augur: high fees, poor UX, and complex tokens. This isn’t just an upgrade — it’s the first scalable, usable prediction market. The zero-fee model was genius for bootstrapping liquidity.",
+          "num_likes": 5,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 1,
+          "user_id": 0,
+          "content": "Shayne Coplan built Polymarket in a bathroom during lockdown. Now it’s done $9B in volume, called the election early, and got a $2B investment from NYSE’s parent. From a 16-year-old ETH investor to a crypto maverick — this is the wild story of how prediction markets went mainstream. https://example.com/polymarket-rise",
+          "num_likes": 1,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 3,
+          "user_id": 2,
+          "content": "Let’s not forget: Polymarket was fined $1.4M by the CFTC and raided by the FBI. This isn’t just a ‘disruptive startup’ story — it’s a regulatory time bomb. Just because it’s popular doesn’t mean it’s legal. The CFTC has been clear — these are derivatives, and they require oversight.",
+          "num_likes": 0,
+          "num_dislikes": 1
+        }
+      ],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 1,
+      "timestamp": "2026-03-26T20:35:57.749477",
+      "total_posts_created": 3,
+      "total_engagements": 7,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [
+        {
+          "post_id": 2,
+          "user_id": 1,
+          "content": "Polymarket’s use of Polygon + USDC solved the fatal flaws of old prediction markets like Augur: high fees, poor UX, and complex tokens. This isn’t just an upgrade — it’s the first scalable, usable prediction market. The zero-fee model was genius for bootstrapping liquidity.",
+          "num_likes": 5,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 1,
+          "user_id": 0,
+          "content": "Shayne Coplan built Polymarket in a bathroom during lockdown. Now it’s done $9B in volume, called the election early, and got a $2B investment from NYSE’s parent. From a 16-year-old ETH investor to a crypto maverick — this is the wild story of how prediction markets went mainstream. https://example.com/polymarket-rise",
+          "num_likes": 1,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 3,
+          "user_id": 2,
+          "content": "Let’s not forget: Polymarket was fined $1.4M by the CFTC and raided by the FBI. This isn’t just a ‘disruptive startup’ story — it’s a regulatory time bomb. Just because it’s popular doesn’t mean it’s legal. The CFTC has been clear — these are derivatives, and they require oversight.",
+          "num_likes": 0,
+          "num_dislikes": 1
+        }
+      ],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    },
+    {
+      "round_num": 2,
+      "timestamp": "2026-03-26T20:36:02.582330",
+      "total_posts_created": 3,
+      "total_engagements": 7,
+      "active_agent_count": 6,
+      "belief_positions": {
+        "2": {
+          "Twitter Reddit": 0.08000000000000002,
+          "Polymarket": 0.08000000000000002,
+          "Polymarket's": 0.08000000000000002,
+          "Focus": 0.08000000000000002,
+          "Polymarket's rise": 0.08000000000000002
+        },
+        "3": {
+          "Twitter Reddit": -0.06,
+          "Polymarket": -0.06,
+          "Polymarket's": -0.06,
+          "Focus": -0.06,
+          "Polymarket's rise": -0.06
+        },
+        "4": {
+          "Twitter Reddit": 0.7,
+          "Polymarket": 0.7,
+          "Polymarket's": 0.7,
+          "Focus": 0.7,
+          "Polymarket's rise": 0.7
+        },
+        "1": {
+          "Twitter Reddit": 0.74,
+          "Polymarket": 0.74,
+          "Polymarket's": 0.74,
+          "Focus": 0.74,
+          "Polymarket's rise": 0.74
+        },
+        "5": {
+          "Twitter Reddit": 0.72,
+          "Polymarket": 0.72,
+          "Polymarket's": 0.72,
+          "Focus": 0.72,
+          "Polymarket's rise": 0.72
+        },
+        "0": {
+          "Twitter Reddit": -0.72,
+          "Polymarket": -0.72,
+          "Polymarket's": -0.72,
+          "Focus": -0.72,
+          "Polymarket's rise": -0.72
+        }
+      },
+      "belief_deltas": {},
+      "viral_posts": [
+        {
+          "post_id": 2,
+          "user_id": 1,
+          "content": "Polymarket’s use of Polygon + USDC solved the fatal flaws of old prediction markets like Augur: high fees, poor UX, and complex tokens. This isn’t just an upgrade — it’s the first scalable, usable prediction market. The zero-fee model was genius for bootstrapping liquidity.",
+          "num_likes": 5,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 1,
+          "user_id": 0,
+          "content": "Shayne Coplan built Polymarket in a bathroom during lockdown. Now it’s done $9B in volume, called the election early, and got a $2B investment from NYSE’s parent. From a 16-year-old ETH investor to a crypto maverick — this is the wild story of how prediction markets went mainstream. https://example.com/polymarket-rise",
+          "num_likes": 1,
+          "num_dislikes": 0
+        },
+        {
+          "post_id": 3,
+          "user_id": 2,
+          "content": "Let’s not forget: Polymarket was fined $1.4M by the CFTC and raided by the FBI. This isn’t just a ‘disruptive startup’ story — it’s a regulatory time bomb. Just because it’s popular doesn’t mean it’s legal. The CFTC has been clear — these are derivatives, and they require oversight.",
+          "num_likes": 0,
+          "num_dislikes": 1
+        }
+      ],
+      "sentiment_summary": {
+        "Twitter Reddit": 0.243,
+        "Polymarket": 0.243,
+        "Polymarket's": 0.243,
+        "Focus": 0.243,
+        "Polymarket's rise": 0.243
+      }
+    }
+  ],
+  "belief_trajectories": {
+    "Twitter Reddit": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket's": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Focus": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ],
+    "Polymarket's rise": [
+      {
+        "round": 0,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 1,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      },
+      {
+        "round": 2,
+        "mean": 0.24333333333333332,
+        "min": -0.72,
+        "max": 0.74,
+        "spread": 1.46,
+        "count": 6
+      }
+    ]
+  },
+  "opinion_convergence": {
+    "Twitter Reddit": 0.0,
+    "Polymarket": 0.0,
+    "Polymarket's": 0.0,
+    "Focus": 0.0,
+    "Polymarket's rise": 0.0
+  },
+  "turning_points": []
+}

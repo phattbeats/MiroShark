@@ -25,6 +25,17 @@ import sqlite3
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
+from wonderwall.social_agent.belief_state import (
+    BeliefState,
+    extract_topics_from_requirement,
+    inject_belief_context,
+)
+from wonderwall.social_agent.round_analyzer import (
+    RoundAnalyzer,
+    SimulationTrajectory,
+    update_trust_from_actions,
+)
+
 # Global variables: used for signal handling
 _shutdown_event = None
 _cleanup_done = False
@@ -417,6 +428,11 @@ class RedditSimulationRunner:
         self.env = None
         self.agent_graph = None
         self.ipc_handler = None
+        # Belief tracking
+        self.belief_states: Dict[int, BeliefState] = {}
+        self.topics: List[str] = []
+        self.round_analyzer: Optional[RoundAnalyzer] = None
+        self.trajectory: Optional[SimulationTrajectory] = None
         
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration file"""
@@ -519,7 +535,56 @@ class RedditSimulationRunner:
                 pass
         
         return active_agents
-    
+
+    def _init_belief_system(self):
+        """Initialize belief states for all agents from simulation config."""
+        simulation_req = self.config.get("simulation_requirement", "")
+        self.topics = extract_topics_from_requirement(simulation_req)
+        print(f"  Belief tracking topics: {self.topics}")
+
+        self.round_analyzer = RoundAnalyzer(self.topics)
+        self.trajectory = SimulationTrajectory()
+        self.trajectory.topics = self.topics
+
+        agent_configs = self.config.get("agent_configs", [])
+        for cfg in agent_configs:
+            agent_id = cfg.get("agent_id", 0)
+            self.belief_states[agent_id] = BeliefState.from_profile(cfg, self.topics)
+
+        print(f"  Initialized belief states for {len(self.belief_states)} agents")
+
+    def _run_round_analysis(self, db_path: str, active_agent_ids: List[int], round_num: int):
+        """Run belief updates and round analysis after each round."""
+        if not self.round_analyzer:
+            return
+
+        snapshot = self.round_analyzer.analyze_round(
+            db_path=db_path,
+            belief_states=self.belief_states,
+            active_agent_ids=active_agent_ids,
+            round_num=round_num,
+        )
+        self.trajectory.add_snapshot(snapshot)
+
+        # Inject updated belief context into each active agent's system message
+        for agent_id in active_agent_ids:
+            bs = self.belief_states.get(agent_id)
+            if not bs:
+                continue
+            try:
+                agent = self.env.agent_graph.get_agent(agent_id)
+                belief_text = bs.to_prompt_text()
+                feedback = self.round_analyzer.generate_agent_feedback(
+                    snapshot, agent_id, bs
+                )
+                combined = belief_text
+                if feedback:
+                    combined += "\n\n" + feedback
+                if combined.strip():
+                    inject_belief_context(agent, combined)
+            except Exception:
+                pass
+
     async def run(self, max_rounds: int = None):
         """Run Reddit simulation
 
@@ -578,12 +643,16 @@ class RedditSimulationRunner:
             agent_graph=self.agent_graph,
             platform=wonderwall.DefaultPlatformType.REDDIT,
             database_path=db_path,
-            semaphore=30,  # Limit maximum concurrent LLM requests to prevent API overload
+            semaphore=60,  # Concurrent LLM requests (increase for faster APIs)
         )
         
         await self.env.reset()
         print("Environment initialization complete\n")
-        
+
+        # Initialize belief tracking system
+        print("Initializing belief tracking system...")
+        self._init_belief_system()
+
         # Initialize IPC handler
         self.ipc_handler = IPCHandler(self.simulation_dir, self.env, self.agent_graph)
         self.ipc_handler.update_status("running")
@@ -641,7 +710,11 @@ class RedditSimulationRunner:
             }
             
             await self.env.step(actions)
-            
+
+            # Run belief updates and round analysis
+            active_ids = [aid for aid, _ in active_agents]
+            self._run_round_analysis(db_path, active_ids, round_num)
+
             if (round_num + 1) % 10 == 0 or round_num == 0:
                 elapsed = (datetime.now() - start_time).total_seconds()
                 progress = (round_num + 1) / total_rounds * 100
@@ -654,6 +727,13 @@ class RedditSimulationRunner:
         print(f"\nSimulation loop completed!")
         print(f"  - Total elapsed: {total_elapsed:.1f}s")
         print(f"  - Database: {db_path}")
+
+        # Save belief trajectory for report agent
+        if self.trajectory:
+            trajectory_path = os.path.join(self.simulation_dir, "trajectory.json")
+            self.trajectory.save(trajectory_path)
+            print(f"  - Belief trajectory: {trajectory_path}")
+            print(f"  - Convergence: {json.dumps(self.trajectory._compute_convergence(), indent=2)}")
         
         # Whether to enter command waiting mode
         if self.wait_for_commands:

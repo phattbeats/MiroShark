@@ -1,7 +1,7 @@
 <template>
   <div
+    v-if="projects.length > 0 || loading"
     class="history-database"
-    :class="{ 'no-projects': projects.length === 0 && !loading }"
     ref="historyContainer"
   >
     <!-- Background decoration: tech grid lines (only shown when projects exist) -->

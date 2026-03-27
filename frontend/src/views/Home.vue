@@ -5,7 +5,7 @@
       <div class="nav-brand">MIROSHARK</div>
       <div class="nav-links">
         <a href="https://github.com/aaronjmars/MiroShark" target="_blank" class="github-link">
-          Visit Our GitHub Homepage <span class="arrow">↗</span>
+          GitHub <span class="arrow">↗</span>
         </a>
       </div>
     </nav>
@@ -13,38 +13,28 @@
     <div class="main-content">
       <!-- Upper Section: Hero Area -->
       <section class="hero-section">
-        <div class="hero-left">
-          <div class="tag-row">
-            <span class="orange-tag">A Concise & Universal Swarm Intelligence Engine</span>
-          </div>
-          
-          <h1 class="main-title">
-            Upload Any Report<br>
-            <span class="gradient-text">Simulate the Future Instantly</span>
-          </h1>
-          
-          <div class="hero-desc">
-            <p>
-              Even with just a piece of text, <span class=”highlight-bold”>MiroShark</span> can automatically generate a parallel world composed of up to <span class=”highlight-orange”>millions of Agents</span> based on the reality seeds within. Inject variables from a god's-eye view to find the <span class=”highlight-code”>”local optimum”</span> in complex group interactions under dynamic environments.
-            </p>
-            <p class=”slogan-text”>
-              Let the future rehearse among Agents, let decisions prevail after countless trials<span class=”blinking-cursor”>_</span>
-            </p>
-          </div>
-           
-          <div class="decoration-square"></div>
+        <div class="tag-row">
+          <span class="orange-tag">A Concise & Universal Swarm Intelligence Engine</span>
         </div>
-        
-        <div class="hero-right">
-          <!-- Logo Area -->
-          <div class="logo-container">
-            <img src="../assets/logo/miroshark-banner.jpg" alt="MiroShark Logo" class="hero-logo" />
-          </div>
-          
-          <button class="scroll-down-btn" @click="scrollToBottom">
-            ↓
-          </button>
+
+        <h1 class="main-title">
+          <span class="gradient-text">Simulate the Future Instantly</span>
+        </h1>
+
+        <div class="hero-desc">
+          <p>
+            Upload any document. <span class="highlight-bold">MiroShark</span> extracts the key players, generates <span class="highlight-orange">hundreds of AI agents</span> with unique personas, and simulates how they'd react on Twitter, Reddit, and Polymarket. Watch opinions form, arguments spread, and markets move.
+          </p>
+          <p class="slogan-text">
+            Don't predict the future. Simulate it<span class="blinking-cursor">_</span>
+          </p>
         </div>
+
+        <div class="decoration-square"></div>
+
+        <button class="scroll-down-btn" @click="scrollToBottom">
+          ↓
+        </button>
       </section>
 
       <!-- Lower Section: Two-Column Layout -->
@@ -57,20 +47,9 @@
           
           <h2 class="section-title">Ready</h2>
           <p class="section-desc">
-            Prediction engine on standby. Upload multiple unstructured data files to initialize the simulation sequence.
+            Prediction engine on standby. Upload documents to initialize the simulation sequence.
           </p>
           
-          <!-- Data Metric Cards -->
-          <div class="metrics-row">
-            <div class="metric-card">
-              <div class="metric-value">Low Cost</div>
-              <div class="metric-label">Average $5 per standard simulation</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-value">High Availability</div>
-              <div class="metric-label">Up to millions of Agent simulations</div>
-            </div>
-          </div>
 
           <!-- Simulation Steps Overview (New Section) -->
           <div class="steps-container">
@@ -147,7 +126,7 @@
                 
                 <div v-if="files.length === 0" class="upload-placeholder">
                   <div class="upload-icon">↑</div>
-                  <div class="upload-title">Drag & Drop Files to Upload</div>
+                  <div class="upload-title">Drop Files to Upload</div>
                   <div class="upload-hint">or click to browse the file system</div>
                 </div>
                 
@@ -202,10 +181,6 @@
       <!-- History Project Database -->
       <HistoryDatabase />
 
-      <!-- Attribution Footer -->
-      <footer class="attribution-footer">
-        Built on top of <a href="https://github.com/666ghj/MiroFish" target="_blank">MiroFish</a> — thanks to the original authors for the foundation.
-      </footer>
     </div>
   </div>
 </template>
@@ -310,46 +285,34 @@ const startSimulation = () => {
 </script>
 
 <style scoped>
-/* Global Variables & Reset */
-:root {
-  --black: #000000;
-  --white: #FFFFFF;
-  --orange: #FF4500;
-  --gray-light: #F5F5F5;
-  --gray-text: #666666;
-  --border: #E5E5E5;
-  /*
-    Use Space Grotesk as the primary heading font, JetBrains Mono for code/label fonts
-    Make sure these Google Fonts are imported in index.html
-  */
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-sans: 'Space Grotesk', system-ui, sans-serif;
-
-}
+/* ═══════════════════════════════════════════════════════════
+   HOME — Hyperstitions Design System applied
+   ═══════════════════════════════════════════════════════════ */
 
 .home-container {
   min-height: 100vh;
-  background: var(--white);
-  font-family: var(--font-sans);
-  color: var(--black);
+  background: var(--background);
+  font-family: var(--font-display);
+  color: var(--foreground);
 }
 
-/* Top Navigation */
+/* ── Top Navigation ── */
 .navbar {
-  height: 60px;
-  background: var(--black);
-  color: var(--white);
+  height: var(--space-xl);
+  background: var(--color-black);
+  color: var(--color-white);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 40px;
+  padding: 0 var(--space-lg);
 }
 
 .nav-brand {
   font-family: var(--font-mono);
-  font-weight: 800;
-  letter-spacing: 1px;
-  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  font-size: 14px;
+  text-transform: uppercase;
 }
 
 .nav-links {
@@ -358,134 +321,118 @@ const startSimulation = () => {
 }
 
 .github-link {
-  color: var(--white);
+  color: var(--color-white);
   text-decoration: none;
   font-family: var(--font-mono);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: opacity 0.2s;
+  gap: var(--space-xs);
+  transition: var(--transition-fast);
+  opacity: 0.6;
 }
 
-.github-link:hover {
-  opacity: 0.8;
-}
+.github-link:hover { opacity: 1; }
 
-.arrow {
-  font-family: sans-serif;
-}
+.arrow { font-family: sans-serif; }
 
-/* Main Content Area */
+/* ── Main Content ── */
 .main-content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 60px 40px;
+  padding: var(--space-2xl) var(--space-lg);
 }
 
-/* Hero Section */
+/* ── Hero Section ── */
 .hero-section {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 80px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: var(--space-2xl);
   position: relative;
-}
-
-.hero-left {
-  flex: 1;
-  padding-right: 60px;
 }
 
 .tag-row {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 25px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 13px;
 }
 
 .orange-tag {
-  background: var(--orange);
-  color: var(--white);
-  padding: 4px 10px;
+  background: var(--color-orange);
+  color: var(--color-white);
+  padding: 4px var(--space-sm);
   font-weight: 700;
-  letter-spacing: 1px;
-  font-size: 0.75rem;
-}
-
-.version-text {
-  color: #999;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 3px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
 }
 
 .main-title {
-  font-size: 4.5rem;
-  line-height: 1.2;
-  font-weight: 500;
-  margin: 0 0 40px 0;
-  letter-spacing: -2px;
-  color: var(--black);
+  font-family: var(--font-display);
+  font-size: 50px;
+  line-height: 1.25;
+  font-weight: 400;
+  margin: 0 0 var(--space-lg) 0;
+  letter-spacing: -1px;
+  color: var(--foreground);
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, #000000 0%, #444444 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
+  color: var(--color-orange);
+  -webkit-text-fill-color: var(--color-orange);
+  display: inline;
 }
 
 .hero-desc {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: var(--gray-text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.5;
+  color: rgba(10,10,10,0.7);
   max-width: 640px;
-  margin-bottom: 50px;
-  font-weight: 400;
-  text-align: justify;
+  margin-bottom: var(--space-xl);
 }
 
-.hero-desc p {
-  margin-bottom: 1.5rem;
-}
+.hero-desc p { margin-bottom: var(--space-md); }
 
 .highlight-bold {
-  color: var(--black);
-  font-weight: 700;
+  color: var(--foreground);
+  font-weight: 400;
 }
 
 .highlight-orange {
-  color: var(--orange);
-  font-weight: 700;
+  color: var(--color-orange);
   font-family: var(--font-mono);
+  font-size: 0.85em;
 }
 
 .highlight-code {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 2px 6px;
-  border-radius: 2px;
+  background: rgba(10,10,10,0.05);
+  padding: 2px var(--space-xs);
   font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--black);
-  font-weight: 600;
+  font-size: 0.85em;
+  color: var(--foreground);
 }
 
 .slogan-text {
-  font-size: 1.2rem;
-  font-weight: 520;
-  color: var(--black);
-  letter-spacing: 1px;
-  border-left: 3px solid var(--orange);
-  padding-left: 15px;
-  margin-top: 20px;
+  font-family: var(--font-display);
+  font-size: 25px;
+  line-height: 1.5;
+  color: var(--foreground);
+  border-left: var(--border-orange);
+  padding-left: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 .blinking-cursor {
-  color: var(--orange);
+  color: var(--color-green);
   animation: blink 1s step-end infinite;
-  font-weight: 700;
 }
 
 @keyframes blink {
@@ -494,55 +441,51 @@ const startSimulation = () => {
 }
 
 .decoration-square {
-  width: 16px;
-  height: 16px;
-  background: var(--orange);
-}
-
-.hero-right {
-  flex: 0.8;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.logo-container {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  padding-right: 40px;
-}
-
-.hero-logo {
-  max-width: 500px; /* Adjust logo size */
-  width: 100%;
+  width: var(--space-sm);
+  height: var(--space-sm);
+  background: var(--color-green);
+  margin-top: var(--space-md);
 }
 
 .scroll-down-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
+  margin-top: var(--space-md);
+  width: var(--space-lg);
+  height: var(--space-lg);
+  border: var(--border-medium);
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--orange);
+  color: var(--color-orange);
   font-size: 1.2rem;
-  transition: all 0.2s;
+  transition: var(--transition-fast);
 }
 
 .scroll-down-btn:hover {
-  border-color: var(--orange);
+  border-color: var(--color-orange);
 }
 
-/* Dashboard Two-Column Layout */
+/* ── Warning Stripe Divider ── */
+.dashboard-section::before {
+  content: '';
+  display: block;
+  height: 7px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-orange),
+    var(--color-orange) 11px,
+    var(--background) 11px,
+    var(--background) 22px
+  );
+  margin-bottom: var(--space-xl);
+}
+
+/* ── Dashboard Section ── */
 .dashboard-section {
   display: flex;
-  gap: 60px;
-  border-top: 1px solid var(--border);
-  padding-top: 60px;
+  gap: var(--space-xl);
+  padding-top: 0;
   align-items: flex-start;
 }
 
@@ -552,228 +495,282 @@ const startSimulation = () => {
   flex-direction: column;
 }
 
-/* Left Panel */
-.left-panel {
-  flex: 0.8;
-}
+/* ── Left Panel ── */
+.left-panel { flex: 0.8; }
 
 .panel-header {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 14px;
+  color: rgba(10,10,10,0.4);
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .status-dot {
-  color: var(--orange);
+  color: var(--color-green);
   font-size: 0.8rem;
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 520;
-  margin: 0 0 15px 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 400;
+  margin: 0 0 var(--space-sm) 0;
 }
 
 .section-desc {
-  color: var(--gray-text);
-  margin-bottom: 25px;
-  line-height: 1.6;
+  color: rgba(10,10,10,0.5);
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-bottom: var(--space-md);
+  line-height: 1.5;
 }
 
+/* ── Metric Cards ── */
 .metrics-row {
   display: flex;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 .metric-card {
-  border: 1px solid var(--border);
-  padding: 20px 30px;
+  border: var(--border-light);
+  padding: var(--space-md) var(--space-lg);
   min-width: 150px;
+  transition: var(--transition-fast);
 }
 
+.metric-card:hover { border-color: var(--color-orange); }
+
 .metric-value {
-  font-family: var(--font-mono);
-  font-size: 1.8rem;
-  font-weight: 520;
-  margin-bottom: 5px;
+  font-family: var(--font-display);
+  font-size: 31px;
+  margin-bottom: var(--space-xs);
 }
 
 .metric-label {
-  font-size: 0.85rem;
-  color: #999;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: rgba(10,10,10,0.4);
+  letter-spacing: 1px;
 }
 
-/* Simulation Steps Overview */
+/* ── Workflow Steps ── */
 .steps-container {
-  border: 1px solid var(--border);
-  padding: 30px;
+  border: var(--border-light);
+  padding: var(--space-lg);
   position: relative;
+}
+
+/* Corner markers */
+.steps-container::before,
+.steps-container::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.steps-container::before {
+  top: 12px; left: 12px;
+  border-top: 3px solid var(--color-orange);
+  border-left: 3px solid var(--color-orange);
+}
+.steps-container::after {
+  bottom: 12px; right: 12px;
+  border-bottom: 3px solid var(--color-green);
+  border-right: 3px solid var(--color-green);
 }
 
 .steps-header {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: #999;
-  margin-bottom: 25px;
+  font-size: 14px;
+  color: rgba(10,10,10,0.4);
+  margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-xs);
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .diamond-icon {
+  color: var(--color-orange);
   font-size: 1.2rem;
-  line-height: 1;
 }
 
 .workflow-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-md);
 }
 
 .workflow-item {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  gap: var(--space-md);
 }
 
 .step-num {
   font-family: var(--font-mono);
   font-weight: 700;
-  color: var(--black);
-  opacity: 0.3;
+  font-size: 15px;
+  color: var(--color-orange);
+  opacity: 0.5;
 }
 
-.step-info {
-  flex: 1;
-}
+.step-info { flex: 1; }
 
 .step-title {
-  font-weight: 520;
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-size: 22px;
   margin-bottom: 4px;
 }
 
 .step-desc {
-  font-size: 0.85rem;
-  color: var(--gray-text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: rgba(10,10,10,0.4);
+  line-height: 1.6;
 }
 
-/* Right Interactive Console */
-.right-panel {
-  flex: 1.2;
-}
+/* ── Right Console ── */
+.right-panel { flex: 1.2; }
 
 .console-box {
-  border: 1px solid #CCC; /* Outer solid border */
-  padding: 8px; /* Inner padding creates double-border effect */
+  border: var(--border-medium);
+  padding: var(--space-xs);
+  position: relative;
 }
 
-.console-section {
-  padding: 20px;
+/* Console corner markers */
+.console-box::before,
+.console-box::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.console-box::before {
+  top: -2px; right: -2px;
+  border-top: 3px solid var(--color-orange);
+  border-right: 3px solid var(--color-orange);
+}
+.console-box::after {
+  bottom: -2px; left: -2px;
+  border-bottom: 3px solid var(--color-green);
+  border-left: 3px solid var(--color-green);
 }
 
-.console-section.btn-section {
-  padding-top: 0;
-}
+.console-section { padding: var(--space-md); }
+.console-section.btn-section { padding-top: 0; }
 
 .console-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 15px;
+  margin-bottom: var(--space-sm);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: #666;
+  font-size: 13px;
+  color: rgba(10,10,10,0.4);
+  letter-spacing: 1px;
 }
 
+.console-label { text-transform: uppercase; }
+.console-meta { font-size: 11px; }
+
+/* ── Upload Zone ── */
 .upload-zone {
-  border: 1px dashed #CCC;
+  border: 2px dashed rgba(10,10,10,0.12);
   height: 200px;
   overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
-  background: #FAFAFA;
+  transition: var(--transition-medium);
+  background: var(--color-gray);
 }
 
-.upload-zone.has-files {
-  align-items: flex-start;
-}
+.upload-zone.has-files { align-items: flex-start; }
 
 .upload-zone:hover {
-  background: #F0F0F0;
-  border-color: #999;
+  border-color: var(--color-orange);
+  background: var(--background);
 }
 
-.upload-placeholder {
-  text-align: center;
+.upload-zone.drag-over {
+  border-color: var(--color-green);
+  background: rgba(67,193,101,0.05);
 }
+
+.upload-placeholder { text-align: center; }
 
 .upload-icon {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #DDD;
+  width: var(--space-lg);
+  height: var(--space-lg);
+  border: var(--border-medium);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 15px;
-  color: #999;
+  margin: 0 auto var(--space-sm);
+  color: var(--color-orange);
+  font-size: 1.2rem;
 }
 
 .upload-title {
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-bottom: 5px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin-bottom: var(--space-xs);
 }
 
 .upload-hint {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: #999;
+  font-size: 13px;
+  color: rgba(10,10,10,0.35);
 }
 
+/* ── File List ── */
 .file-list {
   width: 100%;
-  padding: 15px;
+  padding: var(--space-sm);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-xs);
 }
 
 .file-item {
   display: flex;
   align-items: center;
-  background: var(--white);
-  padding: 8px 12px;
-  border: 1px solid #EEE;
+  background: var(--background);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--border-light);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
-.file-name {
-  flex: 1;
-  margin: 0 10px;
-}
+.file-name { flex: 1; margin: 0 var(--space-sm); }
 
 .remove-btn {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
-  color: #999;
+  color: rgba(10,10,10,0.35);
+  transition: var(--transition-fast);
 }
 
+.remove-btn:hover { color: var(--color-red); }
+
+/* ── Console Divider ── */
 .console-divider {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: var(--space-sm) 0;
 }
 
 .console-divider::before,
@@ -781,131 +778,126 @@ const startSimulation = () => {
   content: '';
   flex: 1;
   height: 1px;
-  background: #EEE;
+  background: rgba(10,10,10,0.08);
 }
 
 .console-divider span {
-  padding: 0 15px;
+  padding: 0 var(--space-sm);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: #BBB;
-  letter-spacing: 1px;
+  font-size: 11px;
+  color: rgba(10,10,10,0.25);
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
+/* ── Text Input ── */
 .input-wrapper {
   position: relative;
-  border: 1px solid #DDD;
-  background: #FAFAFA;
+  border: var(--border-light);
+  background: var(--color-gray);
+  transition: var(--transition-fast);
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--color-orange);
 }
 
 .code-input {
   width: 100%;
   border: none;
   background: transparent;
-  padding: 20px;
+  padding: var(--space-md);
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 15px;
   line-height: 1.6;
   resize: vertical;
   outline: none;
   min-height: 150px;
+  color: var(--foreground);
+}
+
+.code-input::placeholder {
+  color: rgba(10,10,10,0.35);
 }
 
 .model-badge {
   position: absolute;
-  bottom: 10px;
-  right: 15px;
+  bottom: var(--space-xs);
+  right: var(--space-sm);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: #AAA;
+  font-size: 11px;
+  color: rgba(10,10,10,0.25);
+  letter-spacing: 1px;
 }
 
+/* ── Launch Button ── */
 .start-engine-btn {
   width: 100%;
-  background: var(--black);
-  color: var(--white);
-  border: none;
-  padding: 20px;
+  background: var(--color-black);
+  color: var(--color-white);
+  border: 2px solid var(--color-black);
+  padding: 20px var(--space-lg);
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 1px;
+  transition: all 0.15s ease;
+  letter-spacing: 3px;
+  text-transform: uppercase;
   position: relative;
   overflow: hidden;
 }
 
-/* Clickable state (not disabled) */
 .start-engine-btn:not(:disabled) {
-  background: var(--black);
-  border: 1px solid var(--black);
-  animation: pulse-border 2s infinite;
+  animation: btn-pulse 2s ease-in-out infinite;
 }
 
 .start-engine-btn:hover:not(:disabled) {
-  background: var(--orange);
-  border-color: var(--orange);
-  transform: translateY(-2px);
+  background: var(--color-orange);
+  border-color: var(--color-orange);
 }
 
 .start-engine-btn:active:not(:disabled) {
-  transform: translateY(0);
+  opacity: 0.9;
 }
 
 .start-engine-btn:disabled {
-  background: #E5E5E5;
-  color: #999;
+  background: var(--color-gray);
+  color: rgba(10,10,10,0.35);
   cursor: not-allowed;
-  transform: none;
-  border: 1px solid #E5E5E5;
+  border-color: rgba(10,10,10,0.08);
 }
 
-/* Guide animation: subtle border pulse */
-@keyframes pulse-border {
-  0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2); }
-  70% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+@keyframes btn-pulse {
+  0%, 100% { border-color: var(--color-black); }
+  50% { border-color: var(--color-orange); }
 }
 
-/* Responsive Layout */
-@media (max-width: 1024px) {
-  .dashboard-section {
-    flex-direction: column;
-  }
-  
-  .hero-section {
-    flex-direction: column;
-  }
-  
-  .hero-left {
-    padding-right: 0;
-    margin-bottom: 40px;
-  }
-  
-  .hero-logo {
-    max-width: 200px;
-    margin-bottom: 20px;
-  }
-}
-
+/* ── Footer ── */
 .attribution-footer {
   text-align: center;
-  padding: 20px 0;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 0.85rem;
+  padding: var(--space-lg) 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: rgba(10,10,10,0.25);
+  letter-spacing: 1px;
 }
 
 .attribution-footer a {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(10,10,10,0.4);
   text-decoration: none;
 }
 
 .attribution-footer a:hover {
-  color: #fff;
-  text-decoration: underline;
+  color: var(--color-orange);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .dashboard-section { flex-direction: column; }
+  .main-title { font-size: 34px; }
 }
 </style>
