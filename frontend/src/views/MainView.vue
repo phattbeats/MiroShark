@@ -188,20 +188,30 @@ const initProject = async () => {
 
 const handleNewProject = async () => {
   const pending = getPendingUpload()
-  if (!pending.isPending || pending.files.length === 0) {
+  const hasFiles = pending.files.length > 0
+  const hasTemplate = !!pending.templateSeedText
+  if (!pending.isPending || (!hasFiles && !hasTemplate)) {
     error.value = 'No pending files found.'
     addLog('Error: No pending files found for new project.')
     return
   }
-  
+
   try {
     loading.value = true
     currentPhase.value = 0
     ontologyProgress.value = { message: 'Uploading and analyzing docs...' }
-    addLog('Starting ontology generation: Uploading files...')
-    
+    addLog(hasTemplate
+      ? `Starting from template "${pending.templateName}"...`
+      : 'Starting ontology generation: Uploading files...')
+
     const formData = new FormData()
-    pending.files.forEach(f => formData.append('files', f))
+    if (hasFiles) {
+      pending.files.forEach(f => formData.append('files', f))
+    } else {
+      const blob = new Blob([pending.templateSeedText], { type: 'text/markdown' })
+      const fileName = `${(pending.templateName || 'template').replace(/\s+/g, '_')}.md`
+      formData.append('files', blob, fileName)
+    }
     formData.append('simulation_requirement', pending.simulationRequirement)
     
     const res = await generateOntology(formData)

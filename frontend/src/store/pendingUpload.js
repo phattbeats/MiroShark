@@ -7,20 +7,34 @@ import { reactive } from 'vue'
 const state = reactive({
   files: [],
   simulationRequirement: '',
-  isPending: false
+  isPending: false,
+  templateSeedText: '',
+  templateName: ''
 })
 
 export function setPendingUpload(files, requirement) {
   state.files = files
   state.simulationRequirement = requirement
   state.isPending = true
+  state.templateSeedText = ''
+  state.templateName = ''
+}
+
+export function setPendingTemplate(requirement, seedText, templateName) {
+  state.files = []
+  state.simulationRequirement = requirement
+  state.isPending = true
+  state.templateSeedText = seedText
+  state.templateName = templateName
 }
 
 export function getPendingUpload() {
   return {
     files: state.files,
     simulationRequirement: state.simulationRequirement,
-    isPending: state.isPending
+    isPending: state.isPending,
+    templateSeedText: state.templateSeedText,
+    templateName: state.templateName
   }
 }
 
@@ -28,6 +42,8 @@ export function clearPendingUpload() {
   state.files = []
   state.simulationRequirement = ''
   state.isPending = false
+  state.templateSeedText = ''
+  state.templateName = ''
 }
 
 export default state
