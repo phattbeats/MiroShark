@@ -95,7 +95,7 @@
             <span class="card-date">{{ formatDate(project.created_at) }}</span>
             <span class="card-time">{{ formatTime(project.created_at) }}</span>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
+          <div class="card-progress-row">
             <span class="card-progress" :class="getProgressClass(project)">
               <span class="status-dot">●</span> {{ formatRounds(project) }}
             </span>
@@ -1471,6 +1471,12 @@ onUnmounted(() => {
   letter-spacing: 3px;
   text-align: center;
   line-height: 1.5;
+}
+
+.card-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Compare mode */

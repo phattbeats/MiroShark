@@ -371,13 +371,28 @@ const getRankDeltaTitle = (name, simKey) => {
   return `Rank difference: ${label.replace(/[▲▼]/, '')}`
 }
 
-// Chart point computation
+// Chart point computation — shared Y-axis scale across both timelines
+const sharedChartMax = computed(() => {
+  const t1 = data.value?.sim1?.timeline || []
+  const t2 = data.value?.sim2?.timeline || []
+  const all = [...t1, ...t2].map(r => r.total_actions)
+  return Math.max(...all, 1)
+})
+
+const sharedRoundRange = computed(() => {
+  const t1 = data.value?.sim1?.timeline || []
+  const t2 = data.value?.sim2?.timeline || []
+  const allRounds = [...t1, ...t2].map(r => r.round_num)
+  if (!allRounds.length) return { min: 0, range: 1 }
+  const min = Math.min(...allRounds)
+  const max = Math.max(...allRounds)
+  return { min, range: Math.max(max - min, 1) }
+})
+
 const buildChartPoints = (timeline) => {
   if (!timeline || !timeline.length) return []
-  const maxActions = Math.max(...timeline.map(r => r.total_actions), 1)
-  const minR = timeline[0].round_num
-  const maxR = timeline[timeline.length - 1].round_num
-  const rangeR = Math.max(maxR - minR, 1)
+  const maxActions = sharedChartMax.value
+  const { min: minR, range: rangeR } = sharedRoundRange.value
   return timeline.map(r => ({
     round: r.round_num,
     x: chartPad + ((r.round_num - minR) / rangeR) * (chartW - 2 * chartPad),
