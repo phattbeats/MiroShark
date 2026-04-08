@@ -46,7 +46,7 @@ class Project:
 
     # Configuration
     simulation_requirement: Optional[str] = None
-    chunk_size: int = 500
+    chunk_size: int = 1000
     chunk_overlap: int = 50
 
     # Error information

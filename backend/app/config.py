@@ -61,7 +61,7 @@ class Config:
     ALLOWED_EXTENSIONS = {'pdf', 'md', 'txt', 'markdown'}
     
     # Text processing configuration
-    DEFAULT_CHUNK_SIZE = 500  # Default chunk size
+    DEFAULT_CHUNK_SIZE = 1000  # Default chunk size (doubled from 500 for fewer NER calls + better context)
     DEFAULT_CHUNK_OVERLAP = 50  # Default overlap size
     
     # Wonderwall simulation configuration
@@ -88,6 +88,12 @@ class Config:
     # Optional: dedicated model for web research (e.g. "perplexity/sonar-pro" on OpenRouter
     # for grounded search, or "perplexity/sonar" for fast search). If empty, uses default LLM.
     WEB_SEARCH_MODEL = os.environ.get('WEB_SEARCH_MODEL', '')
+
+    # NER model — optional faster model for entity extraction (high-volume, mechanical task)
+    # When not set, NER uses the default LLM config above.
+    NER_MODEL_NAME = os.environ.get('NER_MODEL_NAME', '')
+    NER_BASE_URL = os.environ.get('NER_BASE_URL', '')
+    NER_API_KEY = os.environ.get('NER_API_KEY', '')
 
     # Observability configuration
     MIROSHARK_LOG_PROMPTS = os.environ.get('MIROSHARK_LOG_PROMPTS', 'false').lower() == 'true'

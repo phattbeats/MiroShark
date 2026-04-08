@@ -52,7 +52,7 @@ class GraphBuilderService:
         text: str,
         ontology: Dict[str, Any],
         graph_name: str = "MiroShark Graph",
-        chunk_size: int = 500,
+        chunk_size: int = 1000,
         chunk_overlap: int = 50,
         max_workers: int = 6
     ) -> str:

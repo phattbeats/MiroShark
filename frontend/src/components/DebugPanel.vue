@@ -11,6 +11,7 @@
         <span v-if="stats.tokens_total" class="debug-header__stat">{{ formatTokens(stats.tokens_total) }} tok</span>
       </div>
       <div class="debug-header__right">
+        <button class="debug-btn debug-btn--icon" :class="{ 'debug-btn--copied': justCopied }" @click.stop="copyAll" :title="justCopied ? 'Copied!' : 'Copy all events'">{{ justCopied ? '&#10003;' : '&#9112;' }}</button>
         <button class="debug-btn debug-btn--icon" @click.stop="clearEvents" title="Clear">&#10005;</button>
         <button class="debug-btn debug-btn--icon" @click.stop="isVisible = false" title="Close (Ctrl+Shift+D)">&#9866;</button>
       </div>
@@ -241,6 +242,7 @@ const stats = ref({
 })
 
 const MAX_EVENTS = 2000
+const justCopied = ref(false)
 
 const tabs = [
   { key: 'feed', label: 'Live Feed' },
@@ -328,6 +330,27 @@ function clearEvents() {
   stats.value = {
     llm_calls: 0, tokens_input: 0, tokens_output: 0, tokens_total: 0,
     avg_latency_ms: 0, errors: 0, events_by_type: {}, models_used: {},
+  }
+}
+
+async function copyAll() {
+  const payload = JSON.stringify(events.value, null, 2)
+  try {
+    await navigator.clipboard.writeText(payload)
+    justCopied.value = true
+    setTimeout(() => { justCopied.value = false }, 1500)
+  } catch {
+    // Fallback for non-HTTPS contexts
+    const ta = document.createElement('textarea')
+    ta.value = payload
+    ta.style.position = 'fixed'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    justCopied.value = true
+    setTimeout(() => { justCopied.value = false }, 1500)
   }
 }
 
@@ -553,6 +576,10 @@ onUnmounted(() => {
 }
 .debug-btn--icon:hover {
   color: #fff;
+}
+
+.debug-btn--copied {
+  color: #43C165 !important;
 }
 
 /* ── Body ── */

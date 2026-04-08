@@ -55,6 +55,22 @@ def create_smart_llm_client(timeout: float = 300.0):
     )
 
 
+def create_ner_llm_client(timeout: float = 120.0):
+    """
+    Factory for NER extraction — a mechanical task that works fine on smaller/faster models.
+    Uses NER_* config when set, otherwise falls back to the default LLM client.
+    """
+    if not Config.NER_MODEL_NAME:
+        return create_llm_client(timeout=timeout)
+
+    return LLMClient(
+        api_key=Config.NER_API_KEY or Config.LLM_API_KEY,
+        base_url=Config.NER_BASE_URL or Config.LLM_BASE_URL,
+        model=Config.NER_MODEL_NAME,
+        timeout=timeout,
+    )
+
+
 class LLMClient:
     """LLM client using OpenAI-compatible APIs"""
 

@@ -30,36 +30,77 @@ _event_logger = EventLogger()
 
 @observability_bp.route('/events/stream')
 def stream_events():
-    """Server-Sent Events endpoint for live event streaming."""
+    """Server-Sent Events endpoint for live event streaming.
+
+    Uses file-tailing as the primary mechanism (reliable across Flask
+    debug reloader processes).  The in-memory subscriber is kept as a
+    fast-path for same-process events but the global JSONL file is
+    always tailed so no events are missed.
+    """
     sim_id = request.args.get('simulation_id')
     raw_types = request.args.get('event_types', '')
     event_types = set(t.strip() for t in raw_types.split(',') if t.strip()) or None
 
     subscriber = _event_logger.subscribe(simulation_id=sim_id, event_types=event_types)
 
-    # File tailer for subprocess events (simulation writes directly to disk)
-    file_tailer = None
+    # Always tail the global events file (handles cross-process visibility)
+    from ..utils.event_logger import LOG_DIR
+    global_tailer = FileTailer(os.path.join(LOG_DIR, 'events.jsonl'))
+
+    # Also tail simulation-specific file when filtered
+    sim_tailer = None
     if sim_id:
         events_file = os.path.join(
             Config.WONDERWALL_SIMULATION_DATA_DIR, sim_id, 'events.jsonl'
         )
-        file_tailer = FileTailer(events_file)
+        sim_tailer = FileTailer(events_file)
+
+    # Track event IDs to deduplicate between in-memory bus and file tailer
+    seen_ids = set()
+
+    def _emit(event):
+        eid = event.get('event_id')
+        if eid and eid in seen_ids:
+            return None
+        if eid:
+            seen_ids.add(eid)
+            # Keep seen_ids bounded
+            if len(seen_ids) > 5000:
+                seen_ids.clear()
+        # Apply filters
+        if sim_id and event.get('simulation_id') and event['simulation_id'] != sim_id:
+            return None
+        if event_types and event.get('event_type') not in event_types:
+            return None
+        return f"event: {event['event_type']}\ndata: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
 
     def generate():
         try:
             last_heartbeat = time.time()
             while True:
-                # In-memory events from Flask process
-                for event in subscriber.poll(timeout=1.0):
-                    yield f"event: {event['event_type']}\ndata: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
+                emitted = False
 
-                # File-based events from simulation subprocess
-                if file_tailer:
-                    for event in file_tailer.read_new_events():
-                        # Apply filters
-                        if event_types and event.get('event_type') not in event_types:
-                            continue
-                        yield f"event: {event['event_type']}\ndata: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
+                # In-memory events (fast path, same process)
+                for event in subscriber.poll(timeout=0.5):
+                    chunk = _emit(event)
+                    if chunk:
+                        yield chunk
+                        emitted = True
+
+                # Global JSONL file (cross-process reliable)
+                for event in global_tailer.read_new_events():
+                    chunk = _emit(event)
+                    if chunk:
+                        yield chunk
+                        emitted = True
+
+                # Simulation-specific JSONL (subprocess events)
+                if sim_tailer:
+                    for event in sim_tailer.read_new_events():
+                        chunk = _emit(event)
+                        if chunk:
+                            yield chunk
+                            emitted = True
 
                 # Heartbeat every 15 seconds
                 now = time.time()
@@ -67,6 +108,9 @@ def stream_events():
                     hb = json.dumps({'type': 'heartbeat', 'timestamp': datetime.utcnow().isoformat() + 'Z'})
                     yield f"event: heartbeat\ndata: {hb}\n\n"
                     last_heartbeat = now
+
+                if not emitted:
+                    time.sleep(0.5)
         finally:
             subscriber.close()
             _event_logger.unsubscribe(subscriber)

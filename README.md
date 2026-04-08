@@ -146,6 +146,25 @@ Render reads `render.yaml` automatically. Set the same environment variables abo
 
 ---
 
+### Quick Start: `./miroshark`
+
+The launcher script handles everything — dependency checks, Neo4j startup, package installation, and launching both frontend and backend:
+
+```bash
+cp .env.example .env   # configure your LLM + Neo4j settings
+./miroshark
+```
+
+What it does:
+1. Checks Python 3.11+, Node 18+, uv, Neo4j/Docker
+2. Starts Neo4j if not already running (Docker or native)
+3. Installs frontend + backend dependencies if missing
+4. Kills stale processes on ports 3000/5001
+5. Launches Vite dev server (`:3000`) and Flask API (`:5001`)
+6. Ctrl+C to stop everything
+
+---
+
 ### Option A: Cloud API (no GPU needed)
 
 Only Neo4j runs locally. LLM and embeddings use a cloud provider.
@@ -354,6 +373,26 @@ SMART_MODEL_NAME=qwen3.5:27b
 
 If only `SMART_MODEL_NAME` is set (without `SMART_PROVIDER`/`SMART_BASE_URL`/`SMART_API_KEY`), the smart model inherits the default provider settings — useful when you just want a bigger model on the same backend.
 
+### NER Model
+
+Set `NER_MODEL_NAME` to route entity extraction through a faster, cheaper model. NER is a high-volume mechanical task (structured JSON output, low temperature) — it doesn't need a 235B parameter model. A 14B-30B model runs 5-10x faster with equivalent extraction quality.
+
+```bash
+# Use a fast MoE model for NER on OpenRouter
+NER_MODEL_NAME=qwen/qwen3-30b-a3b
+
+# Or a local Ollama model
+NER_MODEL_NAME=qwen3:14b
+```
+
+When not set, NER uses the default LLM. The model routing stacks with Smart Model — you can run three tiers:
+
+| Workflow | Model | Why |
+|---|---|---|
+| NER extraction | `qwen3:14b` (fast, local) | High-volume, structured output, doesn't need reasoning |
+| Simulation rounds, profiles, config | `qwen3.5:27b` (default) | Balanced cost/quality for bulk work |
+| Reports, ontology, graph reasoning | `claude-sonnet-4` (smart) | Needs strong reasoning for end-user output |
+
 ### Environment Variables
 
 All settings live in `.env` (copy from `.env.example`):
@@ -373,6 +412,11 @@ LLM_MODEL_NAME=qwen3.5:27b
 
 # Claude Code mode (only when LLM_PROVIDER=claude-code)
 # CLAUDE_CODE_MODEL=claude-sonnet-4-20250514
+
+# NER model (optional — faster model for entity extraction)
+# NER_MODEL_NAME=qwen/qwen3-30b-a3b  # Or any smaller/faster model
+# NER_API_KEY=                         # Only if different from LLM_API_KEY
+# NER_BASE_URL=                        # Only if different from LLM_BASE_URL
 
 # Neo4j
 NEO4J_URI=bolt://localhost:7687

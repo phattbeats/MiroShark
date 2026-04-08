@@ -9,45 +9,28 @@ entities and relations from text chunks, guided by the graph's ontology.
 import logging
 from typing import Dict, Any, List, Optional
 
-from ..utils.llm_client import LLMClient, create_llm_client
+from ..utils.llm_client import LLMClient, create_ner_llm_client
 
 logger = logging.getLogger('miroshark.ner_extractor')
 
 # System prompt template for NER/RE extraction
 _SYSTEM_PROMPT = """You are a Named Entity Recognition and Relation Extraction system.
-Given a text and an ontology (entity types + relation types), extract all entities and relations.
+Given a text and an ontology, extract all entities and relations. Return valid JSON only.
 
 ONTOLOGY:
 {ontology_description}
 
 RULES:
-1. Only extract entity types and relation types defined in the ontology.
-2. Normalize entity names: strip whitespace, use canonical form (e.g., "Jack Ma" not "ma jack").
-3. Each entity must have: name, type (from ontology), and optional attributes.
-4. Each relation must have: source entity name, target entity name, type (from ontology), and a fact sentence describing the relationship.
+1. Extract ONLY entity and relation types defined in the ontology.
+2. Normalize names to canonical form ("Jack Ma" not "ma jack"). Merge co-references.
+3. Entity names MUST be proper nouns or specific identifiers — REJECT fragments ("the founder", "a large company"), abstract concepts ("blockchain technology"), and descriptions.
+4. Use the full canonical name when both short and full names appear ("Robin Hanson" not "Hanson").
 5. If no entities or relations are found, return empty lists.
-6. Be precise — only extract what is explicitly stated or strongly implied in the text.
-7. Merge co-references: "the company", "it", "the firm" all resolve to the canonical entity name.
-8. Fact sentences should be self-contained and readable without the original text.
+6. Each relation needs a self-contained fact sentence.
 
-REJECTION RULES (critical):
-9. REJECT fragments and descriptions as entity names. "NYU dropout", "the founder", \
-"a large company", "CO" are NOT valid entity names. Entity names must be proper nouns \
-or specific identifiers (e.g., "Shayne Coplan", "Polymarket", "CFTC").
-10. REJECT abstract concepts and events as entities unless they match the ontology. \
-"prediction markets", "US presidential election", "blockchain technology" are NOT entities \
-unless the ontology explicitly defines them as a type.
-11. When the same entity appears with a short name AND a full name (e.g., "Hanson" and \
-"Robin Hanson"), use ONLY the full canonical name.
-12. For the "summary" in attributes, extract a SHORT factual sentence from the text that \
-describes what this entity IS or DOES. Not just "Name (Type)" — e.g., \
-"Polymarket is a prediction market platform founded in 2020" or \
-"Shayne Coplan is the 26-year-old founder of Polymarket".
-
-EXAMPLES:
-
-Example input: "Tesla CEO Elon Musk announced plans to cut 10% of the workforce. The move was criticized by the United Auto Workers union."
-Example output:
+EXAMPLE:
+Input: "Tesla CEO Elon Musk announced plans to cut 10% of the workforce. The move was criticized by the United Auto Workers union."
+Output:
 {{
   "entities": [
     {{"name": "Elon Musk", "type": "PublicFigure", "attributes": {{"role": "CEO"}}}},
@@ -56,35 +39,11 @@ Example output:
   ],
   "relations": [
     {{"source": "Elon Musk", "target": "Tesla", "type": "LEADS", "fact": "Elon Musk is the CEO of Tesla."}},
-    {{"source": "Tesla", "target": "United Auto Workers", "type": "OPPOSES", "fact": "Tesla's plan to cut 10% of workforce was criticized by the United Auto Workers union."}}
+    {{"source": "Tesla", "target": "United Auto Workers", "type": "OPPOSES", "fact": "Tesla's workforce cut was criticized by the United Auto Workers union."}}
   ]
 }}
 
-Example input: "Senator Warren introduced the AI Accountability Act, which would require companies to disclose training data. Google and OpenAI lobbied against the bill."
-Example output:
-{{
-  "entities": [
-    {{"name": "Elizabeth Warren", "type": "Politician", "attributes": {{"role": "Senator"}}}},
-    {{"name": "AI Accountability Act", "type": "Policy", "attributes": {{"status": "introduced"}}}},
-    {{"name": "Google", "type": "Company", "attributes": {{}}}},
-    {{"name": "OpenAI", "type": "Company", "attributes": {{}}}}
-  ],
-  "relations": [
-    {{"source": "Elizabeth Warren", "target": "AI Accountability Act", "type": "PROPOSES", "fact": "Senator Elizabeth Warren introduced the AI Accountability Act."}},
-    {{"source": "Google", "target": "AI Accountability Act", "type": "OPPOSES", "fact": "Google lobbied against the AI Accountability Act."}},
-    {{"source": "OpenAI", "target": "AI Accountability Act", "type": "OPPOSES", "fact": "OpenAI lobbied against the AI Accountability Act."}}
-  ]
-}}
-
-Return ONLY valid JSON in this exact format:
-{{
-  "entities": [
-    {{"name": "...", "type": "...", "attributes": {{"key": "value"}}}}
-  ],
-  "relations": [
-    {{"source": "...", "target": "...", "type": "...", "fact": "..."}}
-  ]
-}}"""
+Return JSON: {{"entities": [...], "relations": [...]}}"""
 
 _USER_PROMPT = """Extract entities and relations from the following text:
 
@@ -95,7 +54,7 @@ class NERExtractor:
     """Extract entities and relations from text using local LLM."""
 
     def __init__(self, llm_client: Optional[LLMClient] = None, max_retries: int = 2):
-        self.llm = llm_client or create_llm_client()
+        self.llm = llm_client or create_ner_llm_client()
         self.max_retries = max_retries
 
     def extract(self, text: str, ontology: Dict[str, Any]) -> Dict[str, Any]:
