@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore", message=".*resource_tracker.*")
 
 from flask import Flask, request
 from flask_cors import CORS
+from flask_compress import Compress
 
 from .config import Config
 from .utils.logger import setup_logger, get_logger
@@ -41,6 +42,9 @@ def create_app(config_class=Config):
     
     # Enable CORS
     CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+    # Enable gzip/brotli response compression
+    Compress(app)
 
     # --- Initialize Neo4jStorage singleton (DI via app.extensions) ---
     from .storage import Neo4jStorage

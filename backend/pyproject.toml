@@ -12,6 +12,7 @@ dependencies = [
     # Core framework
     "flask>=3.0.0",
     "flask-cors>=6.0.0",
+    "flask-compress>=1.17",
 
     # LLM related
     "openai>=1.0.0",

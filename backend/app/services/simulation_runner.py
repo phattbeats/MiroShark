@@ -1068,6 +1068,55 @@ class SimulationRunner:
         return actions[offset:offset + limit]
     
     @classmethod
+    def _scan_jsonl_raw(cls, simulation_id: str):
+        """
+        Yield raw dicts from all platform JSONL files without creating
+        AgentAction objects.  Skips event/bookkeeping lines.
+        Each yielded dict has an extra '_platform' key.
+        """
+        sim_dir = os.path.join(cls.RUN_STATE_DIR, simulation_id)
+        platform_files = [
+            ("twitter",     os.path.join(sim_dir, "twitter",     "actions.jsonl")),
+            ("reddit",      os.path.join(sim_dir, "reddit",      "actions.jsonl")),
+            ("polymarket",  os.path.join(sim_dir, "polymarket",  "actions.jsonl")),
+        ]
+        found_any = False
+        for plat, path in platform_files:
+            if not os.path.exists(path):
+                continue
+            found_any = True
+            with open(path, 'r', encoding='utf-8') as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if "event_type" in data or "agent_id" not in data:
+                        continue
+                    data['_platform'] = data.get('platform') or plat
+                    yield data
+        # Fallback: legacy single file
+        if not found_any:
+            legacy = os.path.join(sim_dir, "actions.jsonl")
+            if os.path.exists(legacy):
+                with open(legacy, 'r', encoding='utf-8') as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            data = json.loads(line)
+                        except json.JSONDecodeError:
+                            continue
+                        if "event_type" in data or "agent_id" not in data:
+                            continue
+                        data['_platform'] = data.get('platform', '')
+                        yield data
+
+    @classmethod
     def get_timeline(
         cls,
         simulation_id: str,
@@ -1075,29 +1124,18 @@ class SimulationRunner:
         end_round: Optional[int] = None
     ) -> List[Dict[str, Any]]:
         """
-        Get simulation timeline (summarized by round)
-
-        Args:
-            simulation_id: Simulation ID
-            start_round: Starting round
-            end_round: Ending round
-            
-        Returns:
-            Summary info per round
+        Get simulation timeline (summarized by round).
+        Scans JSONL directly — no intermediate AgentAction objects.
         """
-        actions = cls.get_actions(simulation_id, limit=10000)
-        
-        # Group by round
         rounds: Dict[int, Dict[str, Any]] = {}
-        
-        for action in actions:
-            round_num = action.round_num
-            
+
+        for data in cls._scan_jsonl_raw(simulation_id):
+            round_num = data.get("round", 0)
             if round_num < start_round:
                 continue
             if end_round is not None and round_num > end_round:
                 continue
-            
+
             if round_num not in rounds:
                 rounds[round_num] = {
                     "round_num": round_num,
@@ -1105,22 +1143,22 @@ class SimulationRunner:
                     "reddit_actions": 0,
                     "active_agents": set(),
                     "action_types": {},
-                    "first_action_time": action.timestamp,
-                    "last_action_time": action.timestamp,
+                    "first_action_time": data.get("timestamp", ""),
+                    "last_action_time": data.get("timestamp", ""),
                 }
-            
+
             r = rounds[round_num]
-            
-            if action.platform == "twitter":
+            plat = data['_platform']
+            if plat == "twitter":
                 r["twitter_actions"] += 1
-            else:
+            elif plat == "reddit":
                 r["reddit_actions"] += 1
-            
-            r["active_agents"].add(action.agent_id)
-            r["action_types"][action.action_type] = r["action_types"].get(action.action_type, 0) + 1
-            r["last_action_time"] = action.timestamp
-        
-        # Convert to list
+
+            r["active_agents"].add(data.get("agent_id", 0))
+            atype = data.get("action_type", "")
+            r["action_types"][atype] = r["action_types"].get(atype, 0) + 1
+            r["last_action_time"] = data.get("timestamp", "")
+
         result = []
         for round_num in sorted(rounds.keys()):
             r = rounds[round_num]
@@ -1135,51 +1173,46 @@ class SimulationRunner:
                 "first_action_time": r["first_action_time"],
                 "last_action_time": r["last_action_time"],
             })
-        
+
         return result
     
     @classmethod
     def get_agent_stats(cls, simulation_id: str) -> List[Dict[str, Any]]:
         """
-        Get statistics for each Agent
-        
-        Returns:
-            Agent statistics list
+        Get statistics for each Agent.
+        Scans JSONL directly — no intermediate AgentAction objects.
         """
-        actions = cls.get_actions(simulation_id, limit=10000)
-        
         agent_stats: Dict[int, Dict[str, Any]] = {}
-        
-        for action in actions:
-            agent_id = action.agent_id
-            
+
+        for data in cls._scan_jsonl_raw(simulation_id):
+            agent_id = data.get("agent_id", 0)
+
             if agent_id not in agent_stats:
                 agent_stats[agent_id] = {
                     "agent_id": agent_id,
-                    "agent_name": action.agent_name,
+                    "agent_name": data.get("agent_name", ""),
                     "total_actions": 0,
                     "twitter_actions": 0,
                     "reddit_actions": 0,
                     "action_types": {},
-                    "first_action_time": action.timestamp,
-                    "last_action_time": action.timestamp,
+                    "first_action_time": data.get("timestamp", ""),
+                    "last_action_time": data.get("timestamp", ""),
                 }
-            
+
             stats = agent_stats[agent_id]
             stats["total_actions"] += 1
-            
-            if action.platform == "twitter":
+
+            plat = data['_platform']
+            if plat == "twitter":
                 stats["twitter_actions"] += 1
-            else:
+            elif plat == "reddit":
                 stats["reddit_actions"] += 1
-            
-            stats["action_types"][action.action_type] = stats["action_types"].get(action.action_type, 0) + 1
-            stats["last_action_time"] = action.timestamp
-        
-        # Sort by total action count
-        result = sorted(agent_stats.values(), key=lambda x: x["total_actions"], reverse=True)
-        
-        return result
+
+            atype = data.get("action_type", "")
+            stats["action_types"][atype] = stats["action_types"].get(atype, 0) + 1
+            stats["last_action_time"] = data.get("timestamp", "")
+
+        return sorted(agent_stats.values(), key=lambda x: x["total_actions"], reverse=True)
     
     @classmethod
     def cleanup_simulation_logs(cls, simulation_id: str) -> Dict[str, Any]:
