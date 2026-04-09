@@ -40,6 +40,11 @@
           <span class="card-id">{{ formatSimulationId(project.simulation_id) }}</span>
           <div class="card-status-icons">
             <span
+              v-if="project.parent_simulation_id"
+              class="fork-badge"
+              :title="`Forked from ${formatSimulationId(project.parent_simulation_id)}`"
+            >⑂</span>
+            <span
               class="status-icon"
               :class="{ available: project.project_id, unavailable: !project.project_id }"
               title="Graph Build"
@@ -223,6 +228,41 @@
             <div class="modal-playback-hint">
               <span class="hint-text">Select a step to replay from the simulation history</span>
             </div>
+
+            <!-- Fork Section -->
+            <div class="modal-fork-section">
+              <div class="modal-divider">
+                <span class="divider-line"></span>
+                <span class="divider-text">Fork</span>
+                <span class="divider-line"></span>
+              </div>
+
+              <div v-if="!showForkPanel" class="fork-intro">
+                <p class="fork-desc">Clone this simulation with a new scenario — agent profiles are reused instantly.</p>
+                <button class="fork-trigger-btn" @click="openForkPanel">⑂ Fork Simulation</button>
+                <div v-if="selectedProject.parent_simulation_id" class="fork-lineage-badge">
+                  ⑂ Forked from <span class="fork-parent-id">{{ formatSimulationId(selectedProject.parent_simulation_id) }}</span>
+                </div>
+              </div>
+
+              <div v-else class="fork-form">
+                <label class="fork-label">Scenario (edit to explore a variant)</label>
+                <textarea
+                  v-model="forkRequirement"
+                  class="fork-textarea"
+                  placeholder="Describe the scenario you want to simulate..."
+                  rows="3"
+                ></textarea>
+                <p class="fork-note">Agent profiles will be copied from the parent simulation — no re-preparation needed.</p>
+                <div v-if="forkError" class="fork-error">{{ forkError }}</div>
+                <div class="fork-actions">
+                  <button class="fork-cancel-btn" @click="closeForkPanel" :disabled="forking">Cancel</button>
+                  <button class="fork-submit-btn" @click="executeFork" :disabled="forking">
+                    {{ forking ? 'Forking...' : '⑂ Fork & Open' }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Transition>
@@ -233,7 +273,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, onActivated, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getSimulationHistory } from '../api/simulation'
+import { getSimulationHistory, forkSimulation } from '../api/simulation'
 
 const router = useRouter()
 const route = useRoute()
@@ -250,6 +290,12 @@ let observer = null
 // Compare mode
 const compareMode = ref(false)
 const compareSelections = ref([])
+
+// Fork mode
+const showForkPanel = ref(false)
+const forkRequirement = ref('')
+const forking = ref(false)
+const forkError = ref('')
 
 const toggleCompareMode = () => {
   if (compareMode.value && compareSelections.value.length === 2) {
@@ -476,6 +522,8 @@ const navigateToProject = (simulation) => {
 // Close modal
 const closeModal = () => {
   selectedProject.value = null
+  showForkPanel.value = false
+  forkError.value = ''
 }
 
 // Navigate to graph build page (Project)
@@ -541,6 +589,45 @@ const goToInteraction = () => {
       params: { reportId: selectedProject.value.report_id }
     })
     closeModal()
+  }
+}
+
+// Open fork panel for selected simulation
+const openForkPanel = () => {
+  forkRequirement.value = selectedProject.value?.simulation_requirement || ''
+  forkError.value = ''
+  showForkPanel.value = true
+}
+
+// Close fork panel
+const closeForkPanel = () => {
+  showForkPanel.value = false
+  forkError.value = ''
+}
+
+// Execute fork
+const executeFork = async () => {
+  if (!selectedProject.value) return
+  forking.value = true
+  forkError.value = ''
+  try {
+    const response = await forkSimulation({
+      parent_simulation_id: selectedProject.value.simulation_id,
+      simulation_requirement: forkRequirement.value || undefined,
+    })
+    if (response.success) {
+      const newSimId = response.data.simulation_id
+      showForkPanel.value = false
+      closeModal()
+      await loadHistory()
+      router.push({ name: 'SimulationRun', params: { simulationId: newSimId } })
+    } else {
+      forkError.value = response.error || 'Fork failed'
+    }
+  } catch (err) {
+    forkError.value = err?.response?.data?.error || err.message || 'Fork failed'
+  } finally {
+    forking.value = false
   }
 }
 
@@ -1508,4 +1595,163 @@ onUnmounted(() => {
 }
 .compare-select-btn:hover { border-color: #FF6B1A; color: #FF6B1A; }
 .compare-select-btn.selected { border-color: #FF6B1A; color: #FF6B1A; background: rgba(255,107,26,0.1); }
+
+/* ===== Fork badge on cards ===== */
+.fork-badge {
+  font-size: 0.8rem;
+  color: #FFB347;
+  opacity: 0.8;
+  cursor: default;
+}
+
+/* ===== Fork section in modal ===== */
+.modal-fork-section {
+  background: #FAFAFA;
+  padding: 0 0 22px;
+}
+
+.fork-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 34px 0;
+}
+
+.fork-desc {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.4);
+  letter-spacing: 1px;
+  text-align: center;
+  margin: 0;
+}
+
+.fork-trigger-btn {
+  padding: 8px 22px;
+  border: 1px solid rgba(255, 179, 71, 0.5);
+  background: rgba(255, 179, 71, 0.06);
+  color: #CC8800;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fork-trigger-btn:hover {
+  border-color: #FFB347;
+  background: rgba(255, 179, 71, 0.12);
+}
+
+.fork-lineage-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.4);
+  letter-spacing: 2px;
+}
+
+.fork-parent-id {
+  color: #FFB347;
+  font-weight: 600;
+}
+
+/* Fork form */
+.fork-form {
+  padding: 16px 34px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fork-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.fork-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: #F5F5F5;
+  border: 1px solid rgba(10, 10, 10, 0.12);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #0A0A0A;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.fork-textarea:focus {
+  border-color: #FFB347;
+}
+
+.fork-note {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(10, 10, 10, 0.35);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.fork-error {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #FF4444;
+  padding: 6px 10px;
+  background: rgba(255, 68, 68, 0.06);
+  border: 1px solid rgba(255, 68, 68, 0.15);
+}
+
+.fork-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.fork-cancel-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(10, 10, 10, 0.12);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.5);
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+}
+
+.fork-cancel-btn:hover:not(:disabled) {
+  border-color: rgba(10, 10, 10, 0.3);
+  color: #0A0A0A;
+}
+
+.fork-submit-btn {
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 179, 71, 0.6);
+  background: rgba(255, 179, 71, 0.08);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #CC8800;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+}
+
+.fork-submit-btn:hover:not(:disabled) {
+  background: rgba(255, 179, 71, 0.18);
+  border-color: #FFB347;
+}
+
+.fork-submit-btn:disabled,
+.fork-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>

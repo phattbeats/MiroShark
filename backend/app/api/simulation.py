@@ -270,6 +270,66 @@ def create_simulation():
         }), 500
 
 
+@simulation_bp.route('/fork', methods=['POST'])
+def fork_simulation():
+    """
+    Fork an existing simulation into a new child simulation.
+
+    Copies agent profiles and configuration from the parent so the child
+    is immediately ready to run.  Optionally accepts a new
+    simulation_requirement to explore a different scenario with the same
+    agent population.
+
+    Request (JSON):
+        {
+            "parent_simulation_id": "sim_xxxx",        // Required
+            "simulation_requirement": "What if..."     // Optional override
+        }
+
+    Returns:
+        {
+            "success": true,
+            "data": { ...simulation state... }
+        }
+    """
+    try:
+        data = request.get_json() or {}
+
+        parent_simulation_id = data.get('parent_simulation_id')
+        if not parent_simulation_id:
+            return jsonify({
+                "success": False,
+                "error": "Please provide parent_simulation_id"
+            }), 400
+
+        simulation_requirement = data.get('simulation_requirement') or None
+
+        manager = SimulationManager()
+        state = manager.fork_simulation(
+            parent_simulation_id=parent_simulation_id,
+            simulation_requirement=simulation_requirement,
+        )
+
+        return jsonify({
+            "success": True,
+            "data": state.to_dict()
+        })
+
+    except ValueError as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 404
+
+    except Exception as e:
+        logger.error(f"Failed to fork simulation: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
 def _check_simulation_prepared(simulation_id: str) -> tuple:
     """
     Check if the simulation has been prepared
@@ -995,6 +1055,9 @@ def get_simulation_history():
             # Get associated report_id (find the latest report for this simulation)
             sim_dict["report_id"] = _get_report_id_for_simulation(sim.simulation_id)
             
+            # Propagate fork lineage fields (already in to_dict but ensure they surface)
+            sim_dict.setdefault("parent_simulation_id", sim.parent_simulation_id)
+
             # Add version number
             sim_dict["version"] = "v1.0.2"
             

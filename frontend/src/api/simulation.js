@@ -243,3 +243,12 @@ export const getInfluenceLeaderboard = (simulationId) => {
   return service.get(`/api/simulation/${simulationId}/influence`)
 }
 
+/**
+ * Fork a simulation — copies agent profiles and config into a new simulation
+ * that is immediately ready to run.
+ * @param {Object} data - { parent_simulation_id, simulation_requirement? }
+ */
+export const forkSimulation = (data) => {
+  return requestWithRetry(() => service.post('/api/simulation/fork', data), 3, 1000)
+}
+

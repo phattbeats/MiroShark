@@ -74,7 +74,11 @@ class SimulationState:
 
     # Error info
     error: Optional[str] = None
-    
+
+    # Fork lineage
+    parent_simulation_id: Optional[str] = None
+    config_diff: Optional[Dict] = None
+
     def to_dict(self) -> Dict[str, Any]:
         """Full state dictionary (for internal use)"""
         return {
@@ -96,6 +100,8 @@ class SimulationState:
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "error": self.error,
+            "parent_simulation_id": self.parent_simulation_id,
+            "config_diff": self.config_diff,
         }
     
     def to_simple_dict(self) -> Dict[str, Any]:
@@ -188,6 +194,8 @@ class SimulationManager:
             created_at=data.get("created_at", datetime.now().isoformat()),
             updated_at=data.get("updated_at", datetime.now().isoformat()),
             error=data.get("error"),
+            parent_simulation_id=data.get("parent_simulation_id"),
+            config_diff=data.get("config_diff"),
         )
         
         self._simulations[simulation_id] = state
@@ -523,6 +531,104 @@ class SimulationManager:
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     
+    def fork_simulation(
+        self,
+        parent_simulation_id: str,
+        simulation_requirement: Optional[str] = None,
+    ) -> SimulationState:
+        """
+        Fork an existing simulation into a new child simulation.
+
+        Copies all prepared files (profiles, config) from the parent so the
+        child is immediately READY to run without going through the full
+        prepare pipeline again.  The caller may override simulation_requirement
+        to explore a different scenario with the same agent population.
+
+        Args:
+            parent_simulation_id: ID of the simulation to fork from
+            simulation_requirement: Optional new scenario description.
+                                    Defaults to the parent's requirement.
+
+        Returns:
+            New SimulationState with status=READY and parent_simulation_id set
+        """
+        import uuid
+
+        parent = self._load_simulation_state(parent_simulation_id)
+        if not parent:
+            raise ValueError(f"Parent simulation not found: {parent_simulation_id}")
+
+        parent_dir = self._get_simulation_dir(parent_simulation_id)
+
+        # Create new simulation ID and directory
+        new_id = f"sim_{uuid.uuid4().hex[:12]}"
+        new_dir = self._get_simulation_dir(new_id)
+        os.makedirs(new_dir, exist_ok=True)
+
+        # Copy preparation files
+        files_to_copy = [
+            "reddit_profiles.json",
+            "twitter_profiles.csv",
+            "polymarket_profiles.json",
+        ]
+        for fname in files_to_copy:
+            src = os.path.join(parent_dir, fname)
+            if os.path.exists(src):
+                shutil.copy2(src, os.path.join(new_dir, fname))
+
+        # Copy and optionally patch the simulation config
+        config_diff: Dict[str, Any] = {}
+        parent_config_path = os.path.join(parent_dir, "simulation_config.json")
+        if os.path.exists(parent_config_path):
+            with open(parent_config_path, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+
+            original_requirement = config_data.get("simulation_requirement", "")
+
+            if simulation_requirement and simulation_requirement != original_requirement:
+                config_diff["simulation_requirement"] = {
+                    "from": original_requirement,
+                    "to": simulation_requirement,
+                }
+                config_data["simulation_requirement"] = simulation_requirement
+
+            # Update IDs to point to the new simulation
+            config_data["simulation_id"] = new_id
+
+            new_config_path = os.path.join(new_dir, "simulation_config.json")
+            with open(new_config_path, "w", encoding="utf-8") as f:
+                json.dump(config_data, f, ensure_ascii=False, indent=2)
+        else:
+            if simulation_requirement:
+                config_diff["simulation_requirement"] = {
+                    "from": "",
+                    "to": simulation_requirement,
+                }
+
+        state = SimulationState(
+            simulation_id=new_id,
+            project_id=parent.project_id,
+            graph_id=parent.graph_id,
+            enable_twitter=parent.enable_twitter,
+            enable_reddit=parent.enable_reddit,
+            enable_polymarket=parent.enable_polymarket,
+            status=SimulationStatus.READY,
+            entities_count=parent.entities_count,
+            profiles_count=parent.profiles_count,
+            entity_types=list(parent.entity_types),
+            config_generated=True,
+            config_reasoning=f"Forked from {parent_simulation_id}",
+            parent_simulation_id=parent_simulation_id,
+            config_diff=config_diff if config_diff else None,
+        )
+
+        self._save_simulation_state(state)
+        logger.info(
+            f"Forked simulation: {new_id} from parent={parent_simulation_id}, "
+            f"diff={config_diff}"
+        )
+        return state
+
     def get_run_instructions(self, simulation_id: str) -> Dict[str, str]:
         """Get run instructions"""
         sim_dir = self._get_simulation_dir(simulation_id)
