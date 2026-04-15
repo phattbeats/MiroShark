@@ -122,6 +122,60 @@ class EntityReader:
             logger.warning(f"Failed to get edges for node {node_uuid}: {str(e)}")
             return []
 
+    @staticmethod
+    def _is_nonspeaking_entity(name: str, entity_type: str) -> bool:
+        """Reject entities that shouldn't become simulation agents.
+
+        Catches:
+        - Dates extracted as entities ("June 18, 2023", "November 5, 2024")
+        - Abstract concepts ("DeFi", "prediction markets", "blockchain technology")
+        - Generic events ("2024 US presidential election", "Product Market Fit")
+        - Country names used as market proxies ("Germany", "Canada", "United Kingdom")
+        """
+        import re
+
+        n = name.strip()
+        if not n:
+            return True
+
+        # Dates — patterns like "June 18, 2023" or "November 5, 2024"
+        if re.fullmatch(
+            r'(?:January|February|March|April|May|June|July|August|September|'
+            r'October|November|December)\s+\d{1,2}(?:,?\s*\d{4})?',
+            n,
+            re.IGNORECASE,
+        ):
+            return True
+
+        # Year-only entities
+        if re.fullmatch(r'\d{4}', n):
+            return True
+
+        # Known non-speaking abstract concepts and geographic proxies
+        _REJECT_NAMES = {
+            "defi", "blockchain", "cryptocurrency", "prediction markets",
+            "blockchain technology", "smart contracts",
+            "product market fit",
+        }
+        if n.lower() in _REJECT_NAMES:
+            return True
+
+        # Countries used as market proxies (typed as Organization/geographic)
+        _COUNTRY_NAMES = {
+            "germany", "canada", "united kingdom", "united states",
+            "france", "china", "japan", "india", "brazil", "australia",
+            "south korea", "singapore", "switzerland",
+        }
+        et_lower = entity_type.lower()
+        if n.lower() in _COUNTRY_NAMES and et_lower in ("organization", "entity"):
+            return True
+
+        # Events extracted as entities
+        if re.search(r'\d{4}\s+(us|u\.s\.|presidential|election)', n, re.IGNORECASE):
+            return True
+
+        return False
+
     def filter_defined_entities(
         self,
         graph_id: str,
@@ -177,6 +231,12 @@ class EntityReader:
                 entity_type = matching_labels[0]
             else:
                 entity_type = custom_labels[0]
+
+            # --- Reject entities that can't be meaningful simulation agents ---
+            entity_name = node.get("name", "")
+            if self._is_nonspeaking_entity(entity_name, entity_type):
+                logger.debug(f"Skipping non-speaking entity: '{entity_name}' ({entity_type})")
+                continue
 
             entity_types_found.add(entity_type)
 

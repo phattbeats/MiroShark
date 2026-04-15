@@ -96,6 +96,61 @@ class TextProcessor:
         # --- Collapse excessive blank lines ---
         text = re.sub(r'\n{3,}', '\n\n', text)
 
+        # --- Citation marker blocks (PDF extraction artifacts) ---
+        # Blocks like "Sacra +2\nWikipedia +4\nBritannica\nSubstack +3"
+        # appear between paragraphs in extracted PDFs. We detect
+        # citation-like lines (short, capitalized, no prose punctuation)
+        # and strip them only when 2+ appear consecutively — a single
+        # isolated capitalized line is likely a section header.
+        def _looks_like_citation(line: str) -> bool:
+            s = line.strip()
+            if not s or len(s) > 60:
+                return False
+            core = re.sub(r'\s*\+\s*\d+$', '', s)
+            core = re.sub(r'…$', '', core)
+            if not core:
+                return False
+            words = core.split()
+            if len(words) > 5 or len(words) == 0:
+                return False
+            if any(re.search(r'\d', w) for w in words):
+                return False
+            if any(len(w) > 2 and w[0].islower() for w in words):
+                return False
+            if core[-1] in '.,:;!?)"':
+                return False
+            return True
+
+        raw_lines = text.split('\n')
+        # Mark each line as citation-like or not
+        is_cite = [_looks_like_citation(l) for l in raw_lines]
+        # Only strip citation lines that are part of a run of 2+
+        # (blank lines between citations count as part of the run)
+        keep = [True] * len(raw_lines)
+        i = 0
+        while i < len(raw_lines):
+            if not is_cite[i]:
+                i += 1
+                continue
+            # Found a citation line — scan ahead for a cluster
+            cluster = [i]
+            j = i + 1
+            while j < len(raw_lines):
+                if is_cite[j]:
+                    cluster.append(j)
+                    j += 1
+                elif not raw_lines[j].strip():
+                    j += 1  # blank line, keep scanning
+                else:
+                    break
+            if len(cluster) >= 2:
+                # Mark the entire run (including blanks) for removal
+                for idx in range(i, j):
+                    keep[idx] = False
+            i = j
+        text = '\n'.join(l for l, k in zip(raw_lines, keep) if k)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+
         # --- Deduplicate repeated lines (e.g. headers/footers in PDFs) ---
         lines = text.split('\n')
         seen_counts: dict[str, int] = {}

@@ -226,6 +226,16 @@ class NERExtractor:
                 "attributes": entity.get("attributes", {}),
             })
 
+        # Collect ontology type names so we can reject relations that target
+        # a type name instead of an entity instance (common LLM hallucination)
+        ontology_type_names = set()
+        for et in ontology.get("entity_types", []):
+            if isinstance(et, dict):
+                ontology_type_names.add(et.get("name", "").strip().lower())
+        for rt in ontology.get("relation_types", ontology.get("edge_types", [])):
+            if isinstance(rt, dict):
+                ontology_type_names.add(rt.get("name", "").strip().lower())
+
         # Clean relations
         cleaned_relations = []
         entity_names_lower = {e["name"].lower() for e in cleaned_entities}
@@ -238,6 +248,20 @@ class NERExtractor:
             fact = str(relation.get("fact", "")).strip()
 
             if not source or not target:
+                continue
+
+            # Reject self-referential relations (e.g. Polymarket → Polymarket)
+            if source.lower() == target.lower():
+                logger.debug(f"Rejecting self-referential relation: {source} → {target}")
+                continue
+
+            # Reject relations where source or target is a type name, not an instance
+            # (e.g. "General Catalyst → CryptocurrencyProject" instead of "→ Polymarket")
+            if source.lower() in ontology_type_names and source.lower() not in entity_names_lower:
+                logger.debug(f"Rejecting relation with type-name source: {source}")
+                continue
+            if target.lower() in ontology_type_names and target.lower() not in entity_names_lower:
+                logger.debug(f"Rejecting relation with type-name target: {target}")
                 continue
 
             # Ensure source and target entities exist

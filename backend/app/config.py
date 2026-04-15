@@ -61,8 +61,8 @@ class Config:
     ALLOWED_EXTENSIONS = {'pdf', 'md', 'txt', 'markdown'}
     
     # Text processing configuration
-    DEFAULT_CHUNK_SIZE = 1000  # Default chunk size (doubled from 500 for fewer NER calls + better context)
-    DEFAULT_CHUNK_OVERLAP = 50  # Default overlap size
+    DEFAULT_CHUNK_SIZE = 1500  # Larger chunks = fewer NER calls + better entity context
+    DEFAULT_CHUNK_OVERLAP = 100  # More overlap prevents splitting entities at boundaries
     
     # Wonderwall simulation configuration
     WONDERWALL_DEFAULT_MAX_ROUNDS = int(os.environ.get('WONDERWALL_DEFAULT_MAX_ROUNDS', '10'))

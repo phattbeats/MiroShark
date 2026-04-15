@@ -154,6 +154,12 @@ Based on the above content, design entity types and relationship types suitable 
 
         return message
 
+    @staticmethod
+    def _is_clean_identifier(s: str) -> bool:
+        """Check that a type name is ASCII PascalCase or UPPER_SNAKE_CASE."""
+        import re
+        return bool(s) and bool(re.fullmatch(r'[A-Za-z][A-Za-z0-9_]*', s))
+
     def _validate_and_process(self, result: Dict[str, Any]) -> Dict[str, Any]:
         """Validate and post-process results"""
 
@@ -165,7 +171,12 @@ Based on the above content, design entity types and relationship types suitable 
         if "analysis_summary" not in result:
             result["analysis_summary"] = ""
 
-        # Validate entity types
+        # Validate entity types — reject entries with non-ASCII / garbage names
+        result["entity_types"] = [
+            e for e in result["entity_types"]
+            if isinstance(e, dict) and self._is_clean_identifier(e.get("name", ""))
+        ]
+
         for entity in result["entity_types"]:
             if "attributes" not in entity:
                 entity["attributes"] = []
@@ -175,14 +186,32 @@ Based on the above content, design entity types and relationship types suitable 
             if len(entity.get("description", "")) > 100:
                 entity["description"] = entity["description"][:97] + "..."
 
+        # Collect valid entity type names for relation target validation
+        valid_type_names = {e["name"] for e in result["entity_types"]}
+
         # Validate relationship types
-        for edge in result["edge_types"]:
+        for edge in result.get("edge_types", []):
             if "source_targets" not in edge:
                 edge["source_targets"] = []
             if "attributes" not in edge:
                 edge["attributes"] = []
             if len(edge.get("description", "")) > 100:
                 edge["description"] = edge["description"][:97] + "..."
+            # Drop source_targets referencing non-existent or garbled type names
+            edge["source_targets"] = [
+                st for st in edge["source_targets"]
+                if isinstance(st, dict)
+                and st.get("source", "") in valid_type_names
+                and st.get("target", "") in valid_type_names
+            ]
+
+        # Remove edge types with no valid source_targets left
+        result["edge_types"] = [
+            e for e in result["edge_types"]
+            if isinstance(e, dict)
+            and self._is_clean_identifier(e.get("name", ""))
+            and e.get("source_targets")
+        ]
 
         # Limit: max 10 custom entity types, max 10 custom edge types
         MAX_ENTITY_TYPES = 10
