@@ -136,6 +136,7 @@ class EmbeddingService:
             "HTTP-Referer": "https://github.com/aaronjmars/MiroShark",
             "X-OpenRouter-Title": "MiroShark - Universal Swarm Intelligence Engine",
             "X-OpenRouter-Categories": "roleplay",
+            "User-Agent": "MiroShark/1.0 (EmbeddingService)",
         }
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"

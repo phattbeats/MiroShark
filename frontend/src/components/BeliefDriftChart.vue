@@ -4,7 +4,7 @@
     <div class="bd-header">
       <div class="bd-title">
         <span class="bd-icon">◎</span>
-        <span class="bd-label">BELIEF DRIFT</span>
+        <span class="bd-label">DRIFT</span>
       </div>
       <button
         class="bd-export-btn"
@@ -236,12 +236,12 @@ const load = async () => {
   error.value = ''
   try {
     const res = await getBeliefDrift(props.simulationId)
-    if (res.data?.success && res.data.data) {
-      driftData.value = res.data.data
-    } else if (res.data?.success && !res.data.data) {
+    if (res.success && res.data) {
+      driftData.value = res.data
+    } else if (res.success && !res.data) {
       driftData.value = null
     } else {
-      error.value = res.data?.error || 'Failed to load belief drift data.'
+      error.value = res.error || 'Failed to load belief drift data.'
     }
   } catch (err) {
     error.value = err.message || 'Failed to load belief drift.'

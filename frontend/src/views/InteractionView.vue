@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step5Interaction from '../components/Step5Interaction.vue'
@@ -208,6 +208,14 @@ watch(() => route.params.reportId, (newId) => {
   }
 }, { immediate: true })
 
+watchEffect(() => {
+  const status = statusClass.value
+  const dot = status === 'processing' ? '\uD83D\uDFE0' : status === 'error' ? '\uD83D\uDD34' : status === 'completed' ? '\uD83D\uDFE2' : ''
+  document.title = dot ? `${dot} (5/5) MiroShark` : '(5/5) MiroShark'
+})
+
+onUnmounted(() => { document.title = 'MiroShark' })
+
 onMounted(() => {
   addLog('InteractionView initialized')
   loadReportData()
@@ -332,6 +340,7 @@ onMounted(() => {
 .status-indicator.ready .dot { background: #43C165; }
 .status-indicator.processing .dot { background: #FF6B1A; animation: pulse 1s infinite; }
 .status-indicator.completed .dot { background: #43C165; }
+.status-indicator.idle .dot { background: #FFB347; }
 .status-indicator.error .dot { background: #FF4444; }
 
 @keyframes pulse { 50% { opacity: 0.5; } }

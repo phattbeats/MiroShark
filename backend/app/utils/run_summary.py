@@ -79,10 +79,14 @@ def generate_run_summary(
     output_dir: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Generate a run summary from an events.jsonl file.
+    Generate a run summary from events.jsonl files.
+
+    Reads both the global events.jsonl (LLMClient calls from Flask process)
+    and the per-simulation events.jsonl (Wonderwall agent calls from subprocess),
+    deduplicates by event_id, and merges into a single summary.
 
     Args:
-        events_path: Path to events.jsonl (global or per-sim)
+        events_path: Path to global events.jsonl
         sim_id: Optional simulation ID filter
         start_after: Optional ISO timestamp — only include events after this
         output_dir: Directory to write run_summary.md (defaults to events_path parent)
@@ -90,28 +94,44 @@ def generate_run_summary(
     Returns:
         Summary dict with all aggregated data.
     """
-    if not os.path.exists(events_path):
+    # Collect event files to read: global + per-sim
+    event_files = []
+    if os.path.exists(events_path):
+        event_files.append(events_path)
+    if output_dir:
+        sim_events = os.path.join(output_dir, "events.jsonl")
+        if os.path.exists(sim_events) and sim_events != events_path:
+            event_files.append(sim_events)
+
+    if not event_files:
         logger.warning(f"Events file not found: {events_path}")
         return {}
 
-    # Load and filter events
+    # Load and filter events from all files, deduplicate by event_id
     events = []
-    with open(events_path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                e = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if e.get("event_type") != "llm_call":
-                continue
-            if start_after and e.get("timestamp", "") <= start_after:
-                continue
-            if sim_id and e.get("simulation_id") and e.get("simulation_id") != sim_id:
-                continue
-            events.append(e)
+    seen_ids = set()
+    for fpath in event_files:
+        with open(fpath, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if e.get("event_type") != "llm_call":
+                    continue
+                if start_after and e.get("timestamp", "") <= start_after:
+                    continue
+                if sim_id and e.get("simulation_id") and e.get("simulation_id") != sim_id:
+                    continue
+                eid = e.get("event_id")
+                if eid and eid in seen_ids:
+                    continue
+                if eid:
+                    seen_ids.add(eid)
+                events.append(e)
 
     if not events:
         logger.info("No LLM call events found for summary")
@@ -170,6 +190,7 @@ def _aggregate(events: List[Dict[str, Any]]) -> Dict[str, Any]:
         "report_agent": "Report Generation",
         "graph_tools": "Graph Tools / Interviews",
         "simulation": "Simulation Misc",
+        "SocialAgent": "Wonderwall Simulation",
     }
 
     by_phase: Dict[str, Dict[str, Any]] = defaultdict(lambda: {

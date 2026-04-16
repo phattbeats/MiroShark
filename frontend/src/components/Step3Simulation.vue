@@ -27,7 +27,7 @@
         :disabled="isStarting"
         @click="handleRestart"
       >
-        {{ runStatus.runner_status === 'failed' ? 'Restart (failed)' : 'Restart' }}
+        ↻ {{ runStatus.runner_status === 'failed' ? 'Restart (failed)' : 'Restart' }}
       </button>
 
       <!-- Replay (when simulation has data) -->
@@ -46,7 +46,7 @@
         @click="openArticleDrawer"
         title="Generate a publishable article brief from simulation results"
       >
-        ✍ Article
+        ▤ Article
       </button>
 
       <!-- Influence Leaderboard toggle -->
@@ -68,7 +68,7 @@
         @click="showBeliefDrift = !showBeliefDrift; showInfluence = false; showDirector = false"
         title="Aggregate belief drift chart"
       >
-        ◎ Belief Drift
+        ◎ Drift
       </button>
 
       <!-- Director Mode toggle (only while simulation is running) -->
@@ -77,10 +77,10 @@
         class="action-btn secondary director-btn"
         :class="{ active: showDirector }"
         @click="showDirector = !showDirector; showInfluence = false; showBeliefDrift = false"
-        :title="directorEventsTotal >= 3 ? 'Director Mode — max events reached' : 'Director Mode — inject a breaking event into the simulation'"
+        :title="directorEventsTotal >= 10 ? 'Director Mode — max events reached' : 'Director Mode — inject a breaking event into the simulation'"
       >
         ⚡ Director
-        <span v-if="directorEventsTotal > 0" class="director-badge">{{ directorEventsTotal }}/3</span>
+        <span v-if="directorEventsTotal > 0" class="director-badge">{{ directorEventsTotal }}/10</span>
       </button>
 
       <!-- Resume (when paused/stopped/failed with partial data) -->
@@ -118,27 +118,7 @@
       <span class="events-slash">/</span>
       <span class="events-platform">Polymarket <span class="events-count">{{ runStatus.polymarket_actions_count || 0 }}</span></span>
 
-      <!-- Notify when done toggle — shown while simulation is running and push is supported -->
-      <template v-if="phase === 1 && pushSupported">
-        <span class="events-divider"></span>
-        <label
-          class="notify-toggle"
-          :class="{ active: pushSubscribed, denied: pushPermission === 'denied' }"
-          :title="pushPermission === 'denied' ? 'Notifications blocked in browser settings' : pushSubscribed ? 'Will notify when done' : 'Notify me when this simulation finishes'"
-        >
-          <input
-            type="checkbox"
-            v-model="notifyWhenDone"
-            @change="onNotifyToggle"
-            :disabled="pushPermission === 'denied' || pushSubscribed"
-            style="display:none"
-          />
-          <span class="notify-icon">{{ pushSubscribed ? '🔔' : '🔕' }}</span>
-          <span class="notify-label">
-            {{ pushSubscribed ? 'Notify on' : pushPermission === 'denied' ? 'Blocked' : 'Notify me' }}
-          </span>
-        </label>
-      </template>
+      <!-- Status dot removed — page title shows status instead -->
     </div>
 
     <!-- Platform Status Rows -->
@@ -224,18 +204,18 @@
           class="director-input"
           placeholder="Describe the event (e.g. 'Central bank unexpectedly raised rates by 100bps')..."
           maxlength="500"
-          :disabled="directorEventsTotal >= 3 || isInjectingEvent"
+          :disabled="directorEventsTotal >= 10 || isInjectingEvent"
           rows="3"
         ></textarea>
         <div class="director-form-footer">
           <span class="director-char-count">{{ directorEventText.length }}/500</span>
           <button
             class="director-inject-btn"
-            :disabled="!directorEventText.trim() || directorEventsTotal >= 3 || isInjectingEvent"
+            :disabled="!directorEventText.trim() || directorEventsTotal >= 10 || isInjectingEvent"
             @click="handleInjectEvent"
           >
             <span v-if="isInjectingEvent" class="loading-spinner-small"></span>
-            {{ isInjectingEvent ? 'Injecting...' : directorEventsTotal >= 3 ? 'Max events reached' : 'Inject Event' }}
+            {{ isInjectingEvent ? 'Injecting...' : directorEventsTotal >= 10 ? 'Max events reached' : 'Inject Event' }}
           </button>
         </div>
         <div v-if="directorError" class="director-error">{{ directorError }}</div>
@@ -301,36 +281,32 @@
         <button class="filter-clear" @click="clearAgentFilter">Clear</button>
       </div>
 
-      <!-- Director Event Banners (inline in timeline) -->
-      <div
-        v-for="evt in directorEventHistory"
-        :key="'director-' + evt.id"
-        class="director-timeline-banner"
-      >
-        <div class="director-banner-line"></div>
-        <div class="director-banner-content">
-          <span class="director-banner-icon">⚡</span>
-          <span class="director-banner-text">BREAKING — Round {{ evt.injected_at_round }}: {{ evt.event_text }}</span>
-        </div>
-        <div class="director-banner-line"></div>
-      </div>
-
       <!-- Timeline Feed -->
       <div class="timeline-feed">
         <div class="timeline-axis"></div>
 
         <TransitionGroup name="timeline-item">
           <div
-            v-for="action in chronologicalActions" 
-            :key="action._uniqueId || action.id || `${action.timestamp}-${action.agent_id}`" 
+            v-for="action in chronologicalActions"
+            :key="action._uniqueId || action.id || `${action.timestamp}-${action.agent_id}`"
             class="timeline-item"
-            :class="action.platform"
+            :class="[action.platform, { 'director-event': action._isDirectorEvent }]"
           >
             <div class="timeline-marker">
               <div class="marker-dot"></div>
             </div>
-            
-            <div class="timeline-card">
+
+            <!-- Director Event Banner -->
+            <div v-if="action._isDirectorEvent" class="timeline-card director-card">
+              <div class="director-inline-banner">
+                <span class="director-inline-icon">⚡</span>
+                <span class="director-inline-label">BREAKING — Round {{ action.round_num }}</span>
+              </div>
+              <div class="director-inline-text">{{ action.action_args?.content }}</div>
+            </div>
+
+            <!-- Normal Action Card -->
+            <div v-else class="timeline-card">
               <div class="card-header">
                 <div class="agent-info clickable" @click="filterByAgent(action.agent_name)">
                   <div class="avatar-placeholder">{{ (action.agent_name || 'A')[0] }}</div>
@@ -574,8 +550,19 @@
           <div class="article-drawer-body">
             <!-- Loading state -->
             <div v-if="isGeneratingArticle" class="article-loading">
-              <div class="article-loading-spinner"></div>
-              <span>Generating article from simulation data...</span>
+              <div class="article-skeleton">
+                <div class="skel-title"></div>
+                <div class="skel-line long"></div>
+                <div class="skel-line medium"></div>
+                <div class="skel-line long"></div>
+                <div class="skel-line short"></div>
+                <div class="skel-gap"></div>
+                <div class="skel-line long"></div>
+                <div class="skel-line medium"></div>
+                <div class="skel-line long"></div>
+                <div class="skel-line short"></div>
+              </div>
+              <span class="article-loading-label">Generating article from simulation data...</span>
             </div>
 
             <!-- Error state -->
@@ -598,7 +585,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   startSimulation,
@@ -607,8 +594,6 @@ import {
   getRunStatus,
   getRunStatusDetail,
   generateSimulationArticle,
-  getVapidPublicKey,
-  subscribePush,
   injectDirectorEvent,
   getDirectorEvents,
 } from '../api/simulation'
@@ -665,14 +650,7 @@ const directorEventsTotal = ref(0)
 const isInjectingEvent = ref(false)
 const directorError = ref(null)
 
-// Push notification state
-const pushSupported = typeof window !== 'undefined' &&
-  'Notification' in window &&
-  'serviceWorker' in navigator &&
-  'PushManager' in window
-const pushPermission = ref(typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'denied')
-const notifyWhenDone = ref(false)
-const pushSubscribed = ref(false)
+// Page title status indicator
 const articleError = ref(null)
 const articleCopied = ref(false)
 
@@ -701,12 +679,12 @@ const handleInjectEvent = async () => {
     const res = await injectDirectorEvent(props.simulationId, {
       event_text: directorEventText.value.trim()
     })
-    if (res.data?.success) {
+    if (res.success) {
       directorEventText.value = ''
-      directorEventsTotal.value = res.data.total_events
+      directorEventsTotal.value = res.total_events
       await loadDirectorEvents()
     } else {
-      directorError.value = res.data?.error || 'Failed to inject event'
+      directorError.value = res.error || 'Failed to inject event'
     }
   } catch (err) {
     directorError.value = err.response?.data?.error || err.message || 'Failed to inject event'
@@ -719,9 +697,9 @@ const loadDirectorEvents = async () => {
   if (!props.simulationId) return
   try {
     const res = await getDirectorEvents(props.simulationId)
-    if (res.data?.success) {
-      directorEventHistory.value = res.data.events || []
-      directorPendingEvents.value = res.data.pending || []
+    if (res.success) {
+      directorEventHistory.value = res.events || []
+      directorPendingEvents.value = res.pending || []
       directorEventsTotal.value = directorEventHistory.value.length + directorPendingEvents.value.length
     }
   } catch {
@@ -760,12 +738,30 @@ const scrollToBottom = () => {
 // Computed
 // Display actions in chronological order (latest at bottom)
 const chronologicalActions = computed(() => {
-  let actions = allActions.value
+  let actions = [...allActions.value]
+
+  // Inject director events as synthetic timeline entries
+  for (const evt of directorEventHistory.value) {
+    actions.push({
+      _uniqueId: 'director-' + evt.id,
+      _isDirectorEvent: true,
+      agent_name: 'DIRECTOR',
+      action_type: 'BREAKING_EVENT',
+      platform: 'director',
+      timestamp: evt.timestamp,
+      round_num: evt.injected_at_round || evt.submitted_at_round,
+      action_args: { content: evt.event_text },
+    })
+  }
+
+  // Sort by timestamp so director events appear in correct position
+  actions.sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''))
+
   if (filteredPlatform.value) {
-    actions = actions.filter(a => a.platform === filteredPlatform.value)
+    actions = actions.filter(a => a.platform === filteredPlatform.value || a._isDirectorEvent)
   }
   if (filteredAgent.value) {
-    actions = actions.filter(a => a.agent_name === filteredAgent.value)
+    actions = actions.filter(a => a.agent_name === filteredAgent.value || a._isDirectorEvent)
   }
   return actions
 })
@@ -842,8 +838,6 @@ const resetAllState = () => {
   startError.value = null
   isStarting.value = false
   isStopping.value = false
-  pushSubscribed.value = false
-  notifyWhenDone.value = false
   stopPolling()  // Stop any previously existing polling
 }
 
@@ -906,74 +900,8 @@ const doStartSimulation = async () => {
   }
 }
 
-// ── Push notifications ────────────────────────────────────────────────────────
-
-/** Convert a URL-safe base64 string to a Uint8Array (required by pushManager.subscribe). */
-function _urlB64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const rawData = atob(base64)
-  return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)))
-}
-
-/**
- * Request notification permission, subscribe to Web Push, and send the
- * subscription to the backend tied to this simulation's ID.
- */
-const setupPushNotification = async () => {
-  if (!pushSupported || !props.simulationId) return
-
-  try {
-    const permission = await Notification.requestPermission()
-    pushPermission.value = permission
-
-    if (permission !== 'granted') {
-      notifyWhenDone.value = false
-      return
-    }
-
-    // Fetch VAPID public key from backend
-    const keyRes = await getVapidPublicKey()
-    if (!keyRes?.data?.public_key) {
-      console.warn('[MiroShark] Push notifications unavailable — VAPID key missing')
-      notifyWhenDone.value = false
-      return
-    }
-
-    const applicationServerKey = _urlB64ToUint8Array(keyRes.data.public_key)
-
-    // Get the active service worker registration
-    const registration = await navigator.serviceWorker.ready
-
-    // Subscribe (creates or reuses an existing push subscription)
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey,
-    })
-
-    // Send subscription to backend
-    await subscribePush({
-      simulation_id: props.simulationId,
-      subscription: subscription.toJSON(),
-    })
-
-    pushSubscribed.value = true
-    addLog('Push notification registered — you will be notified when this simulation completes')
-  } catch (err) {
-    console.warn('[MiroShark] Push notification setup failed:', err)
-    notifyWhenDone.value = false
-    pushSubscribed.value = false
-  }
-}
-
-/** Called when the "Notify me" toggle changes. */
-const onNotifyToggle = () => {
-  if (notifyWhenDone.value) {
-    setupPushNotification()
-  }
-}
-
-// ── End push notifications ────────────────────────────────────────────────────
+// ── Page title status indicator ───────────────────────────────────────────────
+// Title is set by SimulationRunView.vue parent — don't override here
 
 // Resume simulation from last completed round
 const handleResume = async () => {
@@ -1476,10 +1404,13 @@ onUnmounted(() => {
   background: var(--color-gray, #F5F5F5);
   padding: 6px 12px;
   display: flex;
-  align-items: stretch;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
   border-bottom: 2px solid rgba(10,10,10,0.08);
+}
+.actions-bar .action-btn {
+  flex: 0 1 calc(33.333% - 4px);
 }
 
 .events-summary {
@@ -1818,7 +1749,7 @@ onUnmounted(() => {
 /* --- Influence Leaderboard overlay --- */
 .influence-overlay {
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
   background: var(--background);
   border-top: 1px solid rgba(10,10,10,0.06);
 }
@@ -2447,22 +2378,48 @@ onUnmounted(() => {
 .article-loading {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 40px 0;
-  color: rgba(10,10,10,0.45);
-  font-family: var(--font-mono, 'Space Mono', monospace);
-  font-size: 12px;
+  gap: 18px;
+  padding: 32px 24px;
 }
 
-.article-loading-spinner {
-  width: 28px;
-  height: 28px;
-  border: 2px solid rgba(10,10,10,0.12);
-  border-top-color: #FF6B1A;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.article-loading-label {
+  text-align: center;
+  color: rgba(10,10,10,0.35);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.article-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skel-title {
+  height: 22px;
+  width: 55%;
+  background: linear-gradient(90deg, rgba(10,10,10,0.06) 25%, rgba(10,10,10,0.12) 50%, rgba(10,10,10,0.06) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.skel-line {
+  height: 12px;
+  background: linear-gradient(90deg, rgba(10,10,10,0.05) 25%, rgba(10,10,10,0.10) 50%, rgba(10,10,10,0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.skel-line.long { width: 100%; }
+.skel-line.medium { width: 75%; }
+.skel-line.short { width: 40%; }
+
+.skel-gap { height: 8px; }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .article-error {
@@ -2511,39 +2468,6 @@ onUnmounted(() => {
 .article-content :deep(.md-quote) { border-left: 3px solid #FF6B1A; margin: 0.8em 0; padding: 4px 12px; color: rgba(10,10,10,0.6); font-style: italic; }
 
 /* Push notification toggle inside events-summary bar */
-.notify-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  user-select: none;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.15s;
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(10,10,10,0.4);
-}
-.notify-toggle:hover:not(.denied) {
-  background: rgba(10,10,10,0.06);
-  color: rgba(10,10,10,0.7);
-}
-.notify-toggle.active {
-  color: #FF6B1A;
-}
-.notify-toggle.denied {
-  cursor: default;
-  opacity: 0.5;
-}
-.notify-icon {
-  font-size: 12px;
-  line-height: 1;
-}
-.notify-label {
-  font-family: var(--font-mono, 'Space Mono', monospace);
-}
-
 /* Director Mode */
 .director-btn.active {
   border-color: #f59e0b;
@@ -2557,6 +2481,32 @@ onUnmounted(() => {
   border-radius: 3px;
   font-size: 10px;
   color: #f59e0b;
+}
+
+.director-card {
+  background: #FFF8F0 !important;
+  border-left: 3px solid #FF6B1A !important;
+}
+.director-inline-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FF6B1A;
+}
+.director-inline-icon { font-size: 14px; }
+.director-inline-text {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(10,10,10,0.8);
+}
+.timeline-item.director-event .marker-dot {
+  background: #FF6B1A !important;
 }
 
 .director-panel {

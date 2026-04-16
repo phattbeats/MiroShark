@@ -96,6 +96,7 @@ class LLMClient:
                 'HTTP-Referer': 'https://github.com/aaronjmars/MiroShark',
                 'X-OpenRouter-Title': 'MiroShark - Universal Swarm Intelligence Engine',
                 'X-OpenRouter-Categories': 'roleplay',
+                'User-Agent': f'MiroShark/1.0 (LLMClient; model={self.model})',
             },
         )
 
@@ -180,6 +181,33 @@ class LLMClient:
             kwargs["extra_body"] = {
                 "options": {"num_ctx": self._num_ctx}
             }
+
+        # OpenRouter metadata: tag each generation with caller/simulation context
+        if not self._is_ollama() and 'openrouter' in (self.base_url or ''):
+            # Detect caller for metadata
+            caller = 'unknown'
+            for frame_info in inspect.stack()[1:5]:
+                mod = frame_info.filename
+                if 'llm_client' not in mod and 'claude_code_client' not in mod:
+                    module_name = os.path.splitext(os.path.basename(mod))[0]
+                    caller = f'{module_name}.{frame_info.function}'
+                    break
+
+            from .trace_context import TraceContext
+            sim_id = TraceContext.get('simulation_id', '')
+            agent_name = TraceContext.get('agent_name', '')
+            round_num = TraceContext.get('round_num', '')
+
+            extra = kwargs.get("extra_body", {})
+            extra["metadata"] = {
+                "caller": caller,
+                "simulation_id": sim_id,
+                "agent_name": str(agent_name)[:64],
+                "round": str(round_num),
+            }
+            if sim_id:
+                extra["session_id"] = sim_id
+            kwargs["extra_body"] = extra
 
         t0 = time.perf_counter()
         error_info = None

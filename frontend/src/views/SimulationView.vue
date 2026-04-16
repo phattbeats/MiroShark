@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step2EnvSetup from '../components/Step2EnvSetup.vue'
@@ -287,6 +287,12 @@ const refreshGraph = () => {
   }
 }
 
+watchEffect(() => {
+  const status = statusClass.value
+  const dot = status === 'processing' ? '\uD83D\uDFE0' : status === 'error' ? '\uD83D\uDD34' : status === 'completed' ? '\uD83D\uDFE2' : ''
+  document.title = dot ? `${dot} (2/5) MiroShark` : '(2/5) MiroShark'
+})
+
 onMounted(async () => {
   addLog('SimulationView initialized')
 
@@ -415,6 +421,7 @@ onMounted(async () => {
 
 .status-indicator.processing .dot { background: #FF6B1A; animation: pulse 1s infinite; }
 .status-indicator.completed .dot { background: #43C165; }
+.status-indicator.idle .dot { background: #FFB347; }
 .status-indicator.error .dot { background: #FF4444; }
 
 @keyframes pulse { 50% { opacity: 0.5; } }

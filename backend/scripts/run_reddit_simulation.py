@@ -480,8 +480,14 @@ class RedditSimulationRunner:
         return ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI,
             model_type=llm_model,
+            default_headers={
+                'HTTP-Referer': 'https://github.com/aaronjmars/MiroShark',
+                'X-OpenRouter-Title': 'MiroShark - Universal Swarm Intelligence Engine',
+                'X-OpenRouter-Categories': 'roleplay',
+                'User-Agent': f'MiroShark/1.0 (Wonderwall-Simulation; model={llm_model})',
+            },
         )
-    
+
     def _get_active_agents_for_round(
         self, 
         env, 

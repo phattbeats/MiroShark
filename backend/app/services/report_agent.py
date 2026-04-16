@@ -1383,6 +1383,48 @@ class ReportAgent:
                 return path
         return candidates[0]  # return default even if missing
 
+    def _match_actions(self, actions: list, query_filter: str) -> list:
+        """Filter actions by query with progressive fallback.
+
+        Try 1: OR-separated phrases (e.g. "regulatory sudden OR regulatory unexpected")
+        Try 2: Individual words from the query (any single word matches)
+        Try 3: No filter — return all content actions
+        """
+        if not query_filter:
+            return actions
+
+        # Try 1: OR-separated terms
+        terms = [t.strip() for t in query_filter.split(' or ') if t.strip()]
+        if not terms:
+            terms = [query_filter]
+        matched = [
+            a for a in actions
+            if any(
+                term in json.dumps(a.get('action_args', {})).lower()
+                or term in (a.get('agent_name', '') or '').lower()
+                for term in terms
+            )
+        ]
+        if matched:
+            return matched
+
+        # Try 2: split into individual words (3+ chars), match any
+        words = [w for w in query_filter.replace(' or ', ' ').split() if len(w) >= 3]
+        if words:
+            matched = [
+                a for a in actions
+                if any(
+                    word in json.dumps(a.get('action_args', {})).lower()
+                    or word in (a.get('agent_name', '') or '').lower()
+                    for word in words
+                )
+            ]
+            if matched:
+                return matched
+
+        # Try 3: return all actions (no filter) — better than empty
+        return actions
+
     def _execute_simulation_feed(self, parameters: Dict[str, Any]) -> str:
         """Read actual simulation posts, comments, and trades."""
         platform_filter = parameters.get("platform", "all")
@@ -1399,6 +1441,7 @@ class ReportAgent:
 
         for platform in platforms:
             actions_path = os.path.join(sim_dir, platform, "actions.jsonl")
+            logger.debug(f"simulation_feed: checking {actions_path} exists={os.path.exists(actions_path)}")
             if not os.path.exists(actions_path):
                 continue
 
@@ -1415,13 +1458,8 @@ class ReportAgent:
             if round_filter is not None:
                 actions = [a for a in actions if a.get('round_num') == round_filter]
 
-            # Apply keyword filter
-            if query_filter:
-                actions = [
-                    a for a in actions
-                    if query_filter in json.dumps(a.get('action_args', {})).lower()
-                    or query_filter in (a.get('agent_name', '') or '').lower()
-                ]
+            # Apply keyword filter with progressive fallback
+            actions = self._match_actions(actions, query_filter)
 
             if not actions:
                 continue
@@ -1481,12 +1519,7 @@ class ReportAgent:
 
                         if round_filter is not None:
                             actions = [a for a in actions if a.get('round_num') == round_filter]
-                        if query_filter:
-                            actions = [
-                                a for a in actions
-                                if query_filter in json.dumps(a.get('action_args', {})).lower()
-                                or query_filter in (a.get('agent_name', '') or '').lower()
-                            ]
+                        actions = self._match_actions(actions, query_filter)
 
                         if not actions:
                             continue

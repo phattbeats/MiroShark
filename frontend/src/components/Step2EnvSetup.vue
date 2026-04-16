@@ -83,9 +83,9 @@
               <span class="preview-title">Generated Agent Profiles</span>
             </div>
             <div class="profiles-list">
-              <div 
-                v-for="(profile, idx) in profiles" 
-                :key="idx" 
+              <div
+                v-for="(profile, idx) in profilesExpanded ? profiles : profiles.slice(0, 4)"
+                :key="idx"
                 class="profile-card"
                 @click="selectProfile(profile)"
               >
@@ -98,9 +98,9 @@
                 </div>
                 <p class="profile-bio">{{ profile.bio || 'No bio available' }}</p>
                 <div v-if="profile.interested_topics?.length" class="profile-topics">
-                  <span 
-                    v-for="topic in profile.interested_topics.slice(0, 3)" 
-                    :key="topic" 
+                  <span
+                    v-for="topic in profile.interested_topics.slice(0, 3)"
+                    :key="topic"
                     class="topic-tag"
                   >{{ topic }}</span>
                   <span v-if="profile.interested_topics.length > 3" class="topic-more">
@@ -109,6 +109,13 @@
                 </div>
               </div>
             </div>
+            <button
+              v-if="profiles.length > 4"
+              class="profiles-toggle"
+              @click="profilesExpanded = !profilesExpanded"
+            >
+              {{ profilesExpanded ? 'Show less' : `Show all ${profiles.length} agents` }}
+            </button>
           </div>
         </div>
       </div>
@@ -205,9 +212,9 @@
                 <span class="config-block-badge">{{ simulationConfig.agent_configs?.length || 0 }}</span>
               </div>
               <div class="agents-cards">
-                <div 
-                  v-for="agent in simulationConfig.agent_configs" 
-                  :key="agent.agent_id" 
+                <div
+                  v-for="agent in agentCardsExpanded ? simulationConfig.agent_configs : simulationConfig.agent_configs?.slice(0, 2)"
+                  :key="agent.agent_id"
                   class="agent-card"
                 >
                   <!-- Card Header -->
@@ -289,6 +296,13 @@
                   </div>
                 </div>
               </div>
+              <button
+                v-if="simulationConfig.agent_configs?.length > 2"
+                class="profiles-toggle"
+                @click="agentCardsExpanded = !agentCardsExpanded"
+              >
+                {{ agentCardsExpanded ? 'Show less' : `Show all ${simulationConfig.agent_configs.length} agents` }}
+              </button>
             </div>
 
             <!-- Platform Configuration -->
@@ -714,6 +728,8 @@ const expectedTotal = ref(null)
 const simulationConfig = ref(null)
 const selectedProfile = ref(null)
 const showProfilesDetail = ref(true)
+const profilesExpanded = ref(false)
+const agentCardsExpanded = ref(false)
 const configError = ref(null)       // Error message when config generation fails
 const isConfigRetrying = ref(false) // True while retry is in progress
 
@@ -1557,6 +1573,26 @@ onUnmounted(() => {
   gap: 12px;
 }
 
+.profiles-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  background: transparent;
+  border: 2px solid rgba(10,10,10,0.08);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(10,10,10,0.4);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.profiles-toggle:hover {
+  border-color: rgba(10,10,10,0.2);
+  color: rgba(10,10,10,0.7);
+}
 
 .profile-card {
   background: #FAFAFA;

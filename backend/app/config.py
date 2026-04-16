@@ -29,14 +29,17 @@ class Config:
     
     # LLM configuration (unified OpenAI format)
     # LLM_PROVIDER: "openai" (default, any OpenAI-compatible API) or "claude-code" (local CLI)
+    # Default model is used for profile generation, sim config, memory compaction.
+    # Recommended: anthropic/claude-haiku-4.5 (rich personas, dense sim configs)
     LLM_PROVIDER = os.environ.get('LLM_PROVIDER', 'openai')
     LLM_API_KEY = os.environ.get('LLM_API_KEY')
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
-    LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
+    LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'anthropic/claude-haiku-4.5')
 
-    # Smart model — optional stronger model for intelligence-sensitive workflows
+    # Smart model — stronger model for intelligence-sensitive workflows
     # (report generation, ontology extraction, graph reasoning).
     # When not set, these workflows use the default LLM config above.
+    # Recommended: anthropic/claude-sonnet-4.6 (#1 quality lever, 9/10 report quality)
     SMART_PROVIDER = os.environ.get('SMART_PROVIDER', '')   # "openai", "claude-code", or empty (inherit)
     SMART_API_KEY = os.environ.get('SMART_API_KEY', '')
     SMART_BASE_URL = os.environ.get('SMART_BASE_URL', '')
@@ -89,12 +92,16 @@ class Config:
     # for grounded search, or "perplexity/sonar" for fast search). If empty, uses default LLM.
     WEB_SEARCH_MODEL = os.environ.get('WEB_SEARCH_MODEL', '')
 
-    # OASIS model — optional model for OASIS/CAMEL agent simulation loop.
+    # OASIS model — model for OASIS/CAMEL agent simulation loop.
     # When not set, uses LLM_MODEL_NAME.
+    # Recommended: google/gemini-2.0-flash-lite-001 (#1 cost driver — cheapest at $0.56/run,
+    # newer models are 4-9x more expensive due to verbosity without quality gain)
     OASIS_MODEL_NAME = os.environ.get('OASIS_MODEL_NAME', '')
 
-    # NER model — optional faster model for entity extraction (high-volume, mechanical task)
+    # NER model — faster model for entity extraction (high-volume, mechanical task)
     # When not set, NER uses the default LLM config above.
+    # Recommended: google/gemini-2.0-flash-001 (reliable JSON, no retries.
+    # flash-lite caused 3x retry bloat due to invalid JSON)
     NER_MODEL_NAME = os.environ.get('NER_MODEL_NAME', '')
     NER_BASE_URL = os.environ.get('NER_BASE_URL', '')
     NER_API_KEY = os.environ.get('NER_API_KEY', '')

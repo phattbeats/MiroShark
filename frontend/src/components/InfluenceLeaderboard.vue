@@ -53,9 +53,6 @@
               <div class="iv-answer">
                 <span class="iv-role agent">{{ interviewAgent.agent_name }}</span>
                 <span class="iv-text">{{ qa.answer }}</span>
-                <button class="iv-share-btn" @click="shareQA(qa)" title="Copy for sharing">
-                  Share ↗
-                </button>
               </div>
             </div>
             <div v-if="interviewLoading" class="iv-thinking">
@@ -93,7 +90,6 @@
     <!-- Score legend -->
     <div class="lb-legend">
       <span class="legend-item"><span class="legend-dot engage"></span>Engagement ×3</span>
-      <span class="legend-item"><span class="legend-dot follow"></span>Follows ×2</span>
       <span class="legend-item"><span class="legend-dot platform"></span>Platforms ×5</span>
       <span class="legend-item"><span class="legend-dot post"></span>Posts ×1</span>
     </div>
@@ -143,10 +139,6 @@
           <div class="bd-item" title="Engagement received (likes, reposts, quotes)">
             <span class="bd-label engage">ENG</span>
             <span class="bd-value">{{ agent.engagement_received }}</span>
-          </div>
-          <div class="bd-item" title="Follows received">
-            <span class="bd-label follow">FOL</span>
-            <span class="bd-value">{{ agent.follows_received }}</span>
           </div>
           <div class="bd-item" title="Original posts created">
             <span class="bd-label post">PST</span>
@@ -221,11 +213,11 @@ const load = async () => {
   error.value = ''
   try {
     const res = await getInfluenceLeaderboard(props.simulationId)
-    if (res.data?.success) {
-      agents.value = res.data.data.agents || []
-      totalAgents.value = res.data.data.total_agents || 0
+    if (res.success && res.data) {
+      agents.value = res.data.agents || []
+      totalAgents.value = res.data.total_agents || 0
     } else {
-      error.value = res.data?.error || 'Failed to load influence data.'
+      error.value = res.error || 'Failed to load influence data.'
     }
   } catch (err) {
     error.value = err.message || 'Failed to load influence data.'
@@ -299,16 +291,16 @@ const submitQuestion = async () => {
       history,
     })
 
-    if (res.data?.success) {
+    if (res.success) {
       interviewHistory.value.push({
         question,
-        answer: res.data.data.answer,
+        answer: res.data.answer,
         timestamp: new Date().toISOString(),
       })
       await nextTick()
       scrollThread()
     } else {
-      interviewError.value = res.data?.error || 'Failed to get a response.'
+      interviewError.value = res.error || 'Failed to get a response.'
     }
   } catch (err) {
     interviewError.value = err.message || 'Request failed.'

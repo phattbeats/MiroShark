@@ -667,9 +667,15 @@ Field descriptions:
             agents_per_hour_min = max(1, agents_per_hour_max // 2)
             logger.warning(f"agents_per_hour_min >= max, corrected to {agents_per_hour_min}")
 
+        # Clamp total_simulation_hours to sane range (24h–336h / 2 weeks max)
+        raw_hours = result.get("total_simulation_hours", 72)
+        clamped_hours = max(24, min(336, raw_hours))
+        if raw_hours != clamped_hours:
+            logger.warning(f"total_simulation_hours {raw_hours} clamped to {clamped_hours}")
+
         return TimeSimulationConfig(
-            total_simulation_hours=result.get("total_simulation_hours", 72),
-            minutes_per_round=result.get("minutes_per_round", 60),  # Default 1 hour per round
+            total_simulation_hours=clamped_hours,
+            minutes_per_round=max(30, min(120, result.get("minutes_per_round", 60))),
             agents_per_hour_min=agents_per_hour_min,
             agents_per_hour_max=agents_per_hour_max,
             peak_hours=result.get("peak_hours", [19, 20, 21, 22]),

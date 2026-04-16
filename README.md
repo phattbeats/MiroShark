@@ -297,24 +297,46 @@ npm run setup:all && npm run dev
 
 ## Configuration
 
-### Recommended Models
+### Cloud Presets (OpenRouter)
 
-A typical simulation runs ~40 turns × 100+ agents. Pick a model that balances cost and quality for that volume.
+Two benchmarked presets are available in `.env.example`. Copy one and set your API key.
 
-#### Cloud (OpenRouter)
+Each model slot controls a different quality axis — benchmarked across 10+ model combos (see `models.md`):
 
-| Model | ID | Cost/sim | Notes |
+| Slot | Controls | Key finding |
+|---|---|---|
+| **Default** | Persona richness, sim density | Haiku produces distinct 348-char voices; Gemini Flash produces generic 173-char copy |
+| **Smart** | Report quality (#1 lever) | Claude Sonnet 9/10, Gemini 2.5 Flash 5/10, DeepSeek 2/10 |
+| **NER** | Extraction reliability | gemini-2.0-flash reliable; flash-lite causes 3x retry bloat |
+| **OASIS** | Cost (biggest consumer) | 850+ calls, 7M+ tokens. Verbosity matters more than $/M |
+
+#### Cheap Mode — ~$1.20/run, ~13 min
+
+All Gemini. Fast and reliable, but thin reports and generic personas.
+
+| Slot | Model | $/M | Why |
 |---|---|---|---|
-| **Qwen3 235B A22B** ⭐ | `qwen/qwen3-235b-a22b-2507` | ~$0.30 | Best overall |
-| GPT-5 Nano | `openai/gpt-5-nano` | ~$0.41 | Budget option |
-| Gemini 2.5 Flash Lite | `google/gemini-2.5-flash-lite` | ~$0.58 | Good alt |
-| DeepSeek V3.2 | `deepseek/deepseek-v3.2` | ~$1.11 | Stronger agentic reasoning |
+| Default | `google/gemini-2.0-flash-001` | $0.10 | Fast, reliable JSON |
+| Smart | `google/gemini-2.5-flash` | $0.30 | Adequate reports |
+| NER | `google/gemini-2.0-flash-001` | $0.10 | No retry bloat |
+| OASIS | `google/gemini-2.0-flash-lite-001` | $0.075 | Cheapest, least verbose |
 
-**Embeddings:** `openai/text-embedding-3-small` on OpenRouter. Keep `EMBEDDING_DIMENSIONS=768`.
+#### Best Mode — ~$3.50/run, ~25 min
 
-#### Local (Ollama)
+Claude reports, Haiku personas, cheap OASIS. Best report quality at reasonable cost.
 
-> **Context override required.** Ollama defaults to 4096 tokens, but MiroShark prompts need 10–30k. Create a custom Modelfile:
+| Slot | Model | $/M | Why |
+|---|---|---|---|
+| Default | `anthropic/claude-haiku-4.5` | $0.80/$4.00 | Rich personas, dense sim configs |
+| Smart | `anthropic/claude-sonnet-4.6` | $3.00/$15.00 | 9/10 report quality, only ~19 calls |
+| NER | `google/gemini-2.0-flash-001` | $0.10 | Proven reliable, no retries |
+| OASIS | `google/gemini-2.0-flash-lite-001` | $0.075 | OASIS doesn't drive quality — Smart does |
+
+> Both presets use `openai/text-embedding-3-small` for embeddings and `google/gemini-2.0-flash-001:online` for web research.
+
+### Local Mode (Ollama)
+
+> **Context override required.** Ollama defaults to 4096 tokens, but MiroShark prompts need 10-30k. Create a custom Modelfile:
 >
 > ```bash
 > printf 'FROM qwen3:14b\nPARAMETER num_ctx 32768' > Modelfile
@@ -339,88 +361,50 @@ A typical simulation runs ~40 turns × 100+ agents. Pick a model that balances c
 
 **Embeddings locally:** `ollama pull nomic-embed-text` — 768 dimensions, matches Neo4j default.
 
-**Hybrid tip:** Run local for simulation rounds (high-volume), route to a cloud model only for final report generation. Most users land here naturally — see **Smart Model** below.
-
-### Smart Model
-
-Set `SMART_MODEL_NAME` to route intelligence-sensitive workflows through a stronger model while keeping everything else on your default (cheaper/faster) model. When not set, all workflows use the same model.
-
-**What uses the smart model:**
-
-| Workflow | Why |
-|---|---|
-| Report generation | Multi-turn reasoning, end-user facing output |
-| Ontology extraction | Foundational — defines the entire knowledge graph schema |
-| Graph reasoning | Sub-question generation, deep search during reports |
-
-**Everything else** (NER extraction, profile generation, simulation config) stays on the default model — these are high-volume and don't need top-tier reasoning.
-
-**Example configs:**
+**Hybrid tip:** Run local for simulation rounds (high-volume), route to Claude for reports. Most users land here naturally:
 
 ```bash
-# Ollama for bulk work, Claude Code for reports
 LLM_MODEL_NAME=qwen3.5:27b
 SMART_PROVIDER=claude-code
 SMART_MODEL_NAME=claude-sonnet-4-20250514
-
-# Ollama for bulk work, OpenRouter premium for reports
-LLM_MODEL_NAME=qwen3.5:27b
-SMART_PROVIDER=openai
-SMART_API_KEY=sk-or-v1-your-key
-SMART_BASE_URL=https://openrouter.ai/api/v1
-SMART_MODEL_NAME=anthropic/claude-sonnet-4
-
-# Same provider, just a bigger model for reports
-LLM_MODEL_NAME=qwen3:8b
-SMART_MODEL_NAME=qwen3.5:27b
 ```
 
-If only `SMART_MODEL_NAME` is set (without `SMART_PROVIDER`/`SMART_BASE_URL`/`SMART_API_KEY`), the smart model inherits the default provider settings — useful when you just want a bigger model on the same backend.
+### Model Routing
 
-### NER Model
+MiroShark routes different workflows to different models. Four independent slots:
 
-Set `NER_MODEL_NAME` to route entity extraction through a faster, cheaper model. NER is a high-volume mechanical task (structured JSON output, low temperature) — it doesn't need a 235B parameter model. A 14B-30B model runs 5-10x faster with equivalent extraction quality.
+| Slot | Env var | What it does | Volume |
+|---|---|---|---|
+| **Default** | `LLM_MODEL_NAME` | Profiles, sim config, memory compaction | ~75-126 calls |
+| **Smart** | `SMART_MODEL_NAME` | Reports, ontology, graph reasoning | ~19 calls |
+| **NER** | `NER_MODEL_NAME` | Entity extraction (structured JSON) | ~85-250 calls |
+| **OASIS** | `OASIS_MODEL_NAME` | Agent decisions in simulation loop | ~850-1650 calls |
 
-```bash
-# Use a fast MoE model for NER on OpenRouter
-NER_MODEL_NAME=qwen/qwen3-30b-a3b
-
-# Or a local Ollama model
-NER_MODEL_NAME=qwen3:14b
-```
-
-When not set, NER uses the default LLM. The model routing stacks with Smart Model — you can run three tiers:
-
-| Workflow | Model | Why |
-|---|---|---|
-| NER extraction | `qwen3:14b` (fast, local) | High-volume, structured output, doesn't need reasoning |
-| Simulation rounds, profiles, config | `qwen3.5:27b` (default) | Balanced cost/quality for bulk work |
-| Reports, ontology, graph reasoning | `claude-sonnet-4` (smart) | Needs strong reasoning for end-user output |
+When a slot is not set, it falls back to the Default model. If only `SMART_MODEL_NAME` is set (without `SMART_PROVIDER`/`SMART_BASE_URL`/`SMART_API_KEY`), the smart model inherits the default provider settings.
 
 ### Environment Variables
 
 All settings live in `.env` (copy from `.env.example`):
 
 ```bash
-# LLM (default — used for bulk/high-volume workflows)
+# LLM (default — profiles, sim config, memory compaction)
 LLM_PROVIDER=openai                # "openai" (default) or "claude-code"
-LLM_API_KEY=ollama                  # Not needed for claude-code mode
+LLM_API_KEY=ollama
 LLM_BASE_URL=http://localhost:11434/v1
 LLM_MODEL_NAME=qwen3.5:27b
 
-# Smart model (optional — used for reports, ontology, graph reasoning)
-# SMART_PROVIDER=claude-code       # "openai", "claude-code", or empty (inherit)
+# Smart model (reports, ontology, graph reasoning — #1 quality lever)
+# SMART_PROVIDER=claude-code
 # SMART_MODEL_NAME=claude-sonnet-4-20250514
-# SMART_API_KEY=                    # Only if different from LLM_API_KEY
-# SMART_BASE_URL=                   # Only if different from LLM_BASE_URL
+
+# OASIS model (agent sim loop — #1 cost driver, use cheapest viable model)
+# OASIS_MODEL_NAME=google/gemini-2.0-flash-lite-001
+
+# NER model (entity extraction — needs reliable JSON, avoid flash-lite)
+# NER_MODEL_NAME=google/gemini-2.0-flash-001
 
 # Claude Code mode (only when LLM_PROVIDER=claude-code)
 # CLAUDE_CODE_MODEL=claude-sonnet-4-20250514
-
-# NER model (optional — faster model for entity extraction)
-# NER_MODEL_NAME=qwen/qwen3-30b-a3b  # Or any smaller/faster model
-# NER_API_KEY=                         # Only if different from LLM_API_KEY
-# NER_BASE_URL=                        # Only if different from LLM_BASE_URL
 
 # Neo4j
 NEO4J_URI=bolt://localhost:7687
@@ -435,7 +419,7 @@ EMBEDDING_DIMENSIONS=768
 
 # Web Enrichment (auto-researches public figures during persona generation)
 WEB_ENRICHMENT_ENABLED=true
-# WEB_SEARCH_MODEL=perplexity/sonar-pro  # Optional: grounded web search via OpenRouter
+# WEB_SEARCH_MODEL=google/gemini-2.0-flash-001:online
 ```
 
 

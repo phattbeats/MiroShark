@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watchEffect, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step1GraphBuild from '../components/Step1GraphBuild.vue'
@@ -126,7 +126,8 @@ const rightPanelStyle = computed(() => {
 const statusClass = computed(() => {
   if (error.value) return 'error'
   if (currentPhase.value >= 2) return 'completed'
-  return 'processing'
+  if (currentPhase.value >= 0) return 'processing'
+  return 'idle'
 })
 
 const statusText = computed(() => {
@@ -134,7 +135,7 @@ const statusText = computed(() => {
   if (currentPhase.value >= 2) return 'Ready'
   if (currentPhase.value === 1) return 'Building Graph'
   if (currentPhase.value === 0) return 'Generating Ontology'
-  return 'Initializing'
+  return 'Idle'
 })
 
 // --- Helpers ---
@@ -410,11 +411,19 @@ const stopGraphPolling = () => {
   }
 }
 
+watchEffect(() => {
+  const step = currentStep.value
+  const status = statusClass.value
+  const dot = status === 'processing' ? '\uD83D\uDFE0' : status === 'error' ? '\uD83D\uDD34' : status === 'completed' ? '\uD83D\uDFE2' : ''
+  document.title = dot ? `${dot} (${step}/5) MiroShark` : `(${step}/5) MiroShark`
+})
+
 onMounted(() => {
   initProject()
 })
 
 onUnmounted(() => {
+  document.title = 'MiroShark'
   stopPolling()
   stopGraphPolling()
 })
@@ -557,6 +566,7 @@ onUnmounted(() => {
 
 .status-indicator.processing .dot { background: var(--color-orange); animation: pulse 1s infinite; }
 .status-indicator.completed .dot { background: var(--color-green); }
+.status-indicator.idle .dot { background: var(--color-amber); }
 .status-indicator.error .dot { background: var(--color-red); }
 
 @keyframes pulse { 50% { opacity: 0.5; } }

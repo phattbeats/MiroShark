@@ -162,6 +162,7 @@ def init_logging_for_simulation(simulation_dir: str):
 from action_logger import SimulationLogManager, PlatformActionLogger, write_simulation_event
 from cross_platform_digest import CrossPlatformLog, inject_cross_platform_context
 from belief_integration import BeliefTracker
+from wonderwall.social_agent.belief_state import inject_belief_context
 from director_events import consume_pending_events, inject_director_event_context
 from market_media_bridge import (
     MarketMediaBridge,
@@ -1053,6 +1054,12 @@ def create_model(config: Dict[str, Any], use_boost: bool = False):
     return ModelFactory.create(
         model_platform=ModelPlatformType.OPENAI,
         model_type=llm_model,
+        default_headers={
+            'HTTP-Referer': 'https://github.com/aaronjmars/MiroShark',
+            'X-OpenRouter-Title': 'MiroShark - Universal Swarm Intelligence Engine',
+            'X-OpenRouter-Categories': 'roleplay',
+            'User-Agent': f'MiroShark/1.0 (Wonderwall-Simulation; model={llm_model})',
+        },
     )
 
 
@@ -1111,28 +1118,14 @@ def get_active_agents_for_round(
     
     base_min = time_config.get("agents_per_hour_min", 5)
     base_max = time_config.get("agents_per_hour_max", 20)
-    
-    peak_hours = time_config.get("peak_hours", [9, 10, 11, 14, 15, 20, 21, 22])
-    off_peak_hours = time_config.get("off_peak_hours", [0, 1, 2, 3, 4, 5])
-    
-    if current_hour in peak_hours:
-        multiplier = time_config.get("peak_activity_multiplier", 1.5)
-    elif current_hour in off_peak_hours:
-        multiplier = time_config.get("off_peak_activity_multiplier", 0.3)
-    else:
-        multiplier = 1.0
-    
-    target_count = int(random.uniform(base_min, base_max) * multiplier)
-    
+
+    target_count = int(random.uniform(base_min, base_max))
+
     candidates = []
     for cfg in agent_configs:
         agent_id = cfg.get("agent_id", 0)
-        active_hours = cfg.get("active_hours", list(range(8, 23)))
         activity_level = cfg.get("activity_level", 0.5)
-        
-        if current_hour not in active_hours:
-            continue
-        
+
         if random.random() < activity_level:
             candidates.append(agent_id)
     
@@ -1334,6 +1327,13 @@ async def run_twitter_simulation(
                 'boundary': 'end', 'actions_count': 0, 'elapsed_ms': 0,
             }, simulation_id=_sim_id, round_num=round_num + 1, platform='twitter')
             continue
+
+        # Inject beliefs BEFORE the round so agents act on current stance
+        if belief_tracker and round_num > 0:
+            for agent_id, agent in active_agents:
+                bs = belief_tracker.belief_states.get(agent_id)
+                if bs:
+                    inject_belief_context(agent, bs.to_prompt_text())
 
         # Inject cross-platform digest into active agents' system messages
         if cross_platform_log:
@@ -1597,6 +1597,13 @@ async def run_reddit_simulation(
                 action_logger.log_round_end(round_num + 1, 0)
             continue
 
+        # Inject beliefs BEFORE the round so agents act on current stance
+        if belief_tracker and round_num > 0:
+            for agent_id, agent in active_agents:
+                bs = belief_tracker.belief_states.get(agent_id)
+                if bs:
+                    inject_belief_context(agent, bs.to_prompt_text())
+
         # Inject cross-platform digest into active agents' system messages
         if cross_platform_log:
             for agent_id, agent in active_agents:
@@ -1629,7 +1636,7 @@ async def run_reddit_simulation(
             db_path, last_rowid, agent_names
         )
 
-        # Update beliefs and inject context for next round
+        # Update beliefs based on this round's actions (will be injected next round)
         belief_tracker.after_round(db_path, result.env, active_agents, round_num, actual_actions)
 
         # Publish sentiment to bridge for Polymarket agents to see
@@ -1961,6 +1968,13 @@ async def run_polymarket_simulation(
                 action_logger.log_round_end(round_num + 1, 0)
             continue
 
+        # Inject beliefs BEFORE the round so agents act on current stance
+        if belief_tracker and round_num > 0:
+            for agent_id, agent in active_agents:
+                bs = belief_tracker.belief_states.get(agent_id)
+                if bs:
+                    inject_belief_context(agent, bs.to_prompt_text())
+
         # Inject cross-platform digest
         if cross_platform_log:
             for agent_id, agent in active_agents:
@@ -1989,7 +2003,7 @@ async def run_polymarket_simulation(
         if market_media_bridge:
             market_media_bridge.update_prices(db_path, round_num)
 
-        # Update beliefs and inject context for next round
+        # Update beliefs based on this round's actions (will be injected next round)
         belief_tracker.after_round(db_path, result.env, active_agents, round_num, actual_actions)
 
         # Record to cross-platform log
@@ -2240,6 +2254,13 @@ async def run_synchronized_simulation(
         # ── Initialize round memory for this round ──
         round_memory.start_round(round_num, simulated_day, simulated_hour)
 
+        # ── Director Mode: consume pending events and prepare injection ──
+        director_events = consume_pending_events(simulation_dir, round_num + 1)
+        director_text = None
+        if director_events:
+            director_text = " | ".join(e["event_text"] for e in director_events)
+            log_info(f"Director Mode: injected {len(director_events)} event(s) at round {round_num + 1}")
+
         # ── All 3 platforms run simultaneously ──
         # Build shared context once (previous rounds only — current round is empty)
         memory_ctx = round_memory.build_context(round_num)
@@ -2251,6 +2272,12 @@ async def run_synchronized_simulation(
         if twitter_result:
             active = get_active_agents_for_round(twitter_result.env, config, simulated_hour, round_num)
             if active:
+                # Inject beliefs BEFORE the round so agents act on current stance
+                if twitter_belief and round_num > 0:
+                    for agent_id, agent in active:
+                        bs = twitter_belief.belief_states.get(agent_id)
+                        if bs:
+                            inject_belief_context(agent, bs.to_prompt_text())
                 if memory_ctx:
                     for _, agent in active:
                         inject_round_memory(agent, memory_ctx)
@@ -2262,6 +2289,9 @@ async def run_synchronized_simulation(
                         digest = cross_platform_log.build_digest(agent_id, exclude_platform="twitter")
                         if digest:
                             inject_cross_platform_context(agent, digest)
+                if director_text:
+                    for _, agent in active:
+                        inject_director_event_context(agent, director_text)
 
                 async def _step_twitter(active_agents=active):
                     actions = {agent: LLMAction() for _, agent in active_agents}
@@ -2273,6 +2303,11 @@ async def run_synchronized_simulation(
         if reddit_result:
             active = get_active_agents_for_round(reddit_result.env, config, simulated_hour, round_num)
             if active:
+                if reddit_belief and round_num > 0:
+                    for agent_id, agent in active:
+                        bs = reddit_belief.belief_states.get(agent_id)
+                        if bs:
+                            inject_belief_context(agent, bs.to_prompt_text())
                 if memory_ctx:
                     for _, agent in active:
                         inject_round_memory(agent, memory_ctx)
@@ -2284,6 +2319,9 @@ async def run_synchronized_simulation(
                         digest = cross_platform_log.build_digest(agent_id, exclude_platform="reddit")
                         if digest:
                             inject_cross_platform_context(agent, digest)
+                if director_text:
+                    for _, agent in active:
+                        inject_director_event_context(agent, director_text)
 
                 async def _step_reddit(active_agents=active):
                     actions = {agent: LLMAction() for _, agent in active_agents}
@@ -2295,6 +2333,11 @@ async def run_synchronized_simulation(
         if polymarket_result:
             active = get_active_agents_for_round(polymarket_result.env, config, simulated_hour, round_num)
             if active:
+                if polymarket_belief and round_num > 0:
+                    for agent_id, agent in active:
+                        bs = polymarket_belief.belief_states.get(agent_id)
+                        if bs:
+                            inject_belief_context(agent, bs.to_prompt_text())
                 if memory_ctx:
                     for _, agent in active:
                         inject_round_memory(agent, memory_ctx)
@@ -2309,6 +2352,9 @@ async def run_synchronized_simulation(
                         digest = cross_platform_log.build_digest(agent_id, exclude_platform="polymarket")
                         if digest:
                             inject_cross_platform_context(agent, digest)
+                if director_text:
+                    for _, agent in active:
+                        inject_director_event_context(agent, director_text)
 
                 # Inject social media summary directly into the observation prompt
                 # so traders see it alongside portfolio/market data (not buried in system msg)

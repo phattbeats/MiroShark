@@ -4269,10 +4269,10 @@ def inject_director_event(simulation_id: str):
         if not state or state.runner_status not in [RunnerStatus.RUNNING]:
             return jsonify({"success": False, "error": "Simulation is not currently running"}), 400
 
-        # Enforce max 3 events per simulation
+        # Enforce max 10 events per simulation
         total = get_event_count(sim_dir)
-        if total >= 3:
-            return jsonify({"success": False, "error": "Maximum 3 events per simulation reached"}), 400
+        if total >= 10:
+            return jsonify({"success": False, "error": "Maximum 10 events per simulation reached"}), 400
 
         current_round = state.current_round or 0
         event = add_event(sim_dir, event_text, current_round)

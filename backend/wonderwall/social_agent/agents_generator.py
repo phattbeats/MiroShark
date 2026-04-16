@@ -457,10 +457,10 @@ async def generate_reddit_agents(
             "other_info": {},
         }
         # Update agent profile with additional information
-        profile["other_info"]["user_profile"] = agent_info[i]["persona"]
-        profile["other_info"]["mbti"] = agent_info[i]["mbti"]
-        profile["other_info"]["gender"] = agent_info[i]["gender"]
-        profile["other_info"]["age"] = agent_info[i]["age"]
+        profile["other_info"]["user_profile"] = agent_info[i].get("persona", "")
+        profile["other_info"]["mbti"] = agent_info[i].get("mbti", "INTJ")
+        profile["other_info"]["gender"] = agent_info[i].get("gender", "other")
+        profile["other_info"]["age"] = agent_info[i].get("age", 30)
         profile["other_info"]["country"] = agent_info[i]["country"]
 
         user_info = UserInfo(
@@ -582,10 +582,10 @@ async def generate_reddit_agent_graph(
             "other_info": {},
         }
         # Update agent profile with additional information
-        profile["other_info"]["user_profile"] = agent_info[i]["persona"]
-        profile["other_info"]["mbti"] = agent_info[i]["mbti"]
-        profile["other_info"]["gender"] = agent_info[i]["gender"]
-        profile["other_info"]["age"] = agent_info[i]["age"]
+        profile["other_info"]["user_profile"] = agent_info[i].get("persona", "")
+        profile["other_info"]["mbti"] = agent_info[i].get("mbti", "INTJ")
+        profile["other_info"]["gender"] = agent_info[i].get("gender", "other")
+        profile["other_info"]["age"] = agent_info[i].get("age", 30)
         profile["other_info"]["country"] = agent_info[i]["country"]
 
         user_info = UserInfo(

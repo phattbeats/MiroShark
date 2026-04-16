@@ -53,7 +53,7 @@ ALL_SOCIAL_ACTIONS = [action.value for action in ActionType]
 
 
 class SocialAgent(ChatAgent):
-    r"""Agent that participates in an OASIS simulation.
+    r"""Agent that participates in a Wonderwall simulation.
 
     Supports both the legacy social-media workflow (``SocialAction`` +
     ``SocialEnvironment``) and the new generic simulation framework
@@ -159,14 +159,52 @@ class SocialAgent(ChatAgent):
             "What do you think Helen should do?")
 
     async def _aget_model_response(self, openai_messages, num_tokens, **kwargs):
-        """Filter empty-content messages that Gemini rejects with INVALID_ARGUMENT."""
+        """Filter empty-content messages that Gemini rejects with INVALID_ARGUMENT,
+        and emit llm_call observability events for Wonderwall subprocess visibility."""
+        import os as _os
+        import time as _time
+
         filtered = [
             msg for msg in openai_messages
             if msg.get("content") is not None and str(msg["content"]).strip()
         ]
         if not filtered:
             filtered = [{"role": "user", "content": "(empty context)"}]
-        return await super()._aget_model_response(filtered, num_tokens, **kwargs)
+
+        # Inject OpenRouter metadata per-call so each generation is tagged
+        base_url = _os.environ.get('OPENAI_API_BASE_URL', '')
+        if 'openrouter' in base_url:
+            try:
+                sim_id = _os.environ.get('MIROSHARK_SIMULATION_ID', '')
+                agent_name = str(getattr(self.user_info, 'name', ''))[:64]
+                config = self.model_backend.model_config_dict
+                extra = config.get('extra_body', {})
+                extra['metadata'] = {
+                    'caller': 'SocialAgent.perform_action_by_llm',
+                    'simulation_id': sim_id,
+                    'agent_name': agent_name,
+                    'agent_id': str(self.social_agent_id or ''),
+                }
+                if sim_id:
+                    extra['session_id'] = sim_id
+                config['extra_body'] = extra
+            except Exception:
+                pass
+
+        start = _time.time()
+        error_msg = None
+        result = None
+        try:
+            result = await super()._aget_model_response(filtered, num_tokens, **kwargs)
+            return result
+        except Exception as e:
+            error_msg = str(e)
+            raise
+        finally:
+            try:
+                self._emit_llm_call_event(filtered, start, error_msg, result)
+            except Exception:
+                pass
 
     async def perform_action_by_llm(self):
         # Get environment observation:
@@ -264,6 +302,86 @@ class SocialAgent(ChatAgent):
             }
 
             # Try to find the simulation events.jsonl via CWD or env
+            sim_dir = _os.environ.get('MIROSHARK_SIM_DIR', '.')
+            events_path = _os.path.join(sim_dir, 'events.jsonl')
+            with open(events_path, 'a', encoding='utf-8') as f:
+                f.write(_json.dumps(event, ensure_ascii=False, default=str) + '\n')
+        except Exception:
+            pass  # never break agent execution
+
+    def _emit_llm_call_event(self, openai_messages, start_time, error_msg=None, result=None):
+        """Emit an llm_call observability event from the Wonderwall subprocess."""
+        try:
+            import os as _os
+            import json as _json
+            import time as _time
+            import uuid as _uuid
+            from datetime import datetime as _dt
+
+            latency_ms = (_time.time() - start_time) * 1000
+            log_prompts = _os.environ.get('MIROSHARK_LOG_PROMPTS', 'false').lower() == 'true'
+
+            # Extract model name from environment (set by simulation runner)
+            model = _os.environ.get('OASIS_MODEL_NAME') or _os.environ.get('LLM_MODEL_NAME', 'unknown')
+
+            # Extract real token counts from CAMEL ModelResponse if available
+            tokens_input = 0
+            tokens_output = 0
+            response_preview = None
+            if result is not None:
+                # ModelResponse has usage_dict with prompt_tokens/completion_tokens
+                usage = getattr(result, 'usage_dict', None)
+                if usage:
+                    tokens_input = usage.get('prompt_tokens', 0) or 0
+                    tokens_output = usage.get('completion_tokens', 0) or 0
+                # Fallback: try the raw ChatCompletion response
+                if not tokens_output:
+                    raw_response = getattr(result, 'response', None)
+                    if raw_response:
+                        raw_usage = getattr(raw_response, 'usage', None)
+                        if raw_usage:
+                            tokens_input = getattr(raw_usage, 'prompt_tokens', 0) or 0
+                            tokens_output = getattr(raw_usage, 'completion_tokens', 0) or 0
+                # Extract response preview from output_messages
+                out_msgs = getattr(result, 'output_messages', None)
+                if out_msgs:
+                    content = getattr(out_msgs[0], 'content', None) if out_msgs else None
+                    if content:
+                        response_preview = str(content)[:200]
+
+            # Fallback: estimate input tokens from message content
+            if not tokens_input:
+                input_chars = sum(len(str(m.get('content', ''))) for m in openai_messages)
+                tokens_input = input_chars // 4
+
+            data = {
+                'caller': 'SocialAgent.perform_action_by_llm',
+                'model': model,
+                'tokens_input': tokens_input,
+                'tokens_output': tokens_output,
+                'tokens_total': tokens_input + tokens_output,
+                'latency_ms': round(latency_ms, 1),
+                'error': error_msg,
+                'response_preview': response_preview,
+            }
+            if log_prompts:
+                data['messages'] = openai_messages
+
+            sim_id = _os.environ.get('MIROSHARK_SIMULATION_ID')
+
+            event = {
+                'event_id': f'evt_{_uuid.uuid4().hex[:12]}',
+                'event_type': 'llm_call',
+                'timestamp': _dt.utcnow().isoformat(timespec='milliseconds') + 'Z',
+                'simulation_id': sim_id,
+                'trace_id': None,
+                'round_num': None,
+                'agent_id': self.social_agent_id,
+                'agent_name': getattr(self.user_info, 'name', None),
+                'platform': None,
+                'data': data,
+            }
+
             sim_dir = _os.environ.get('MIROSHARK_SIM_DIR', '.')
             events_path = _os.path.join(sim_dir, 'events.jsonl')
             with open(events_path, 'a', encoding='utf-8') as f:

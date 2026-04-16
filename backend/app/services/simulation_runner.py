@@ -369,6 +369,17 @@ class SimulationRunner:
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
         
+        # Clear director events from previous runs (fresh start only)
+        if start_round == 0:
+            for fname in ("director_events.json", "director_events_history.json"):
+                fpath = os.path.join(sim_dir, fname)
+                if os.path.exists(fpath):
+                    try:
+                        with open(fpath, 'w', encoding='utf-8') as f:
+                            json.dump([], f)
+                    except Exception:
+                        pass
+
         # Initialize run state
         time_config = config.get("time_config", {})
         total_hours = time_config.get("total_simulation_hours", 72)
@@ -479,6 +490,7 @@ class SimulationRunner:
             env['PYTHONUTF8'] = '1'  # Python 3.7+ support, makes all open() default to UTF-8
             env['PYTHONIOENCODING'] = 'utf-8'  # Ensure stdout/stderr use UTF-8
             env['MIROSHARK_SIM_DIR'] = sim_dir  # Observability: tell agents where to write events.jsonl
+            env['MIROSHARK_SIMULATION_ID'] = simulation_id  # Observability: tag Wonderwall events with sim ID
             
             # Set working directory to simulation directory (database files etc. will be generated here)
             # Use start_new_session=True to create new process group, ensuring all child processes can be terminated via os.killpg
