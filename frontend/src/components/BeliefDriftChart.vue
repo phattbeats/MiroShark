@@ -99,6 +99,21 @@
           fill="rgba(10,10,10,0.5)" font-size="9" font-family="monospace"
         >consensus r{{ driftData.consensus_round }}</text>
 
+        <!-- Director event injection markers -->
+        <g v-for="(evt, idx) in eventMarkers" :key="'evt' + idx">
+          <line
+            :x1="xS(evt.round)" :y1="MT"
+            :x2="xS(evt.round)" :y2="H - MB"
+            stroke="rgba(245,158,11,0.7)" stroke-width="1.5"
+            stroke-dasharray="3,2"
+          />
+          <text
+            :x="xS(evt.round) + 4"
+            :y="MT + 12 + idx * 11"
+            fill="rgba(245,158,11,0.8)" font-size="8" font-family="monospace"
+          >⚡ r{{ evt.round }}</text>
+        </g>
+
         <!-- X axis labels -->
         <text
           v-for="r in xTicks"
@@ -135,7 +150,8 @@ import { getBeliefDrift } from '../api/simulation'
 
 const props = defineProps({
   simulationId: { type: String, required: true },
-  visible: { type: Boolean, default: false }
+  visible: { type: Boolean, default: false },
+  directorEvents: { type: Array, default: () => [] }
 })
 
 const loading = ref(false)
@@ -205,6 +221,13 @@ const bullishPath = computed(() => {
   const bot = bearish.map((b, i) => b + neutral[i])
   const top = bot.map((b, i) => b + bullish[i])
   return areaPath(top, bot, rounds)
+})
+
+const eventMarkers = computed(() => {
+  if (!hasData.value || !props.directorEvents?.length) return []
+  return props.directorEvents
+    .filter(e => e.injected_at_round != null)
+    .map(e => ({ round: e.injected_at_round, text: e.event_text }))
 })
 
 const load = async () => {

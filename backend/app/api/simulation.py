@@ -4219,3 +4219,102 @@ def test_push_notification():
             "success": False,
             "error": str(e),
         }), 500
+
+
+# ============================================================
+# Director Mode — Mid-Simulation Event Injection
+# ============================================================
+
+@simulation_bp.route('/<simulation_id>/director/inject', methods=['POST'])
+def inject_director_event(simulation_id: str):
+    """
+    Inject a breaking event into a running simulation (Director Mode).
+
+    The event is queued and consumed by the simulation loop at the next
+    round boundary. All agents receive the event as context before
+    generating their next round of actions.
+
+    Request (JSON):
+        {
+            "event_text": "Central bank unexpectedly raised rates by 100bps"
+        }
+
+    Returns:
+        {
+            "success": true,
+            "event": { ... },
+            "total_events": 2
+        }
+    """
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
+    from director_events import add_event, get_event_count
+
+    try:
+        data = request.get_json() or {}
+        event_text = (data.get('event_text') or '').strip()
+
+        if not event_text:
+            return jsonify({"success": False, "error": "event_text is required"}), 400
+
+        if len(event_text) > 500:
+            return jsonify({"success": False, "error": "event_text must be under 500 characters"}), 400
+
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+        if not os.path.exists(sim_dir):
+            return jsonify({"success": False, "error": f"Simulation not found: {simulation_id}"}), 404
+
+        # Check simulation is running
+        state = SimulationRunner.get_run_state(simulation_id)
+        if not state or state.runner_status not in [RunnerStatus.RUNNING]:
+            return jsonify({"success": False, "error": "Simulation is not currently running"}), 400
+
+        # Enforce max 3 events per simulation
+        total = get_event_count(sim_dir)
+        if total >= 3:
+            return jsonify({"success": False, "error": "Maximum 3 events per simulation reached"}), 400
+
+        current_round = state.current_round or 0
+        event = add_event(sim_dir, event_text, current_round)
+
+        return jsonify({
+            "success": True,
+            "event": event,
+            "total_events": total + 1,
+        })
+
+    except Exception as e:
+        logger.error(f"Failed to inject director event: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@simulation_bp.route('/<simulation_id>/director/events', methods=['GET'])
+def get_director_events(simulation_id: str):
+    """
+    Get all director events (injected + pending) for a simulation.
+
+    Returns:
+        {
+            "success": true,
+            "events": [ ... ],
+            "pending": [ ... ]
+        }
+    """
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
+    from director_events import get_event_history, get_pending_events
+
+    try:
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+        if not os.path.exists(sim_dir):
+            return jsonify({"success": False, "error": f"Simulation not found: {simulation_id}"}), 404
+
+        return jsonify({
+            "success": True,
+            "events": get_event_history(sim_dir),
+            "pending": get_pending_events(sim_dir),
+        })
+
+    except Exception as e:
+        logger.error(f"Failed to get director events: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500

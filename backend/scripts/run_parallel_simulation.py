@@ -162,6 +162,7 @@ def init_logging_for_simulation(simulation_dir: str):
 from action_logger import SimulationLogManager, PlatformActionLogger, write_simulation_event
 from cross_platform_digest import CrossPlatformLog, inject_cross_platform_context
 from belief_integration import BeliefTracker
+from director_events import consume_pending_events, inject_director_event_context
 from market_media_bridge import (
     MarketMediaBridge,
     inject_market_context,
@@ -1349,6 +1350,14 @@ async def run_twitter_simulation(
                 for _, agent in active_agents:
                     inject_market_context(agent, market_prompt)
 
+        # Director Mode: inject breaking events into agent context
+        director_events = consume_pending_events(simulation_dir, round_num + 1)
+        if director_events:
+            combined_text = " | ".join(e["event_text"] for e in director_events)
+            for _, agent in active_agents:
+                inject_director_event_context(agent, combined_text)
+            log_info(f"Director Mode: injected {len(director_events)} event(s) at round {round_num + 1}")
+
         _round_t0 = datetime.now()
         actions = {agent: LLMAction() for _, agent in active_agents}
         await result.env.step(actions)
@@ -1602,6 +1611,14 @@ async def run_reddit_simulation(
             if market_prompt:
                 for _, agent in active_agents:
                     inject_market_context(agent, market_prompt)
+
+        # Director Mode: inject breaking events into agent context
+        director_events = consume_pending_events(simulation_dir, round_num + 1)
+        if director_events:
+            combined_text = " | ".join(e["event_text"] for e in director_events)
+            for _, agent in active_agents:
+                inject_director_event_context(agent, combined_text)
+            log_info(f"Director Mode: injected {len(director_events)} event(s) at round {round_num + 1}")
 
         actions = {agent: LLMAction() for _, agent in active_agents}
         await result.env.step(actions)

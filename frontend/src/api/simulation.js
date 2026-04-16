@@ -328,3 +328,20 @@ export const testPushNotification = (simulationId) => {
   return service.post('/api/simulation/push/test', { simulation_id: simulationId })
 }
 
+/**
+ * Inject a breaking event into a running simulation (Director Mode).
+ * @param {string} simulationId
+ * @param {Object} data - { event_text: string }
+ */
+export const injectDirectorEvent = (simulationId, data) => {
+  return service.post(`/api/simulation/${simulationId}/director/inject`, data)
+}
+
+/**
+ * Get all director events (injected + pending) for a simulation.
+ * @param {string} simulationId
+ */
+export const getDirectorEvents = (simulationId) => {
+  return service.get(`/api/simulation/${simulationId}/director/events`)
+}
+

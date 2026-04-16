@@ -54,7 +54,7 @@
         v-if="allActions.length > 0"
         class="action-btn secondary"
         :class="{ active: showInfluence }"
-        @click="showInfluence = !showInfluence; showBeliefDrift = false"
+        @click="showInfluence = !showInfluence; showBeliefDrift = false; showDirector = false"
         title="Agent influence leaderboard"
       >
         ◈ Influence
@@ -65,10 +65,22 @@
         v-if="allActions.length > 0"
         class="action-btn secondary"
         :class="{ active: showBeliefDrift }"
-        @click="showBeliefDrift = !showBeliefDrift; showInfluence = false"
+        @click="showBeliefDrift = !showBeliefDrift; showInfluence = false; showDirector = false"
         title="Aggregate belief drift chart"
       >
         ◎ Belief Drift
+      </button>
+
+      <!-- Director Mode toggle (only while simulation is running) -->
+      <button
+        v-if="phase === 1"
+        class="action-btn secondary director-btn"
+        :class="{ active: showDirector }"
+        @click="showDirector = !showDirector; showInfluence = false; showBeliefDrift = false"
+        :title="directorEventsTotal >= 3 ? 'Director Mode — max events reached' : 'Director Mode — inject a breaking event into the simulation'"
+      >
+        ⚡ Director
+        <span v-if="directorEventsTotal > 0" class="director-badge">{{ directorEventsTotal }}/3</span>
       </button>
 
       <!-- Resume (when paused/stopped/failed with partial data) -->
@@ -192,11 +204,77 @@
       v-if="showBeliefDrift"
       :simulationId="simulationId"
       :visible="showBeliefDrift"
+      :directorEvents="directorEventHistory"
       class="influence-overlay"
     />
 
+    <!-- Director Mode Panel (overlay when toggled) -->
+    <div v-if="showDirector" class="influence-overlay director-panel">
+      <div class="director-header">
+        <div class="director-title">
+          <span class="director-icon">⚡</span>
+          <span class="director-label">DIRECTOR MODE</span>
+        </div>
+        <span class="director-hint">Inject a breaking event — all agents receive it at the next round boundary</span>
+      </div>
+
+      <div class="director-form">
+        <textarea
+          v-model="directorEventText"
+          class="director-input"
+          placeholder="Describe the event (e.g. 'Central bank unexpectedly raised rates by 100bps')..."
+          maxlength="500"
+          :disabled="directorEventsTotal >= 3 || isInjectingEvent"
+          rows="3"
+        ></textarea>
+        <div class="director-form-footer">
+          <span class="director-char-count">{{ directorEventText.length }}/500</span>
+          <button
+            class="director-inject-btn"
+            :disabled="!directorEventText.trim() || directorEventsTotal >= 3 || isInjectingEvent"
+            @click="handleInjectEvent"
+          >
+            <span v-if="isInjectingEvent" class="loading-spinner-small"></span>
+            {{ isInjectingEvent ? 'Injecting...' : directorEventsTotal >= 3 ? 'Max events reached' : 'Inject Event' }}
+          </button>
+        </div>
+        <div v-if="directorError" class="director-error">{{ directorError }}</div>
+      </div>
+
+      <!-- Event History -->
+      <div v-if="directorEventHistory.length > 0" class="director-history">
+        <div class="director-history-title">Injected Events</div>
+        <div
+          v-for="evt in directorEventHistory"
+          :key="evt.id"
+          class="director-event-card"
+        >
+          <div class="director-event-header">
+            <span class="director-event-badge">⚡ ROUND {{ evt.injected_at_round || evt.submitted_at_round }}</span>
+            <span class="director-event-time">{{ formatEventTime(evt.timestamp) }}</span>
+          </div>
+          <div class="director-event-text">{{ evt.event_text }}</div>
+        </div>
+      </div>
+
+      <!-- Pending Events -->
+      <div v-if="directorPendingEvents.length > 0" class="director-history">
+        <div class="director-history-title">Pending (will inject next round)</div>
+        <div
+          v-for="evt in directorPendingEvents"
+          :key="evt.id"
+          class="director-event-card pending"
+        >
+          <div class="director-event-header">
+            <span class="director-event-badge pending-badge">◌ QUEUED</span>
+          </div>
+          <div class="director-event-text">{{ evt.event_text }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content: Dual Timeline -->
-    <div v-show="!showInfluence && !showBeliefDrift" class="main-content-area" ref="scrollContainer" @scroll="onTimelineScroll">
+    <div v-show="!showInfluence && !showBeliefDrift && !showDirector" class="main-content-area" ref="scrollContainer" @scroll="onTimelineScroll">
       <!-- Scroll to bottom button -->
       <button
         v-if="showScrollBtn"
@@ -221,6 +299,20 @@
           <span class="filter-count">{{ chronologicalActions.length }} events</span>
         </div>
         <button class="filter-clear" @click="clearAgentFilter">Clear</button>
+      </div>
+
+      <!-- Director Event Banners (inline in timeline) -->
+      <div
+        v-for="evt in directorEventHistory"
+        :key="'director-' + evt.id"
+        class="director-timeline-banner"
+      >
+        <div class="director-banner-line"></div>
+        <div class="director-banner-content">
+          <span class="director-banner-icon">⚡</span>
+          <span class="director-banner-text">BREAKING — Round {{ evt.injected_at_round }}: {{ evt.event_text }}</span>
+        </div>
+        <div class="director-banner-line"></div>
       </div>
 
       <!-- Timeline Feed -->
@@ -517,6 +609,8 @@ import {
   generateSimulationArticle,
   getVapidPublicKey,
   subscribePush,
+  injectDirectorEvent,
+  getDirectorEvents,
 } from '../api/simulation'
 import { generateReport } from '../api/report'
 import { renderMarkdown } from '../utils/markdown'
@@ -562,6 +656,15 @@ const showArticleDrawer = ref(false)
 const articleText = ref('')
 const isGeneratingArticle = ref(false)
 
+// Director Mode state
+const showDirector = ref(false)
+const directorEventText = ref('')
+const directorEventHistory = ref([])
+const directorPendingEvents = ref([])
+const directorEventsTotal = ref(0)
+const isInjectingEvent = ref(false)
+const directorError = ref(null)
+
 // Push notification state
 const pushSupported = typeof window !== 'undefined' &&
   'Notification' in window &&
@@ -587,6 +690,53 @@ const filterByPlatform = (platform) => {
 
 const clearPlatformFilter = () => {
   filteredPlatform.value = null
+}
+
+// Director Mode methods
+const handleInjectEvent = async () => {
+  if (!directorEventText.value.trim() || directorEventsTotal.value >= 3) return
+  isInjectingEvent.value = true
+  directorError.value = null
+  try {
+    const res = await injectDirectorEvent(props.simulationId, {
+      event_text: directorEventText.value.trim()
+    })
+    if (res.data?.success) {
+      directorEventText.value = ''
+      directorEventsTotal.value = res.data.total_events
+      await loadDirectorEvents()
+    } else {
+      directorError.value = res.data?.error || 'Failed to inject event'
+    }
+  } catch (err) {
+    directorError.value = err.response?.data?.error || err.message || 'Failed to inject event'
+  } finally {
+    isInjectingEvent.value = false
+  }
+}
+
+const loadDirectorEvents = async () => {
+  if (!props.simulationId) return
+  try {
+    const res = await getDirectorEvents(props.simulationId)
+    if (res.data?.success) {
+      directorEventHistory.value = res.data.events || []
+      directorPendingEvents.value = res.data.pending || []
+      directorEventsTotal.value = directorEventHistory.value.length + directorPendingEvents.value.length
+    }
+  } catch {
+    // Silently ignore — events will load on next poll
+  }
+}
+
+const formatEventTime = (timestamp) => {
+  if (!timestamp) return ''
+  try {
+    const d = new Date(timestamp)
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  } catch {
+    return ''
+  }
 }
 
 const copySimId = () => {
@@ -1034,6 +1184,11 @@ const fetchRunStatusDetail = async () => {
     }
   } catch (err) {
     console.warn('Failed to get detailed status:', err)
+  }
+
+  // Also refresh director events while simulation is running
+  if (phase.value === 1) {
+    loadDirectorEvents()
   }
 }
 
@@ -2387,5 +2542,227 @@ onUnmounted(() => {
 }
 .notify-label {
   font-family: var(--font-mono, 'Space Mono', monospace);
+}
+
+/* Director Mode */
+.director-btn.active {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.director-badge {
+  margin-left: 4px;
+  padding: 1px 5px;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 3px;
+  font-size: 10px;
+  color: #f59e0b;
+}
+
+.director-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  background: var(--background, #FAFAFA);
+}
+
+.director-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(10,10,10,0.08);
+}
+
+.director-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.director-icon {
+  font-size: 14px;
+  color: #f59e0b;
+}
+
+.director-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(10,10,10,0.5);
+}
+
+.director-hint {
+  font-size: 11px;
+  color: rgba(10,10,10,0.35);
+  letter-spacing: 0.5px;
+}
+
+.director-form {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(10,10,10,0.08);
+}
+
+.director-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(10,10,10,0.12);
+  background: rgba(10,10,10,0.02);
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 12px;
+  color: #0a0a0a;
+  resize: none;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.director-input:focus {
+  border-color: #f59e0b;
+}
+
+.director-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.director-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.director-char-count {
+  font-size: 10px;
+  color: rgba(10,10,10,0.3);
+  letter-spacing: 1px;
+}
+
+.director-inject-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f59e0b;
+  border: none;
+  color: #fff;
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.director-inject-btn:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.director-inject-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.director-error {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #dc2626;
+  letter-spacing: 0.5px;
+}
+
+.director-history {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(10,10,10,0.05);
+}
+
+.director-history-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(10,10,10,0.35);
+  margin-bottom: 8px;
+}
+
+.director-event-card {
+  padding: 10px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: rgba(245, 158, 11, 0.04);
+  margin-bottom: 6px;
+}
+
+.director-event-card.pending {
+  border-color: rgba(10,10,10,0.1);
+  background: rgba(10,10,10,0.02);
+  border-style: dashed;
+}
+
+.director-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.director-event-badge {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.pending-badge {
+  color: rgba(10,10,10,0.35);
+}
+
+.director-event-time {
+  font-size: 10px;
+  color: rgba(10,10,10,0.3);
+}
+
+.director-event-text {
+  font-size: 12px;
+  color: rgba(10,10,10,0.7);
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+}
+
+/* Director Timeline Banner */
+.director-timeline-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  margin: 4px 0;
+}
+
+.director-banner-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(245, 158, 11, 0.3);
+}
+
+.director-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  flex-shrink: 0;
+}
+
+.director-banner-icon {
+  font-size: 12px;
+  color: #f59e0b;
+}
+
+.director-banner-text {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 10px;
+  color: #b45309;
+  letter-spacing: 0.5px;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
