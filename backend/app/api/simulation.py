@@ -212,6 +212,10 @@ _SCENARIO_SUGGEST_SYSTEM_PROMPT = (
     "- Grounded in the document (reference named actors, events, or "
     "institutions where possible)\n"
     "- Non-trivial (not 'will X happen this year' with no stake)\n"
+    "- Tied to a resolution window that makes sense for the dynamics "
+    "involved — a few weeks for fast news cycles, a few months for "
+    "product/market reactions, up to a year for policy or structural "
+    "outcomes. Pick whatever window fits the scenario best.\n"
     "Each expected_yes_range must be two integers 0-100 reflecting a "
     "plausible initial market probability band for that framing.\n"
     "Return JSON exactly of this shape:\n"
@@ -220,6 +224,12 @@ _SCENARIO_SUGGEST_SYSTEM_PROMPT = (
     "The rationale field is a single sentence (<= 140 chars) explaining why "
     "this framing follows from the document. Do not include any other fields."
 )
+
+
+def _today_context() -> str:
+    """Current-date preamble so time-sensitive LLM output anchors on today
+    rather than the model's training cutoff."""
+    return f"Today's date is {datetime.now(timezone.utc).strftime('%Y-%m-%d')}."
 
 
 def _normalize_preview(text: str) -> str:
@@ -353,6 +363,11 @@ def suggest_scenarios():
                 "error": "text_preview must be a string"
             }), 400
 
+        sim_prompt_raw = data.get('simulation_prompt') or ''
+        if not isinstance(sim_prompt_raw, str):
+            sim_prompt_raw = ''
+        sim_prompt = " ".join(sim_prompt_raw.split())[:600]
+
         normalized = _normalize_preview(preview)
         # Require at least ~80 chars so we don't spin the LLM on keystroke fragments.
         if len(normalized) < 80:
@@ -362,7 +377,9 @@ def suggest_scenarios():
             })
 
         import hashlib
-        cache_key = hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+        cache_key = hashlib.sha256(
+            (normalized + "||" + sim_prompt).encode('utf-8')
+        ).hexdigest()
 
         if not data.get('no_cache'):
             cached = _scenario_cache_get(cache_key)
@@ -381,14 +398,21 @@ def suggest_scenarios():
                 "data": {"suggestions": [], "cached": False, "reason": "llm_unavailable"}
             })
 
+        sim_prompt_block = (
+            f"User's simulation prompt:\n{sim_prompt}\n\n"
+            if sim_prompt else ""
+        )
         messages = [
             {"role": "system", "content": _SCENARIO_SUGGEST_SYSTEM_PROMPT},
             {
                 "role": "user",
                 "content": (
+                    f"{_today_context()}\n\n"
+                    f"{sim_prompt_block}"
                     "Document excerpt (truncated):\n\n"
                     f"{normalized}\n\n"
-                    "Generate the 3 scenarios now."
+                    "Generate the 3 scenarios now. Pick a resolution window "
+                    "that fits each scenario's natural time horizon."
                 ),
             },
         ]
@@ -443,25 +467,36 @@ _ASK_CACHE_MAX = 32
 _ASK_QUESTION_MAX_CHARS = 400
 
 _ASK_SYSTEM_PROMPT = (
-    "You are a research analyst. The user has a single question about public "
-    "reaction, market dynamics, or policy. They have no source document; your "
-    "job is to produce a *neutral, evidence-grounded briefing* that will seed "
-    "an agent-based social simulation.\n\n"
+    "You are a research analyst producing a briefing that will seed an "
+    "agent-based social simulation. Hundreds of personas will be generated "
+    "from this briefing, so the richer and more specifically populated it "
+    "is, the better the simulation behaves.\n\n"
     "Return JSON of this exact shape:\n"
     '{ "title": str, "simulation_requirement": str, "seed_document": str, '
     '"key_actors": [str], "suggested_platforms": ["twitter"|"reddit"|"polymarket"] }\n\n'
     "Rules:\n"
     "- title: short (<=60 chars), descriptive — this is the project name.\n"
-    "- simulation_requirement: one paragraph (~400-600 chars) framing the simulation "
-    "goal — who the agents should represent and what dynamics to watch.\n"
-    "- seed_document: a 1500-3000 character markdown briefing. Include sections "
-    "for Context, Key Actors/Stakeholders, Recent Events, and Open Questions. "
-    "Use only facts that would plausibly be public knowledge — do not invent "
-    "specific quotes, dates, or figures that could mislead. Prefer qualitative "
-    "framing (\"several major outlets have\") over fabricated specifics.\n"
-    "- key_actors: 4-10 stakeholders likely to post/trade in the simulation.\n"
+    "- simulation_requirement: one paragraph (~400-600 chars) framing the "
+    "simulation goal — who the agents should represent and what dynamics to watch.\n"
+    "- seed_document: a 1800-3500 character markdown briefing with the sections "
+    "Context, Key Actors, Camps & Positions, Recent Events, and Open Questions. "
+    "Populate it with CONCRETE, NAMED entities — not categories. Name specific "
+    "companies, products, funds, media outlets, regulators, CEOs, founders, "
+    "journalists, analysts, researchers, academics, activists, politicians, "
+    "and vocal critics/skeptics. Cover multiple camps so bulls, bears, and "
+    "neutrals are all represented. Prefer qualitative framing over fabricated "
+    "statistics, but DO name real organizations and real public figures "
+    "associated with the topic.\n"
+    "- key_actors: 15-25 entries, each a SPECIFIC named person, company, fund, "
+    "outlet, or agency (e.g. 'Jensen Huang — NVIDIA CEO', 'Gary Marcus — AI "
+    "critic, NYU emeritus', 'Andreessen Horowitz — AI-bull VC', 'Financial "
+    "Times Lex column', 'EU AI Office'). Mix roles (exec, investor, journalist, "
+    "researcher, regulator, activist), stances (bullish/bearish/neutral), and "
+    "geographies (US, EU, UK, Asia) so the persona generator has variety. "
+    "Avoid generic entries like 'venture capitalists' or 'the general public'.\n"
     "- suggested_platforms: 1-3 from the allowed set, chosen by relevance.\n"
-    "Do not include disclaimers. Do not include any other fields."
+    "Do not include disclaimers. Do not invent specific quotes or precise "
+    "figures. Do not include any other fields."
 )
 
 
@@ -504,7 +539,7 @@ def _ask_clean_result(payload, question: str) -> "dict | None":
         for a in actors_raw:
             if isinstance(a, str) and a.strip():
                 actors.append(a.strip())
-            if len(actors) == 10:
+            if len(actors) == 25:
                 break
 
     platforms = []
@@ -578,7 +613,14 @@ def ask_mode():
 
         messages = [
             {"role": "system", "content": _ASK_SYSTEM_PROMPT},
-            {"role": "user", "content": f"User question: {question}\n\nProduce the briefing now."},
+            {
+                "role": "user",
+                "content": (
+                    f"{_today_context()}\n\n"
+                    f"User question: {question}\n\n"
+                    "Produce the briefing now."
+                ),
+            },
         ]
 
         try:

@@ -68,6 +68,7 @@ import { suggestScenarios } from '../api/simulation'
 
 const props = defineProps({
   textPreview: { type: String, default: '' },
+  simulationPrompt: { type: String, default: '' },
   minChars: { type: Number, default: 120 },
   debounceMs: { type: Number, default: 800 }
 })
@@ -125,7 +126,10 @@ const fetchSuggestions = async (preview) => {
   loading.value = true
   error.value = ''
   try {
-    const res = await suggestScenarios({ text_preview: preview })
+    const res = await suggestScenarios({
+      text_preview: preview,
+      simulation_prompt: props.simulationPrompt || ''
+    })
     if (mySeq !== requestSeq.value) return  // superseded
     if (!res || res.success === false) {
       suggestions.value = []

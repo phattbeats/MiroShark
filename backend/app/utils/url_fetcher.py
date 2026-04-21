@@ -1,81 +1,26 @@
 """
 URL fetching and text extraction utility for MiroShark document ingestion.
-Fetches a URL and extracts readable article text without extra dependencies.
+
+Primary path: ask the configured web-search LLM (WEB_SEARCH_MODEL, e.g.
+`google/gemini-2.0-flash-001:online`) to read the URL and return the main
+readable content. This bypasses brittle HTML parsing and handles JS-heavy
+pages that a static parser can't.
+
+SSRF protection: host + resolved-IP validation is still applied so a
+malicious URL can't coerce the model into fetching an internal address.
 """
 
+import json
 import re
 import socket
 import ipaddress
-from html.parser import HTMLParser
 from urllib.parse import urlparse
 
-import requests
+from ..config import Config
+from ..utils.llm_client import create_llm_client
+from ..utils.logger import get_logger
 
-MAX_RESPONSE_BYTES = 5 * 1024 * 1024  # 5 MB
-
-
-class _TextExtractor(HTMLParser):
-    """Simple HTML parser that strips tags and extracts readable body text."""
-
-    # Tags whose content should be ignored entirely
-    SKIP_TAGS = frozenset({
-        'script', 'style', 'noscript', 'nav', 'footer', 'aside',
-        'form', 'button', 'meta', 'link', 'img', 'svg', 'iframe',
-        'head',
-    })
-
-    # Block-level tags that should introduce a newline when closed
-    BLOCK_TAGS = frozenset({
-        'p', 'div', 'article', 'section', 'main',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'li', 'br', 'tr', 'blockquote', 'pre',
-    })
-
-    def __init__(self):
-        super().__init__()
-        self._parts = []
-        self._skip_depth = 0
-        self._title = ''
-        self._in_title = False
-
-    def handle_starttag(self, tag, attrs):
-        tag = tag.lower()
-        if tag in self.SKIP_TAGS:
-            self._skip_depth += 1
-        if tag == 'title':
-            self._in_title = True
-
-    def handle_endtag(self, tag):
-        tag = tag.lower()
-        if tag in self.SKIP_TAGS:
-            self._skip_depth = max(0, self._skip_depth - 1)
-        if tag == 'title':
-            self._in_title = False
-        if tag in self.BLOCK_TAGS:
-            if self._parts and not self._parts[-1].endswith('\n'):
-                self._parts.append('\n')
-
-    def handle_data(self, data):
-        if self._skip_depth > 0:
-            return
-        text = data.strip()
-        if not text:
-            return
-        if self._in_title:
-            self._title = text
-        else:
-            self._parts.append(text + ' ')
-
-    def get_text(self) -> str:
-        raw = ''.join(self._parts)
-        # Normalize whitespace runs
-        raw = re.sub(r'[ \t]+', ' ', raw)
-        # Collapse 3+ newlines to 2
-        raw = re.sub(r'\n{3,}', '\n\n', raw)
-        return raw.strip()
-
-    def get_title(self) -> str:
-        return self._title.strip()
+logger = get_logger("miroshark.url_fetcher")
 
 
 def _check_ip(ip_str: str) -> None:
@@ -100,113 +45,114 @@ def _validate_url(url: str) -> str:
     try:
         _check_ip(socket.gethostbyname(host))
     except socket.gaierror:
-        pass  # let requests surface the DNS error
+        pass  # let the model surface the DNS error
     return host
 
 
-def _safe_get(url: str, headers: dict, timeout: int) -> requests.Response:
+_EXTRACT_SYSTEM_PROMPT = """\
+You are a web page extractor. Given a URL, fetch it and return its main \
+readable content (article body, post text, documentation, etc.) as plain text. \
+Strip navigation, ads, footers, cookie banners, sidebars, and boilerplate.
+
+Respond with STRICT JSON only, no markdown fences, matching this schema:
+{"title": "<page title>", "text": "<full readable body text>"}
+
+Rules:
+- If the page is inaccessible or you cannot retrieve it, respond with:
+  {"title": "", "text": "", "error": "<short reason>"}
+- Do NOT summarize. Return the full readable content verbatim.
+- Do NOT invent content. If unsure, return the error shape above.\
+"""
+
+
+def _parse_model_json(raw: str) -> dict:
+    """Parse model output as JSON, tolerating ``` fences and stray prose."""
+    s = raw.strip()
+    s = re.sub(r'^```(?:json)?\s*', '', s)
+    s = re.sub(r'\s*```$', '', s)
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
+    # Fallback: find first {...} block
+    match = re.search(r'\{.*\}', s, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+    raise ValueError(f"Model did not return valid JSON: {raw[:200]}")
+
+
+def fetch_url_text(url: str, timeout: int = 60) -> dict:
     """
-    GET with manual redirect following — each hop is IP-checked to prevent
-    SSRF via redirect to internal addresses. Also streams the response and
-    enforces a size cap so a large file can't OOM the server.
-    """
-    max_redirects = 5
-    current_url = url
-
-    for _ in range(max_redirects + 1):
-        _validate_url(current_url)
-
-        resp = requests.get(
-            current_url, headers=headers, timeout=timeout,
-            allow_redirects=False, stream=True,
-        )
-
-        if resp.is_redirect and 'location' in resp.headers:
-            current_url = resp.headers['location']
-            resp.close()
-            continue
-
-        resp.raise_for_status()
-
-        # Enforce size limit while streaming
-        chunks = []
-        downloaded = 0
-        for chunk in resp.iter_content(chunk_size=64 * 1024):
-            downloaded += len(chunk)
-            if downloaded > MAX_RESPONSE_BYTES:
-                resp.close()
-                raise ValueError(
-                    f"Response exceeds {MAX_RESPONSE_BYTES // (1024 * 1024)} MB size limit"
-                )
-            chunks.append(chunk)
-        resp.close()
-
-        # Reconstruct a response-like object with the full content
-        resp._content = b''.join(chunks)
-        return resp
-
-    raise ValueError("Too many redirects")
-
-
-def fetch_url_text(url: str, timeout: int = 15) -> dict:
-    """
-    Fetch a URL and extract readable text content suitable for simulation input.
+    Fetch a URL via the configured web-search LLM and return its readable content.
 
     Args:
         url: The URL to fetch (must be http or https).
-        timeout: Request timeout in seconds.
+        timeout: LLM request timeout in seconds.
 
     Returns:
         dict with keys:
-            - title (str): Page title or derived from URL
+            - title (str): Page title (or hostname fallback)
             - text (str): Extracted plain text content
             - url (str): The original URL
             - char_count (int): Length of extracted text
 
     Raises:
         ValueError: For invalid URLs, blocked addresses, or unextractable content.
-        requests.exceptions.RequestException: For HTTP/network errors.
     """
     _validate_url(url)
 
-    headers = {
-        'User-Agent': (
-            'Mozilla/5.0 (compatible; MiroShark/1.0; '
-            '+https://github.com/aaronjmars/MiroShark)'
-        ),
-        'Accept': 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-    }
-
-    response = _safe_get(url, headers, timeout)
-
-    parsed = urlparse(url)
-    content_type = response.headers.get('content-type', '').lower()
-
-    # Plain text or markdown
-    if 'text/plain' in content_type or url.lower().endswith(('.txt', '.md')):
-        text = response.text
-        title = parsed.path.split('/')[-1] or parsed.netloc
-        return {'title': title, 'text': text, 'url': url, 'char_count': len(text)}
-
-    # Require HTML for everything else
-    if 'text/html' not in content_type and 'application/xhtml' not in content_type:
+    model = Config.WEB_SEARCH_MODEL or Config.LLM_MODEL_NAME
+    if not model:
         raise ValueError(
-            f"Unsupported content type '{content_type}'. "
-            "Only HTML and plain-text pages can be fetched."
+            "No web-search model configured. Set WEB_SEARCH_MODEL in .env "
+            "(e.g. google/gemini-2.0-flash-001:online)."
         )
 
-    parser = _TextExtractor()
-    parser.feed(response.text)
+    logger.info(f"Fetching URL via LLM ({model}): {url}")
 
-    title = parser.get_title() or parsed.netloc
-    text = parser.get_text()
+    client = create_llm_client(model=model, timeout=timeout)
+
+    messages = [
+        {"role": "system", "content": _EXTRACT_SYSTEM_PROMPT},
+        {"role": "user", "content": f"Extract the readable content from this URL: {url}"},
+    ]
+
+    try:
+        raw = client.chat(messages, temperature=0.0, max_tokens=16000)
+    except Exception as exc:
+        logger.error(f"LLM URL fetch failed: {exc}")
+        raise ValueError(f"Failed to fetch URL via model: {exc}") from exc
+
+    try:
+        parsed = _parse_model_json(raw)
+    except ValueError:
+        # Model returned plain text — treat it as the body, derive title from URL.
+        text = raw.strip()
+        parsed = {"title": "", "text": text}
+
+    if parsed.get("error"):
+        raise ValueError(f"Model could not fetch URL: {parsed['error']}")
+
+    text = (parsed.get("text") or "").strip()
+    title = (parsed.get("title") or "").strip()
 
     if len(text) < 100:
         raise ValueError(
             "Could not extract meaningful text from the page. "
-            "The page may require JavaScript or have no readable content."
+            "The page may be blocked, empty, or unreachable."
         )
+
+    if not title:
+        parsed_url = urlparse(url)
+        title = parsed_url.netloc or url
+
+    # Cap title length — some sites stuff the entire deck into <title>.
+    MAX_TITLE_CHARS = 120
+    if len(title) > MAX_TITLE_CHARS:
+        title = title[:MAX_TITLE_CHARS - 1].rstrip() + '…'
 
     return {
         'title': title,

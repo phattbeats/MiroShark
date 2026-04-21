@@ -23,74 +23,211 @@ def _mask_key(key: str) -> str:
     return '****' + key[-4:] if len(key) > 4 else '****'
 
 
+# Preset blueprints mirror the .env.example Cheap / Best / Local blocks.
+# The `key_slots` list names the fields the preset's API key should be
+# copied into when the caller supplies `preset_api_key`.
+_PRESETS = {
+    'cheap': {
+        'label': 'Cheap — ~$1/run (OpenRouter, all Gemini)',
+        'fields': {
+            'LLM_PROVIDER': 'openai',
+            'LLM_BASE_URL': 'https://openrouter.ai/api/v1',
+            'LLM_MODEL_NAME': 'google/gemini-2.0-flash-001',
+            'SMART_PROVIDER': 'openai',
+            'SMART_BASE_URL': 'https://openrouter.ai/api/v1',
+            'SMART_MODEL_NAME': 'google/gemini-2.5-flash',
+            'NER_BASE_URL': 'https://openrouter.ai/api/v1',
+            'NER_MODEL_NAME': 'google/gemini-2.0-flash-001',
+            'WONDERWALL_MODEL_NAME': 'google/gemini-2.0-flash-lite-001',
+            'EMBEDDING_PROVIDER': 'openai',
+            'EMBEDDING_BASE_URL': 'https://openrouter.ai/api',
+            'EMBEDDING_MODEL': 'openai/text-embedding-3-small',
+            'EMBEDDING_DIMENSIONS': 768,
+            'WEB_SEARCH_MODEL': 'google/gemini-2.0-flash-001:online',
+        },
+        'key_slots': ['LLM_API_KEY', 'SMART_API_KEY', 'NER_API_KEY', 'EMBEDDING_API_KEY'],
+    },
+    'best': {
+        'label': 'Best — ~$3.50/run (Claude reports, Haiku personas)',
+        'fields': {
+            'LLM_PROVIDER': 'openai',
+            'LLM_BASE_URL': 'https://openrouter.ai/api/v1',
+            'LLM_MODEL_NAME': 'anthropic/claude-haiku-4.5',
+            'SMART_PROVIDER': 'openai',
+            'SMART_BASE_URL': 'https://openrouter.ai/api/v1',
+            'SMART_MODEL_NAME': 'anthropic/claude-sonnet-4.6',
+            'NER_BASE_URL': 'https://openrouter.ai/api/v1',
+            'NER_MODEL_NAME': 'google/gemini-2.0-flash-001',
+            'WONDERWALL_MODEL_NAME': 'google/gemini-2.0-flash-lite-001',
+            'EMBEDDING_PROVIDER': 'openai',
+            'EMBEDDING_BASE_URL': 'https://openrouter.ai/api',
+            'EMBEDDING_MODEL': 'openai/text-embedding-3-small',
+            'EMBEDDING_DIMENSIONS': 768,
+            'WEB_SEARCH_MODEL': 'google/gemini-2.0-flash-001:online',
+        },
+        'key_slots': ['LLM_API_KEY', 'SMART_API_KEY', 'NER_API_KEY', 'EMBEDDING_API_KEY'],
+    },
+    'local': {
+        'label': 'Local — Ollama (free, self-hosted)',
+        'fields': {
+            'LLM_PROVIDER': 'openai',
+            'LLM_BASE_URL': 'http://localhost:11434/v1',
+            'LLM_MODEL_NAME': 'qwen2.5:32b',
+            'LLM_API_KEY': 'ollama',
+            'SMART_PROVIDER': '',
+            'SMART_BASE_URL': '',
+            'SMART_MODEL_NAME': '',
+            'SMART_API_KEY': '',
+            'NER_BASE_URL': '',
+            'NER_MODEL_NAME': '',
+            'NER_API_KEY': '',
+            'WONDERWALL_MODEL_NAME': '',
+            'EMBEDDING_PROVIDER': 'ollama',
+            'EMBEDDING_BASE_URL': 'http://localhost:11434',
+            'EMBEDDING_MODEL': 'nomic-embed-text',
+            'EMBEDDING_API_KEY': '',
+            'EMBEDDING_DIMENSIONS': 768,
+            'WEB_SEARCH_MODEL': '',
+        },
+        'key_slots': [],
+    },
+}
+
+
+def _current_snapshot() -> dict:
+    """Build a summary of every slot the Settings UI cares about."""
+    return {
+        'llm': {
+            'provider': Config.LLM_PROVIDER,
+            'base_url': Config.LLM_BASE_URL,
+            'model_name': Config.LLM_MODEL_NAME,
+            'api_key_masked': _mask_key(Config.LLM_API_KEY or ''),
+            'has_api_key': bool(Config.LLM_API_KEY),
+        },
+        'smart': {
+            'provider': Config.SMART_PROVIDER,
+            'base_url': Config.SMART_BASE_URL,
+            'model_name': Config.SMART_MODEL_NAME,
+            'api_key_masked': _mask_key(Config.SMART_API_KEY or ''),
+            'has_api_key': bool(Config.SMART_API_KEY),
+        },
+        'ner': {
+            'base_url': Config.NER_BASE_URL,
+            'model_name': Config.NER_MODEL_NAME,
+            'api_key_masked': _mask_key(Config.NER_API_KEY or ''),
+            'has_api_key': bool(Config.NER_API_KEY),
+        },
+        'wonderwall': {
+            'model_name': Config.WONDERWALL_MODEL_NAME,
+        },
+        'embedding': {
+            'provider': Config.EMBEDDING_PROVIDER,
+            'base_url': Config.EMBEDDING_BASE_URL,
+            'model_name': Config.EMBEDDING_MODEL,
+            'dimensions': Config.EMBEDDING_DIMENSIONS,
+            'api_key_masked': _mask_key(Config.EMBEDDING_API_KEY or ''),
+            'has_api_key': bool(Config.EMBEDDING_API_KEY),
+        },
+        'web_search_model': Config.WEB_SEARCH_MODEL,
+        'neo4j': {
+            'uri': Config.NEO4J_URI,
+            'user': Config.NEO4J_USER,
+        },
+        'available_presets': [
+            {'id': k, 'label': v['label']} for k, v in _PRESETS.items()
+        ],
+    }
+
+
 @settings_bp.route('', methods=['GET'])
 def get_settings():
-    """Return current active LLM and Neo4j config (API key masked)."""
-    return jsonify({
-        'success': True,
-        'data': {
-            'llm': {
-                'provider': Config.LLM_PROVIDER,
-                'base_url': Config.LLM_BASE_URL,
-                'model_name': Config.LLM_MODEL_NAME,
-                'api_key_masked': _mask_key(Config.LLM_API_KEY or ''),
-                'has_api_key': bool(Config.LLM_API_KEY),
-            },
-            'neo4j': {
-                'uri': Config.NEO4J_URI,
-                'user': Config.NEO4J_USER,
-            },
-        }
-    })
+    """Return current active config across every slot (API keys masked)."""
+    return jsonify({'success': True, 'data': _current_snapshot()})
+
+
+def _apply_preset(preset_id: str, preset_api_key: str) -> None:
+    """Mutate Config in-place to match the named preset."""
+    preset = _PRESETS[preset_id]
+    for attr, value in preset['fields'].items():
+        setattr(Config, attr, value)
+    if preset_api_key:
+        for slot in preset['key_slots']:
+            setattr(Config, slot, preset_api_key)
 
 
 @settings_bp.route('', methods=['POST'])
 def update_settings():
     """
-    Update LLM (and optionally Neo4j) config at runtime.
+    Update configuration at runtime. All fields optional.
 
-    Accepted body fields (all optional):
-      llm.provider, llm.base_url, llm.model_name, llm.api_key
-      neo4j.uri, neo4j.user, neo4j.password
+    Body fields:
+      preset: "cheap" | "best" | "local"                    — apply a full preset
+      preset_api_key: str                                    — key filled into every preset slot
+      llm: { provider, base_url, model_name, api_key }
+      smart: { provider, base_url, model_name, api_key }
+      ner:   { base_url, model_name, api_key }
+      wonderwall: { model_name }
+      embedding: { provider, base_url, model_name, api_key, dimensions }
+      web_search_model: str
+      neo4j: { uri, user, password }
     """
     body = request.get_json(silent=True) or {}
 
-    llm = body.get('llm', {})
-    neo4j = body.get('neo4j', {})
+    preset_id = body.get('preset')
+    if preset_id:
+        if preset_id not in _PRESETS:
+            return jsonify({
+                'success': False,
+                'error': f"Unknown preset '{preset_id}'. Valid: {list(_PRESETS)}"
+            }), 400
+        _apply_preset(preset_id, body.get('preset_api_key', ''))
 
-    if llm.get('provider'):
-        Config.LLM_PROVIDER = llm['provider']
-    if llm.get('base_url'):
-        Config.LLM_BASE_URL = llm['base_url']
-    if llm.get('model_name'):
-        Config.LLM_MODEL_NAME = llm['model_name']
-    if llm.get('api_key'):
-        Config.LLM_API_KEY = llm['api_key']
+    llm = body.get('llm') or {}
+    if llm.get('provider'): Config.LLM_PROVIDER = llm['provider']
+    if llm.get('base_url') is not None: Config.LLM_BASE_URL = llm['base_url']
+    if llm.get('model_name') is not None: Config.LLM_MODEL_NAME = llm['model_name']
+    if llm.get('api_key'): Config.LLM_API_KEY = llm['api_key']
 
-    if neo4j.get('uri'):
-        Config.NEO4J_URI = neo4j['uri']
-    if neo4j.get('user'):
-        Config.NEO4J_USER = neo4j['user']
-    if neo4j.get('password'):
-        Config.NEO4J_PASSWORD = neo4j['password']
+    smart = body.get('smart') or {}
+    if smart.get('provider') is not None: Config.SMART_PROVIDER = smart['provider']
+    if smart.get('base_url') is not None: Config.SMART_BASE_URL = smart['base_url']
+    if smart.get('model_name') is not None: Config.SMART_MODEL_NAME = smart['model_name']
+    if smart.get('api_key'): Config.SMART_API_KEY = smart['api_key']
+
+    ner = body.get('ner') or {}
+    if ner.get('base_url') is not None: Config.NER_BASE_URL = ner['base_url']
+    if ner.get('model_name') is not None: Config.NER_MODEL_NAME = ner['model_name']
+    if ner.get('api_key'): Config.NER_API_KEY = ner['api_key']
+
+    wonderwall = body.get('wonderwall') or {}
+    if wonderwall.get('model_name') is not None:
+        Config.WONDERWALL_MODEL_NAME = wonderwall['model_name']
+
+    embedding = body.get('embedding') or {}
+    if embedding.get('provider') is not None: Config.EMBEDDING_PROVIDER = embedding['provider']
+    if embedding.get('base_url') is not None: Config.EMBEDDING_BASE_URL = embedding['base_url']
+    if embedding.get('model_name') is not None: Config.EMBEDDING_MODEL = embedding['model_name']
+    if embedding.get('api_key'): Config.EMBEDDING_API_KEY = embedding['api_key']
+    if embedding.get('dimensions') is not None:
+        try:
+            Config.EMBEDDING_DIMENSIONS = int(embedding['dimensions'])
+        except (TypeError, ValueError):
+            pass
+
+    if 'web_search_model' in body and body['web_search_model'] is not None:
+        Config.WEB_SEARCH_MODEL = body['web_search_model']
+
+    neo4j = body.get('neo4j') or {}
+    if neo4j.get('uri'): Config.NEO4J_URI = neo4j['uri']
+    if neo4j.get('user'): Config.NEO4J_USER = neo4j['user']
+    if neo4j.get('password'): Config.NEO4J_PASSWORD = neo4j['password']
 
     logger.info(
-        "Settings updated: provider=%s model=%s base_url=%s",
-        Config.LLM_PROVIDER, Config.LLM_MODEL_NAME, Config.LLM_BASE_URL
+        "Settings updated: preset=%s provider=%s model=%s base_url=%s",
+        preset_id or '—', Config.LLM_PROVIDER, Config.LLM_MODEL_NAME, Config.LLM_BASE_URL,
     )
 
-    return jsonify({
-        'success': True,
-        'data': {
-            'llm': {
-                'provider': Config.LLM_PROVIDER,
-                'base_url': Config.LLM_BASE_URL,
-                'model_name': Config.LLM_MODEL_NAME,
-                'api_key_masked': _mask_key(Config.LLM_API_KEY or ''),
-                'has_api_key': bool(Config.LLM_API_KEY),
-            }
-        }
-    })
+    return jsonify({'success': True, 'data': _current_snapshot()})
 
 
 @settings_bp.route('/test-llm', methods=['POST'])

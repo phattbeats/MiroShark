@@ -15,20 +15,42 @@
 
     <SettingsPanel :open="settingsOpen" @close="settingsOpen = false" />
 
+    <!-- Document preview modal (URL fetches + Ask-mode generations) -->
+    <Teleport to="body">
+      <div v-if="previewDoc" class="doc-preview-overlay" @click.self="previewDoc = null">
+        <div class="doc-preview-modal">
+          <div class="doc-preview-header">
+            <div class="doc-preview-title">
+              <span class="doc-preview-icon">◈</span>
+              <span>{{ previewDoc.title }}</span>
+            </div>
+            <button class="doc-preview-close" @click="previewDoc = null">✕</button>
+          </div>
+          <div class="doc-preview-warning"></div>
+          <div class="doc-preview-meta">
+            {{ previewDoc.char_count.toLocaleString() }} chars
+            <span v-if="previewDoc.url" class="doc-preview-meta-sep">·</span>
+            <span v-if="previewDoc.url" class="doc-preview-url">{{ previewDoc.url }}</span>
+          </div>
+          <pre class="doc-preview-body">{{ previewDoc.text }}</pre>
+        </div>
+      </div>
+    </Teleport>
+
     <div class="main-content">
       <!-- Upper Section: Hero Area -->
       <section class="hero-section">
         <div class="tag-row">
-          <span class="orange-tag">A Concise & Universal Swarm Intelligence Engine</span>
+          <span class="orange-tag">Universal Swarm Intelligence Engine</span>
         </div>
 
         <h1 class="main-title">
-          <span class="gradient-text">Simulate the Future Instantly</span>
+          <span class="gradient-text">Simulate anything, for $1</span>
         </h1>
 
         <div class="hero-desc">
           <p>
-            Upload any document. <span class="highlight-bold">MiroShark</span> extracts the key players, generates <span class="highlight-orange">hundreds of AI agents</span> with unique personas, and simulates how they'd react on Twitter, Reddit, and Polymarket. Watch opinions form, arguments spread, and markets move.
+            Drop in anything — a press release, a news headline, a policy draft, a question you can't answer, a historical what-if — and <span class="highlight-bold">MiroShark</span> spawns <span class="highlight-orange">hundreds of agents</span> that react to it hour by hour. Posting, arguing, trading, changing their minds.
           </p>
           <p class="slogan-text">
             Don't predict the future. Simulate it<span class="blinking-cursor">_</span>
@@ -52,49 +74,42 @@
           
           <h2 class="section-title">Ready</h2>
           <p class="section-desc">
-            Prediction engine on standby. Upload documents to initialize the simulation sequence.
+            First simulation in ~10 min, ~$1 on the Cheap preset. Drop in a doc or pick a trending headline to start.
           </p>
-          
 
-          <!-- Simulation Steps Overview (New Section) -->
+
+          <!-- What it does (from README) -->
           <div class="steps-container">
             <div class="steps-header">
-               <span class="diamond-icon">◇</span> Workflow Sequence
+               <span class="diamond-icon">◇</span> What it does
             </div>
             <div class="workflow-list">
               <div class="workflow-item">
                 <span class="step-num">01</span>
                 <div class="step-info">
-                  <div class="step-title">Graph Construction</div>
-                  <div class="step-desc">Reality seed extraction & Individual/group memory injection & GraphRAG construction</div>
+                  <div class="step-title">You bring a scenario</div>
+                  <div class="step-desc">MiroShark builds the world around it — extracts actors, stakes, and open questions from your input.</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">02</span>
                 <div class="step-info">
-                  <div class="step-title">Agent Setup</div>
-                  <div class="step-desc">Entity-relation extraction & Persona generation & Environment config Agent injects simulation parameters</div>
+                  <div class="step-title">Hundreds of grounded agents</div>
+                  <div class="step-desc">React on Twitter, Reddit, and a prediction market. Hour by hour, round after round.</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">03</span>
                 <div class="step-info">
-                  <div class="step-title">Start Simulation</div>
-                  <div class="step-desc">Dual-platform parallel simulation & Automatic prediction requirement parsing & Dynamic temporal memory updates</div>
+                  <div class="step-title">Steer the timeline</div>
+                  <div class="step-desc">Chat with any agent. Drop breaking news mid-run. Fork a counterfactual and watch it diverge.</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">04</span>
                 <div class="step-info">
-                  <div class="step-title">Report Generation</div>
-                  <div class="step-desc">ReportAgent has a rich toolset for in-depth interaction with the post-simulation environment</div>
-                </div>
-              </div>
-              <div class="workflow-item">
-                <span class="step-num">05</span>
-                <div class="step-info">
-                  <div class="step-title">Deep Interaction</div>
-                  <div class="step-desc">Chat with any agent in the simulated world & Converse with the ReportAgent</div>
+                  <div class="step-title">Get a report</div>
+                  <div class="step-desc">A Substack-style write-up of what happened, citing actual posts and trades from the run.</div>
                 </div>
               </div>
             </div>
@@ -171,6 +186,26 @@
               </div>
               <div v-if="askError" class="url-error">{{ askError }}</div>
               <div v-if="askBusy" class="url-doc-meta" style="margin-top:6px">Synthesizing briefing — this uses the Smart model and takes ~20–30s.</div>
+              <div v-if="askDocs.length > 0" class="url-doc-list">
+                <div
+                  v-for="doc in askDocs"
+                  :key="doc.url"
+                  class="url-doc-item"
+                  role="button"
+                  tabindex="0"
+                  title="Click to preview the generated briefing"
+                  @click="previewDoc = doc"
+                  @keydown.enter.prevent="previewDoc = doc"
+                  @keydown.space.prevent="previewDoc = doc"
+                >
+                  <span class="url-doc-icon">◈</span>
+                  <div class="url-doc-info">
+                    <div class="url-doc-title">{{ doc.title }}</div>
+                    <div class="url-doc-meta">{{ doc.char_count.toLocaleString() }} chars · {{ doc.url }}</div>
+                  </div>
+                  <button @click.stop="removeUrlDocByRef(doc)" class="remove-btn">×</button>
+                </div>
+              </div>
             </div>
 
             <!-- URL Input Section -->
@@ -198,14 +233,24 @@
                 </button>
               </div>
               <div v-if="urlError" class="url-error">{{ urlError }}</div>
-              <div v-if="urlDocs.length > 0" class="url-doc-list">
-                <div v-for="(doc, index) in urlDocs" :key="index" class="url-doc-item">
+              <div v-if="fetchedDocs.length > 0" class="url-doc-list">
+                <div
+                  v-for="doc in fetchedDocs"
+                  :key="doc.url"
+                  class="url-doc-item"
+                  role="button"
+                  tabindex="0"
+                  title="Click to preview the extracted content"
+                  @click="previewDoc = doc"
+                  @keydown.enter.prevent="previewDoc = doc"
+                  @keydown.space.prevent="previewDoc = doc"
+                >
                   <span class="url-doc-icon">◈</span>
                   <div class="url-doc-info">
                     <div class="url-doc-title">{{ doc.title }}</div>
                     <div class="url-doc-meta">{{ doc.char_count.toLocaleString() }} chars · {{ doc.url }}</div>
                   </div>
-                  <button @click.stop="removeUrlDoc(index)" class="remove-btn">×</button>
+                  <button @click.stop="removeUrlDocByRef(doc)" class="remove-btn">×</button>
                 </div>
               </div>
               <TrendingTopics
@@ -226,6 +271,7 @@
               </div>
               <ScenarioSuggestions
                 :text-preview="scenarioSuggestPreview"
+                :simulation-prompt="formData.simulationRequirement"
                 @use="handleSuggestionUse"
               />
               <div class="input-wrapper">
@@ -278,6 +324,7 @@ import { fetchUrl } from '../api/graph'
 import { askMode } from '../api/simulation'
 
 const settingsOpen = ref(false)
+const previewDoc = ref(null)
 
 const router = useRouter()
 
@@ -514,6 +561,20 @@ const handleTrendingSelect = ({ url }) => {
 const removeUrlDoc = (index) => {
   urlDocs.value.splice(index, 1)
 }
+
+const removeUrlDocByRef = (doc) => {
+  const idx = urlDocs.value.indexOf(doc)
+  if (idx >= 0) urlDocs.value.splice(idx, 1)
+}
+
+// Split docs by origin — Ask-synthesized briefings show under Just Ask,
+// real URL fetches show under URL Import.
+const askDocs = computed(() =>
+  urlDocs.value.filter(d => typeof d.url === 'string' && d.url.startsWith('miroshark://ask/'))
+)
+const fetchedDocs = computed(() =>
+  urlDocs.value.filter(d => !(typeof d.url === 'string' && d.url.startsWith('miroshark://ask/')))
+)
 
 // Start simulation - navigate immediately, API calls happen on the Process page
 const startSimulation = () => {
@@ -1220,6 +1281,14 @@ const startSimulation = () => {
   padding: var(--space-xs) var(--space-sm);
   border: var(--border-light);
   border-left: 3px solid var(--color-green);
+  cursor: pointer;
+  transition: background 0.1s, border-left-color 0.1s;
+}
+.url-doc-item:hover,
+.url-doc-item:focus-visible {
+  background: rgba(67, 193, 101, 0.06);
+  border-left-color: var(--color-orange);
+  outline: none;
 }
 
 .url-doc-icon {
@@ -1268,6 +1337,98 @@ const startSimulation = () => {
 
 .attribution-footer a:hover {
   color: var(--color-orange);
+}
+
+/* ── Doc Preview Modal ── */
+.doc-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.65);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  animation: doc-preview-fade 0.12s ease-out;
+}
+@keyframes doc-preview-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.doc-preview-modal {
+  background: #FAFAFA;
+  width: 760px;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(10,10,10,0.12);
+  font-family: 'Space Mono', 'Courier New', monospace;
+}
+.doc-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #0A0A0A;
+  color: #FAFAFA;
+}
+.doc-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.doc-preview-icon { color: #43C165; flex-shrink: 0; }
+.doc-preview-close {
+  background: none;
+  border: none;
+  color: rgba(250,250,250,0.6);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+.doc-preview-close:hover { color: #FAFAFA; }
+.doc-preview-warning {
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #FF6B1A,
+    #FF6B1A 10px,
+    #FAFAFA 10px,
+    #FAFAFA 20px
+  );
+}
+.doc-preview-meta {
+  padding: 12px 20px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: rgba(10,10,10,0.45);
+  border-bottom: 2px solid rgba(10,10,10,0.08);
+  overflow-wrap: anywhere;
+}
+.doc-preview-meta-sep { margin: 0 6px; }
+.doc-preview-url { color: #FF6B1A; }
+.doc-preview-body {
+  margin: 0;
+  padding: 18px 20px;
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #0A0A0A;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #FAFAFA;
 }
 
 /* ── Responsive ── */
