@@ -1965,13 +1965,6 @@ onUnmounted(() => {
 }
 
 /* Action Button */
-/* kept for backwards compat */
-.action-controls {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
 .action-btn {
   display: inline-flex;
   align-items: center;

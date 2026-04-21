@@ -1372,14 +1372,3 @@ IMPORTANT: Do NOT include karma, friend_count, follower_count, or statuses_count
 
         logger.info(f"Saved {len(profiles)} Polymarket profiles to {file_path}")
 
-    # Keep old method name as alias for backward compatibility
-    def save_profiles_to_json(
-        self,
-        profiles: List[OasisAgentProfile],
-        file_path: str,
-        platform: str = "reddit"
-    ):
-        """[Deprecated] Please use save_profiles() method"""
-        logger.warning("save_profiles_to_json is deprecated, please use save_profiles method")
-        self.save_profiles(profiles, file_path, platform)
-
