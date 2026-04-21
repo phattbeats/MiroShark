@@ -1242,6 +1242,7 @@ def create_simulation():
             enable_twitter=data.get('enable_twitter', True),
             enable_reddit=data.get('enable_reddit', True),
             enable_polymarket=data.get('enable_polymarket', False),
+            polymarket_market_count=data.get('polymarket_market_count', 1),
         )
         
         return jsonify({
@@ -2511,6 +2512,7 @@ def retry_simulation_config(simulation_id: str):
                     entities=filtered.entities,
                     enable_twitter=state.enable_twitter,
                     enable_reddit=state.enable_reddit,
+                    polymarket_market_count=state.polymarket_market_count,
                 )
 
                 config_path = os.path.join(sim_dir, "simulation_config.json")
@@ -3680,16 +3682,32 @@ def get_counterfactual_drift(simulation_id: str):
         raw_exclude = request.args.get('exclude_agents', '') or ''
         exclude_names = [n.strip() for n in raw_exclude.split(',') if n.strip()]
 
-        # Build username -> str(user_id) map from the profiles file.
+        # Build name -> str(user_id) map from the profiles file.
+        # Index under every available name field because the influence
+        # leaderboard surfaces the display `name` (e.g. "Mallku") while the
+        # profile files also carry a handle under `username` / `user_name`
+        # (e.g. "mallku_519"). Without this, incoming display names fall
+        # through to `unresolved` and counterfactual ends up empty.
         profiles = _demo_load_profiles(sim_dir)
         name_to_id = {}
         for p in profiles:
             if not isinstance(p, dict):
                 continue
-            uid = p.get('user_id') or p.get('agent_id') or p.get('id')
-            uname = p.get('user_name') or p.get('username') or p.get('name')
-            if uid is not None and uname:
-                name_to_id[str(uname)] = str(uid)
+            # `x or y` can't be used here: user_id 0 is a legitimate id and
+            # 0 is falsy, so `p.get('user_id') or p.get('agent_id')` would
+            # silently drop agent 0 (classic Python trap).
+            uid = next(
+                (p[k] for k in ('user_id', 'agent_id', 'id')
+                 if p.get(k) is not None),
+                None,
+            )
+            if uid is None:
+                continue
+            uid_str = str(uid)
+            for key in ('name', 'user_name', 'username'):
+                uname = p.get(key)
+                if uname:
+                    name_to_id.setdefault(str(uname), uid_str)
 
         # Resolve names to ids, tracking which we matched vs. missed.
         excluded_ids = set()
@@ -4130,6 +4148,161 @@ def get_simulation_frame(simulation_id: str, round_num: int):
         return jsonify({"success": False, "error": str(exc)}), 400
     except Exception as e:
         logger.error(f"frame: failed for {simulation_id} round {round_num}: {e}\n{traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ============== Polymarket Live Chart ==============
+
+
+def _polymarket_db_path(simulation_id: str) -> str:
+    """Resolve the on-disk Polymarket DB. Handles both the current layout
+    (``<sim_dir>/polymarket_simulation.db``) and the older nested layout
+    (``<sim_dir>/polymarket/polymarket.db``)."""
+    sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+    candidates = [
+        os.path.join(sim_dir, 'polymarket_simulation.db'),
+        os.path.join(sim_dir, 'polymarket', 'polymarket.db'),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return candidates[0]
+
+
+@simulation_bp.route('/<simulation_id>/polymarket/markets', methods=['GET'])
+def polymarket_markets(simulation_id: str):
+    """List all prediction markets in a simulation with current YES price.
+
+    Response: { success, data: { markets: [{market_id, question, outcome_a,
+    outcome_b, price_yes, reserve_a, reserve_b, resolved, winning_outcome,
+    trade_count, created_at}] } }
+    """
+    try:
+        validate_simulation_id(simulation_id)
+        db_path = _polymarket_db_path(simulation_id)
+        if not os.path.exists(db_path):
+            return jsonify({"success": True, "data": {"markets": []}})
+
+        import sqlite3
+        with sqlite3.connect(db_path) as con:
+            cur = con.cursor()
+            rows = cur.execute(
+                "SELECT market_id, question, outcome_a, outcome_b, reserve_a, reserve_b, "
+                "resolved, winning_outcome, created_at FROM market ORDER BY market_id"
+            ).fetchall()
+            trade_counts = dict(cur.execute(
+                "SELECT market_id, COUNT(*) FROM trade GROUP BY market_id"
+            ).fetchall())
+
+        markets = []
+        for mid, question, out_a, out_b, ra, rb, resolved, winner, created_at in rows:
+            total = (ra or 0) + (rb or 0)
+            price_yes = (rb / total) if total > 0 else 0.5
+            markets.append({
+                "market_id": mid,
+                "question": question,
+                "outcome_a": out_a,
+                "outcome_b": out_b,
+                "price_yes": round(price_yes, 4),
+                "reserve_a": ra,
+                "reserve_b": rb,
+                "resolved": bool(resolved),
+                "winning_outcome": winner,
+                "trade_count": trade_counts.get(mid, 0),
+                "created_at": created_at,
+            })
+        return jsonify({"success": True, "data": {"markets": markets}})
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
+    except Exception as e:
+        logger.error(f"polymarket_markets: {simulation_id}: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@simulation_bp.route('/<simulation_id>/polymarket/market/<int:market_id>/prices', methods=['GET'])
+def polymarket_market_prices(simulation_id: str, market_id: int):
+    """Time-series of YES price for a single market, reconstructed from trades.
+
+    For each trade row we derive yes_price:
+      - outcome == 'YES' → yes_price = price
+      - outcome == 'NO'  → yes_price = 1 - price
+    Prepends an origin point at 0.5 (AMM initial state before any trade).
+
+    Response: { success, data: { market, points: [{t, price_yes, side, outcome,
+    shares, trade_id}] } }
+    """
+    try:
+        validate_simulation_id(simulation_id)
+        db_path = _polymarket_db_path(simulation_id)
+        if not os.path.exists(db_path):
+            return jsonify({"success": False, "error": "Polymarket not enabled for this simulation"}), 404
+
+        import sqlite3
+        with sqlite3.connect(db_path) as con:
+            cur = con.cursor()
+            market_row = cur.execute(
+                "SELECT market_id, question, outcome_a, outcome_b, reserve_a, reserve_b, "
+                "resolved, winning_outcome, created_at FROM market WHERE market_id = ?",
+                (market_id,),
+            ).fetchone()
+            if not market_row:
+                return jsonify({"success": False, "error": f"Market {market_id} not found"}), 404
+            trades = cur.execute(
+                "SELECT trade_id, user_id, side, outcome, shares, price, created_at "
+                "FROM trade WHERE market_id = ? ORDER BY created_at ASC, trade_id ASC",
+                (market_id,),
+            ).fetchall()
+
+        mid, question, out_a, out_b, ra, rb, resolved, winner, created_at = market_row
+        total = (ra or 0) + (rb or 0)
+        current_price_yes = (rb / total) if total > 0 else 0.5
+
+        points = [{
+            "t": created_at,
+            "price_yes": 0.5,
+            "side": None,
+            "outcome": None,
+            "shares": 0,
+            "trade_id": None,
+        }]
+        for tid, uid, side, outcome, shares, price, t_created in trades:
+            outcome_up = (outcome or '').upper()
+            if outcome_up in ('NO', out_b.upper() if out_b else 'NO'):
+                yes_price = max(0.0, min(1.0, 1.0 - (price or 0)))
+            else:
+                yes_price = max(0.0, min(1.0, price or 0))
+            points.append({
+                "t": t_created,
+                "price_yes": round(yes_price, 4),
+                "side": side,
+                "outcome": outcome,
+                "shares": shares,
+                "trade_id": tid,
+            })
+
+        return jsonify({
+            "success": True,
+            "data": {
+                "market": {
+                    "market_id": mid,
+                    "question": question,
+                    "outcome_a": out_a,
+                    "outcome_b": out_b,
+                    "price_yes": round(current_price_yes, 4),
+                    "reserve_a": ra,
+                    "reserve_b": rb,
+                    "resolved": bool(resolved),
+                    "winning_outcome": winner,
+                    "trade_count": len(trades),
+                    "created_at": created_at,
+                },
+                "points": points,
+            },
+        })
+    except ValueError as exc:
+        return jsonify({"success": False, "error": str(exc)}), 400
+    except Exception as e:
+        logger.error(f"polymarket_market_prices: {simulation_id}/{market_id}: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 
@@ -5432,20 +5605,21 @@ def generate_simulation_article(simulation_id: str):
         if state:
             agent_count = state.profiles_count
 
-        # Top 5 most active rounds from timeline
+        # Timeline stats: peak activity, quiet stretches
         timeline = SimulationRunner.get_timeline(simulation_id)
-        top_rounds = sorted(timeline, key=lambda r: r['total_actions'], reverse=True)[:5]
+        top_rounds = sorted(timeline, key=lambda r: r['total_actions'], reverse=True)[:3]
         top_rounds_summary = ', '.join(
             f"round {r['round_num']} ({r['total_actions']} actions)"
             for r in top_rounds
         )
+        total_actions_all = sum(r['total_actions'] for r in timeline) if timeline else 0
 
         # Top 3 influence leaders
         leaders = _compute_influence_ranked(simulation_id, top_n=3)
         leader_lines = []
         for agent in leaders:
             name = agent.get('agent_name', 'Unknown')
-            score = agent.get('score', 0)
+            score = agent.get('influence_score', 0)
             posts = agent.get('posts_created', 0)
             engagement = agent.get('engagement_received', 0)
             leader_lines.append(
@@ -5453,9 +5627,115 @@ def generate_simulation_article(simulation_id: str):
             )
         leaders_text = '\n'.join(leader_lines) if leader_lines else 'No agent data available.'
 
-        # Market price from Polymarket DB (if enabled)
+        # Top-engaged posts — read actions.jsonl per platform, rank CREATE_POSTs
+        # by incoming LIKE_POST / REPOST / QUOTE_POST / CREATE_COMMENT volume.
+        def _top_posts(platform: str, limit: int = 5):
+            path = os.path.join(sim_dir, platform, 'actions.jsonl')
+            if not os.path.exists(path):
+                return []
+            posts = {}  # post_id -> {content, author, round, likes, reposts, replies}
+            engagement = {}  # post_id -> weighted engagement score
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            rec = json.loads(line)
+                        except Exception:
+                            continue
+                        atype = (rec.get('action_type') or '').upper()
+                        args = rec.get('action_args') or {}
+                        pid = args.get('post_id')
+                        if atype == 'CREATE_POST' and pid is not None:
+                            posts[pid] = {
+                                'content': (args.get('content') or '').strip(),
+                                'author': rec.get('agent_name') or '?',
+                                'round': rec.get('round'),
+                                'likes': 0, 'reposts': 0, 'replies': 0, 'quotes': 0,
+                            }
+                        elif atype == 'LIKE_POST' and pid is not None:
+                            engagement[pid] = engagement.get(pid, 0) + 1
+                            if pid in posts:
+                                posts[pid]['likes'] += 1
+                        elif atype in ('REPOST',) and pid is not None:
+                            engagement[pid] = engagement.get(pid, 0) + 3
+                            if pid in posts:
+                                posts[pid]['reposts'] += 1
+                        elif atype == 'QUOTE_POST' and pid is not None:
+                            engagement[pid] = engagement.get(pid, 0) + 3
+                            if pid in posts:
+                                posts[pid]['quotes'] += 1
+                        elif atype == 'CREATE_COMMENT' and pid is not None:
+                            engagement[pid] = engagement.get(pid, 0) + 2
+                            if pid in posts:
+                                posts[pid]['replies'] += 1
+            except Exception:
+                return []
+            ranked = sorted(
+                (p for p in posts.values() if p['content']),
+                key=lambda p: p['likes'] * 1 + p['reposts'] * 3 + p['quotes'] * 3 + p['replies'] * 2,
+                reverse=True,
+            )
+            return ranked[:limit]
+
+        viral_lines = []
+        for plat in ('twitter', 'reddit'):
+            for post in _top_posts(plat, limit=3):
+                text = post['content'][:220].replace('\n', ' ').strip()
+                eng = post['likes'] + post['reposts'] + post['quotes'] + post['replies']
+                viral_lines.append(
+                    f"- Platform: {plat}. Author: {post['author']}. Round: {post['round']}. "
+                    f"Engagement: {post['likes']} likes, {post['reposts']} reposts, "
+                    f"{post['replies']} replies (total {eng}).\n  Content: {text}"
+                )
+        viral_posts_text = '\n'.join(viral_lines) if viral_lines else 'No viral posts captured.'
+
+        # Belief-shift: first vs last trajectory snapshot
+        belief_shift_text = ''
+        trajectory_path = os.path.join(sim_dir, "trajectory.json")
+        if os.path.exists(trajectory_path):
+            try:
+                with open(trajectory_path, 'r', encoding='utf-8') as f:
+                    traj = json.load(f)
+                snaps = traj.get('snapshots') or []
+
+                def _stance_dist(snap):
+                    bp = snap.get('belief_positions') or {}
+                    stances = [
+                        sum(p.values()) / len(p)
+                        for p in bp.values() if isinstance(p, dict) and p
+                    ]
+                    if not stances:
+                        return None
+                    total = len(stances)
+                    nb = sum(1 for s in stances if s > 0.2)
+                    nbe = sum(1 for s in stances if s < -0.2)
+                    return {
+                        'bullish': round(nb / total * 100, 1),
+                        'bearish': round(nbe / total * 100, 1),
+                        'neutral': round((total - nb - nbe) / total * 100, 1),
+                        'round': snap.get('round_num'),
+                    }
+                first = next((_stance_dist(s) for s in snaps if _stance_dist(s)), None)
+                last = next((_stance_dist(s) for s in reversed(snaps) if _stance_dist(s)), None)
+                if first and last:
+                    belief_shift_text = (
+                        f"Opening sentiment (round {first['round']}): "
+                        f"{first['bullish']}% bullish / {first['neutral']}% neutral / {first['bearish']}% bearish. "
+                        f"Closing sentiment (round {last['round']}): "
+                        f"{last['bullish']}% bullish / {last['neutral']}% neutral / {last['bearish']}% bearish. "
+                        f"Net shift: bullish Δ {round(last['bullish'] - first['bullish'], 1):+}%, "
+                        f"bearish Δ {round(last['bearish'] - first['bearish'], 1):+}%."
+                    )
+            except Exception:
+                pass
+
+        # Polymarket: final prices + biggest round-over-round swing
         market_summary = ''
-        polymarket_db = os.path.join(sim_dir, 'polymarket', 'polymarket.db')
+        market_swing_text = ''
+        polymarket_db = _polymarket_db_path(simulation_id)
         if os.path.exists(polymarket_db):
             try:
                 import sqlite3
@@ -5463,51 +5743,95 @@ def generate_simulation_article(simulation_id: str):
                     cur = con.cursor()
                     tables = {r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'")}
                     if 'market' in tables:
-                        rows = cur.execute("SELECT id, reserve_yes, reserve_no FROM market").fetchall()
+                        rows = cur.execute(
+                            "SELECT market_id, question, reserve_a, reserve_b FROM market"
+                        ).fetchall()
                         market_lines = []
-                        for mid, ry, rn in rows:
-                            total = (ry or 0) + (rn or 0)
-                            price_yes = round((rn / total) * 100, 1) if total > 0 else 50.0
-                            market_lines.append(f"Market {mid}: {price_yes}% YES")
+                        for mid, question, ra, rb in rows:
+                            total = (ra or 0) + (rb or 0)
+                            price_yes = round((rb / total) * 100, 1) if total > 0 else 50.0
+                            market_lines.append(f'"{question}" — {price_yes}% YES')
                         market_summary = '; '.join(market_lines)
+                    if 'trade' in tables:
+                        # Biggest absolute price swing in a single trade (YES-normalized)
+                        trade_rows = cur.execute(
+                            "SELECT market_id, outcome, price, shares, created_at FROM trade "
+                            "ORDER BY created_at ASC"
+                        ).fetchall()
+                        prev_yes = {}
+                        biggest = None  # (abs_delta, mid, from_pct, to_pct, shares)
+                        for mid, outcome, price, shares, _ts in trade_rows:
+                            yes_price = (1 - price) if (outcome or '').upper() == 'NO' else price
+                            yes_price = max(0.0, min(1.0, yes_price or 0))
+                            prev = prev_yes.get(mid, 0.5)
+                            delta = abs(yes_price - prev)
+                            if biggest is None or delta > biggest[0]:
+                                biggest = (delta, mid, prev, yes_price, shares)
+                            prev_yes[mid] = yes_price
+                        if biggest and biggest[0] > 0.02:
+                            _d, _mid, _from, _to, _sh = biggest
+                            market_swing_text = (
+                                f"Largest single-trade swing: market {_mid} moved "
+                                f"{round(_from * 100, 1)}% → {round(_to * 100, 1)}% YES "
+                                f"on a {round(_sh or 0, 1)}-share trade."
+                            )
             except Exception:
                 pass
 
-        market_context = (
-            f"\nPrediction market final prices: {market_summary}"
-            if market_summary else ""
-        )
+        market_block = ''
+        if market_summary:
+            market_block += f"\nPrediction market final prices: {market_summary}"
+        if market_swing_text:
+            market_block += f"\n{market_swing_text}"
 
         share_cta = (
-            f"\n\nExplore this simulation yourself: {share_url}"
+            f"\n\n---\n*Explore this simulation yourself: {share_url}*"
             if share_url else ""
         )
 
         # --- LLM call ---
-        prompt = f"""You are writing a simulation study brief in the style of a Substack post. Write 400-600 words.
+        trajectory_line = f"\n**Opinion trajectory:** {belief_shift_text}" if belief_shift_text else ""
 
-Simulation scenario: {scenario or 'Multi-agent social simulation'}
-Total rounds completed: {total_rounds}
-Total agents: {agent_count}
-Most active rounds: {top_rounds_summary or 'N/A'}{market_context}
+        prompt = f"""You are a technology journalist writing a Substack-style dispatch about a multi-agent simulation you just witnessed. The tone is sharp, specific, and a little skeptical — not a press release, not a listicle. Target 500-750 words.
 
-Top influence leaders:
+**Scenario the simulation explored:** {scenario or 'A multi-agent social simulation'}
+**Scale:** {agent_count} autonomous AI agents, {total_rounds} rounds, {total_actions_all} total actions.
+**Peak activity rounds:** {top_rounds_summary or 'N/A'}{trajectory_line}{market_block}
+
+**Top influence leaders (by posts × engagement received):**
 {leaders_text}
 
-Write the article with these sections:
-1. One-sentence abstract (what was simulated and why it matters)
-2. Three bullet-point key findings — be specific, use the data above (active rounds, top agents, market prices if available)
-3. One paragraph on agent dynamics (how did the top agents drive the narrative?)
-4. One paragraph on implications (what does this simulation tell us about the real-world scenario?)
-5. Two-sentence caveat about AI simulation limitations{share_cta}
+**Most-engaged posts (use at most one as a blockquote — quote ONLY the Content string, never the metadata line, and attribute the author in prose):**
+{viral_posts_text}
 
-Return only the article text in Markdown format. Use ## for section headings. Do not include a title — start directly with the abstract."""
+## Writing instructions
 
-        llm = create_smart_llm_client(timeout=120.0)
+Lead with a hook — the single most counterintuitive or striking finding from the data above, stated as a concrete number. Do not open with "In this simulation..." or any variation of "I watched X agents do Y".
+
+Structure (no explicit headings — just flowing paragraphs):
+1. **The hook (1-2 sentences).** One surprising number, stated plainly.
+2. **The setup (1 paragraph).** What scenario was simulated, how many agents, what platforms — but woven into a narrative, not listed.
+3. **The turn (1-2 paragraphs).** What actually happened — peak activity rounds, the moment opinion shifted, a viral post that changed the temperature. Quote one post verbatim (shortened if needed) with attribution. Use `**bold**` for punchy numbers.
+4. **The dynamics (1 paragraph).** How did the top influencers drive it? Did they converge or did a minority hold the line?
+5. **What it means (1 paragraph).** What does this tell us about the real-world scenario? Be specific and avoid platitudes. If the prediction market moved, say which way and why it matters.
+6. **The caveat (2 sentences max).** AI agents are not people. Name one specific limitation of *this* simulation — not a generic disclaimer.
+
+Style rules:
+- Use concrete numbers from the data. "**42%**" beats "nearly half".
+- Name specific agents. "*Mallku kept posting measured takes while the feed polarized*" beats "one agent stood apart".
+- Exactly one blockquote, used only for a real post from the viral-posts list.
+- No corporate hedging. No "it is important to note".
+- No section headings, no bullet lists, no tables. This is a dispatch, not a report.
+- Start with a title on its own line (one short sentence, specific, no clickbait), then a one-line italicized dek, then a blank line, then the body.
+{share_cta}
+
+Return only the article in Markdown."""
+
+        llm = create_smart_llm_client(timeout=150.0)
         article_text = llm.chat(
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=1200,
+            temperature=0.8,
+            max_tokens=2200,
         )
 
         # --- Cache result ---
@@ -6669,13 +6993,20 @@ def get_demographic_breakdown(simulation_id: str):
                 continue
             agents_in_profiles += 1
 
-            user_id = p.get('user_id') or p.get('agent_id') or p.get('id')
-            user_name = (
-                p.get('user_name')
-                or p.get('username')
-                or p.get('name')
-                or ''
+            # `x or y` misfires when user_id is 0 (legitimate id, falsy value).
+            user_id = next(
+                (p[k] for k in ('user_id', 'agent_id', 'id')
+                 if p.get(k) is not None),
+                None,
             )
+            # `influence_by_name` / `primary_platform_by_name` are keyed by the
+            # `agent_name` field in actions.jsonl, which matches the profile's
+            # `name` (display) — NOT the handle (`user_name` / `username`).
+            # Prefer display name; fall back to handle for the rare profile
+            # that has only a handle.
+            display_name = p.get('name') or ''
+            handle = p.get('user_name') or p.get('username') or ''
+            user_name = display_name or handle
 
             age_bucket = _demo_age_bucket(p.get('age'))
             gender_raw = p.get('gender') or 'unknown'
@@ -6683,7 +7014,13 @@ def get_demographic_breakdown(simulation_id: str):
             country_raw = p.get('country') or 'unknown'
             country = str(country_raw).strip() or 'unknown'
             archetype = _demo_classify_archetype(p.get('source_entity_type'))
-            primary_platform = primary_platform_by_name.get(user_name) or 'inactive'
+            # Try display first, handle as fallback (belt-and-suspenders for
+            # sims whose runner happened to log handles instead of display).
+            primary_platform = (
+                primary_platform_by_name.get(display_name)
+                or primary_platform_by_name.get(handle)
+                or 'inactive'
+            )
 
             # Lookup stance + delta
             stance_val = None
@@ -6696,7 +7033,11 @@ def get_demographic_breakdown(simulation_id: str):
                     if key in initial_stance:
                         delta_val = abs(stance_val - initial_stance[key])
 
-            influence = influence_by_name.get(user_name)
+            influence = (
+                influence_by_name.get(display_name)
+                if display_name in influence_by_name
+                else influence_by_name.get(handle)
+            )
 
             if gender not in buckets["by_gender"]:
                 buckets["by_gender"][gender] = _demo_bucket_accumulator()
