@@ -19,7 +19,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 
 from ..config import Config
-from ..utils.llm_client import create_llm_client
+from ..utils.llm_client import create_llm_client, create_smart_llm_client
 from ..utils.logger import get_logger
 from .entity_reader import EntityNode
 
@@ -255,6 +255,11 @@ class SimulationConfigGenerator:
             base_url=base_url,
             model=model_name,
         )
+        # Prediction-market questions frame the whole simulation — route them
+        # through the Smart slot (Claude Sonnet by default) so the phrasing is
+        # sharp, time-bound, and not a foregone conclusion. Falls back to the
+        # default client when SMART_MODEL_NAME is unset.
+        self.smart_llm = create_smart_llm_client()
 
     def generate_config(
         self,
@@ -938,7 +943,7 @@ Context:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
-            result = self.llm.chat_json(messages=messages, temperature=0.5)
+            result = self.smart_llm.chat_json(messages=messages, temperature=0.5)
 
             markets_raw = result.get("markets", [])
             markets = []
