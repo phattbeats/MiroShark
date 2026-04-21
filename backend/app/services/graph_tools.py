@@ -1,13 +1,9 @@
-"""
-Graph Retrieval Tools Service
-Encapsulates graph search, node retrieval, edge queries, and other tools for use by Report Agent.
+"""Graph retrieval tools (search, node/edge queries) used by the Report Agent.
 
-Replaces zep_tools.py — all Zep Cloud calls replaced by GraphStorage.
-
-Core Retrieval Tools (Optimized):
-1. InsightForge (Deep Insight Retrieval) - Most powerful hybrid search, automatically generates sub-questions and multi-dimensional retrieval
-2. PanoramaSearch (Breadth Search) - Get comprehensive view, including expired content
-3. QuickSearch (Simple Search) - Quick retrieval
+Core retrieval tools:
+1. InsightForge — hybrid search that generates sub-questions and combines results
+2. PanoramaSearch — broad view including expired content
+3. QuickSearch — simple keyword retrieval
 """
 
 import json

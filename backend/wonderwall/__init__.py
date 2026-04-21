@@ -34,11 +34,9 @@ from wonderwall.simulations.base import (
 )
 
 __all__ = [
-    # Legacy (fully backwards-compatible)
     "make", "Platform", "ActionType", "DefaultPlatformType", "ManualAction",
     "LLMAction", "print_db_contents", "AgentGraph", "SocialAgent", "UserInfo",
     "generate_reddit_agent_graph", "generate_twitter_agent_graph",
-    # Simulation framework
     "BasePlatform", "BaseAction", "BaseEnvironment", "BasePromptBuilder",
     "SimulationConfig",
 ]

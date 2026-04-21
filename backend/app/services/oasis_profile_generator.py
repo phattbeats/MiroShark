@@ -308,16 +308,12 @@ class OasisProfileGenerator:
             OasisAgentProfile
         """
         entity_type = entity.get_entity_type() or "Entity"
-        
-        # Basic information
+
         name = entity.name
         user_name = self._generate_username(name)
-        
-        # Build context information
         context = self._build_entity_context(entity)
-        
+
         if use_llm:
-            # Use LLM to generate detailed persona
             profile_data = self._generate_profile_with_llm(
                 entity_name=name,
                 entity_type=entity_type,
@@ -326,7 +322,6 @@ class OasisProfileGenerator:
                 context=context
             )
         else:
-            # Use rules to generate basic persona
             profile_data = self._generate_profile_rule_based(
                 entity_name=name,
                 entity_type=entity_type,
@@ -369,12 +364,9 @@ class OasisProfileGenerator:
         )
     
     def _generate_username(self, name: str) -> str:
-        """Generate username"""
-        # Remove special characters, convert to lowercase
         username = name.lower().replace(" ", "_")
         username = ''.join(c for c in username if c.isalnum() or c == '_')
-        
-        # Add random suffix to avoid duplicates
+        # Random suffix to reduce collisions across agents.
         suffix = random.randint(100, 999)
         return f"{username}_{suffix}"
     

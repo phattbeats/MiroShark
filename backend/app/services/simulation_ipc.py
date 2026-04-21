@@ -23,14 +23,12 @@ logger = get_logger('miroshark.simulation_ipc')
 
 
 class CommandType(str, Enum):
-    """Command type"""
-    INTERVIEW = "interview"           # Single agent interview
-    BATCH_INTERVIEW = "batch_interview"  # Batch interview
-    CLOSE_ENV = "close_env"           # Close environment
+    INTERVIEW = "interview"
+    BATCH_INTERVIEW = "batch_interview"
+    CLOSE_ENV = "close_env"
 
 
 class CommandStatus(str, Enum):
-    """Command status"""
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -39,7 +37,6 @@ class CommandStatus(str, Enum):
 
 @dataclass
 class IPCCommand:
-    """IPC command"""
     command_id: str
     command_type: CommandType
     args: Dict[str, Any]
@@ -65,7 +62,6 @@ class IPCCommand:
 
 @dataclass
 class IPCResponse:
-    """IPC response"""
     command_id: str
     status: CommandStatus
     result: Optional[Dict[str, Any]] = None
@@ -109,8 +105,7 @@ class SimulationIPCClient:
         self.simulation_dir = simulation_dir
         self.commands_dir = os.path.join(simulation_dir, "ipc_commands")
         self.responses_dir = os.path.join(simulation_dir, "ipc_responses")
-        
-        # Ensure directories exist
+
         os.makedirs(self.commands_dir, exist_ok=True)
         os.makedirs(self.responses_dir, exist_ok=True)
 
@@ -143,14 +138,12 @@ class SimulationIPCClient:
             args=args
         )
         
-        # Write command file
         command_file = os.path.join(self.commands_dir, f"{command_id}.json")
         with open(command_file, 'w', encoding='utf-8') as f:
             json.dump(command.to_dict(), f, ensure_ascii=False, indent=2)
-        
+
         logger.info(f"Sent IPC command: {command_type.value}, command_id={command_id}")
 
-        # Wait for response
         response_file = os.path.join(self.responses_dir, f"{command_id}.json")
         start_time = time.time()
         
@@ -160,8 +153,7 @@ class SimulationIPCClient:
                     with open(response_file, 'r', encoding='utf-8') as f:
                         response_data = json.load(f)
                     response = IPCResponse.from_dict(response_data)
-                    
-                    # Clean up command and response files
+
                     try:
                         os.remove(command_file)
                         os.remove(response_file)
@@ -174,11 +166,9 @@ class SimulationIPCClient:
                     logger.warning(f"Failed to parse response: {e}")
             
             time.sleep(poll_interval)
-        
-        # Timeout
+
         logger.error(f"Timed out waiting for IPC response: command_id={command_id}")
 
-        # Clean up command file
         try:
             os.remove(command_file)
         except OSError:
@@ -313,12 +303,10 @@ class SimulationIPCServer:
         self.simulation_dir = simulation_dir
         self.commands_dir = os.path.join(simulation_dir, "ipc_commands")
         self.responses_dir = os.path.join(simulation_dir, "ipc_responses")
-        
-        # Ensure directories exist
+
         os.makedirs(self.commands_dir, exist_ok=True)
         os.makedirs(self.responses_dir, exist_ok=True)
 
-        # Environment status
         self._running = False
 
     def start(self):
@@ -349,8 +337,7 @@ class SimulationIPCServer:
         """
         if not os.path.exists(self.commands_dir):
             return None
-        
-        # Get command files sorted by time
+
         command_files = []
         for filename in os.listdir(self.commands_dir):
             if filename.endswith('.json'):
@@ -380,8 +367,7 @@ class SimulationIPCServer:
         response_file = os.path.join(self.responses_dir, f"{response.command_id}.json")
         with open(response_file, 'w', encoding='utf-8') as f:
             json.dump(response.to_dict(), f, ensure_ascii=False, indent=2)
-        
-        # Delete command file
+
         command_file = os.path.join(self.commands_dir, f"{response.command_id}.json")
         try:
             os.remove(command_file)

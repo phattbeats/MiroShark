@@ -1,9 +1,4 @@
-"""
-Entity reading and filtering service.
-Reads nodes from Neo4j graph, filters out meaningful entity type nodes.
-
-Replaces zep_entity_reader.py — all Zep Cloud calls replaced by GraphStorage.
-"""
+"""Reads nodes from Neo4j graph and filters out meaningful entity type nodes."""
 
 from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
@@ -16,15 +11,12 @@ logger = get_logger('miroshark.entity_reader')
 
 @dataclass
 class EntityNode:
-    """Entity node data structure"""
     uuid: str
     name: str
     labels: List[str]
     summary: str
     attributes: Dict[str, Any]
-    # Related edges
     related_edges: List[Dict[str, Any]] = field(default_factory=list)
-    # Related other nodes
     related_nodes: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -48,7 +40,6 @@ class EntityNode:
 
 @dataclass
 class FilteredEntities:
-    """Filtered entity set"""
     entities: List[EntityNode]
     entity_types: Set[str]
     total_count: int
@@ -199,31 +190,23 @@ class EntityReader:
         """
         logger.info(f"Starting to filter entities in graph {graph_id}...")
 
-        # Get all nodes
         all_nodes = self.get_all_nodes(graph_id)
         total_count = len(all_nodes)
 
-        # Get all edges (for subsequent association lookup)
         all_edges = self.get_all_edges(graph_id) if enrich_with_edges else []
-
-        # Build mapping from node UUID to node data
         node_map = {n["uuid"]: n for n in all_nodes}
 
-        # Filter entities matching criteria
         filtered_entities = []
         entity_types_found: Set[str] = set()
 
         for node in all_nodes:
             labels = node.get("labels", [])
 
-            # Filter logic: Labels must contain labels besides "Entity" and "Node"
+            # Entity must have a label beyond the default "Entity" / "Node" pair.
             custom_labels = [la for la in labels if la not in ["Entity", "Node"]]
-
             if not custom_labels:
-                # Only default labels, skip
                 continue
 
-            # If predefined types specified, check if matching
             if defined_entity_types:
                 matching_labels = [la for la in custom_labels if la in defined_entity_types]
                 if not matching_labels:
@@ -240,7 +223,6 @@ class EntityReader:
 
             entity_types_found.add(entity_type)
 
-            # Create entity node object
             entity = EntityNode(
                 uuid=node["uuid"],
                 name=node["name"],
@@ -249,7 +231,6 @@ class EntityReader:
                 attributes=node.get("attributes", {}),
             )
 
-            # Get related edges and nodes
             if enrich_with_edges:
                 related_edges = []
                 related_node_uuids: Set[str] = set()
@@ -274,7 +255,6 @@ class EntityReader:
 
                 entity.related_edges = related_edges
 
-                # Get related linked nodes with their information
                 related_nodes = []
                 for related_uuid in related_node_uuids:
                     if related_uuid in node_map:
@@ -319,15 +299,12 @@ class EntityReader:
             EntityNode or None.
         """
         try:
-            # Get the node directly by UUID (O(1) lookup)
             node = self.storage.get_node(entity_uuid)
             if not node:
                 return None
 
-            # Get edges for this node (O(degree) via Cypher)
             edges = self.storage.get_node_edges(entity_uuid)
 
-            # Process related edges and collect related node UUIDs
             related_edges = []
             related_node_uuids: Set[str] = set()
 
@@ -349,7 +326,7 @@ class EntityReader:
                     })
                     related_node_uuids.add(edge["source_node_uuid"])
 
-            # Fetch related nodes individually (avoids loading ALL nodes)
+            # Fetch related nodes individually instead of loading all nodes.
             related_nodes = []
             for related_uuid in related_node_uuids:
                 related_node = self.storage.get_node(related_uuid)

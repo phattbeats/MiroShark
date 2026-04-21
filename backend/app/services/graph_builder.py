@@ -1,7 +1,4 @@
-"""
-Graph building service.
-Uses GraphStorage (Neo4j) to replace Zep Cloud API.
-"""
+"""Graph building service backed by GraphStorage (Neo4j)."""
 
 import time
 import logging
@@ -22,7 +19,6 @@ _events = EventLogger()
 
 @dataclass
 class GraphInfo:
-    """Graph information"""
     graph_id: str
     node_count: int
     edge_count: int
@@ -38,10 +34,7 @@ class GraphInfo:
 
 
 class GraphBuilderService:
-    """
-    Graph building service
-    Build knowledge graph through GraphStorage interface
-    """
+    """Builds a knowledge graph through the GraphStorage interface."""
 
     def __init__(self, storage: GraphStorage):
         self.storage = storage
@@ -70,7 +63,6 @@ class GraphBuilderService:
         Returns:
             Task ID
         """
-        # Create task
         task_id = self.task_manager.create_task(
             task_type="graph_build",
             metadata={
@@ -80,7 +72,6 @@ class GraphBuilderService:
             }
         )
 
-        # Execute build in background thread
         thread = threading.Thread(
             target=self._build_graph_worker,
             args=(task_id, text, ontology, graph_name, chunk_size, chunk_overlap, max_workers)
@@ -187,7 +178,6 @@ class GraphBuilderService:
                 'elapsed_ms': elapsed_ms,
             })
 
-            # Completed
             self.task_manager.complete_task(task_id, {
                 "graph_id": graph_id,
                 "graph_info": graph_info.to_dict(),
@@ -214,13 +204,7 @@ class GraphBuilderService:
         )
 
     def set_ontology(self, graph_id: str, ontology: Dict[str, Any]):
-        """
-        SetGraphOntology
-
-        Simply stores ontology as JSON in the Graph node.
-        No more dynamic Pydantic class creation (was Zep-specific).
-        The NER extractor reads this ontology to guide extraction.
-        """
+        """Store the ontology JSON on the Graph node for the NER extractor to read."""
         self.storage.set_ontology(graph_id, ontology)
 
     def add_text_batches(

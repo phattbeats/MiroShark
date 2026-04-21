@@ -1,8 +1,4 @@
-"""
-Graph memory update service that processes agent activities and updates them to Neo4j Graph.
-
-Replaces zep_graph_memory_updater.py — Zep client replaced by GraphStorage.
-"""
+"""Graph memory update service that processes agent activities and updates Neo4j."""
 
 import os
 import time
