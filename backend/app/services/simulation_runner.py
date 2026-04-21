@@ -12,7 +12,7 @@ import threading
 import subprocess
 import signal
 import atexit
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional, TextIO, Union
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -233,8 +233,8 @@ class SimulationRunner:
     _processes: Dict[str, subprocess.Popen] = {}
     _action_queues: Dict[str, Queue] = {}
     _monitor_threads: Dict[str, threading.Thread] = {}
-    _stdout_files: Dict[str, Any] = {}  # Store stdout file handles
-    _stderr_files: Dict[str, Any] = {}  # Store stderr file handles
+    _stdout_files: Dict[str, Optional[TextIO]] = {}  # Store stdout file handles
+    _stderr_files: Dict[str, Optional[TextIO]] = {}  # Store stderr file handles
     
     # Graph memory update configuration
     _graph_memory_enabled: Dict[str, bool] = {}  # simulation_id -> enabled
