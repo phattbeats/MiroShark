@@ -565,24 +565,46 @@ export const suggestScenarios = (data) => {
  *     data: [
  *       { simulation_id, scenario, status, runner_status, current_round,
  *         total_rounds, agent_count, quality_health, final_consensus,
- *         resolution_outcome, created_at, parent_simulation_id,
+ *         resolution_outcome, outcome, created_at, parent_simulation_id,
  *         share_card_url, share_landing_url }
  *     ],
  *     count: number,        // items on this page
  *     total: number,        // total public simulations
  *     limit: number,
  *     offset: number,
- *     has_more: boolean
+ *     has_more: boolean,
+ *     verified_only: boolean
  *   }
  *
  * An empty `data` array is normal (render the empty state).
- * @param {Object} options - { limit?: number, offset?: number }
+ * @param {Object} options - { limit?: number, offset?: number, verifiedOnly?: boolean }
  */
 export const getPublicSimulations = (options = {}) => {
   const params = {}
   if (Number.isFinite(options.limit)) params.limit = options.limit
   if (Number.isFinite(options.offset)) params.offset = options.offset
+  if (options.verifiedOnly) params.verified = '1'
   return service.get('/api/simulation/public', { params, timeout: 15000 })
+}
+
+/**
+ * Read the verified-prediction annotation for a simulation.
+ * Returns `data: null` when none has been submitted yet.
+ * @param {string} simulationId
+ */
+export const getSimulationOutcome = (simulationId) => {
+  return service.get(`/api/simulation/${simulationId}/outcome`)
+}
+
+/**
+ * Record a verified-prediction annotation for a public simulation.
+ * Submitting again overwrites the previous annotation. Requires the
+ * simulation to be public.
+ * @param {string} simulationId
+ * @param {Object} data - { label: 'correct' | 'incorrect' | 'partial', outcome_url?: string, outcome_summary?: string }
+ */
+export const submitSimulationOutcome = (simulationId, data) => {
+  return service.post(`/api/simulation/${simulationId}/outcome`, data)
 }
 
 /**

@@ -59,6 +59,16 @@ const routes = [
     path: '/explore',
     name: 'Explore',
     component: () => import('../views/ExploreView.vue')
+  },
+  {
+    // Dedicated URL for the "Verified Prediction" hall — same component
+    // as /explore but with the verified filter pre-applied. Keep it as a
+    // top-level path so it's a clean link to drop into threads about
+    // pre-incident simulations.
+    path: '/verified',
+    name: 'Verified',
+    component: () => import('../views/ExploreView.vue'),
+    props: { verifiedOnly: true }
   }
 ]
 

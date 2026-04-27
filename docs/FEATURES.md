@@ -85,6 +85,20 @@ Failed calls become `{"_error": "..."}` payloads rather than exceptions — agen
 
 `EmbedDialog` has a `Public / Private` toggle backed by `is_public` on the simulation state. Embed URLs return `403` on unpublished simulations — flip the toggle (or `POST /api/simulation/<id>/publish`) to make them publicly embeddable. Defaults to private so existing sims are unaffected.
 
+## Predictive Accuracy Ledger (Verified Predictions)
+
+Every public simulation can be annotated with the real-world outcome it called. From the Embed dialog, choose **Called it / Partial / Called wrong**, paste the article/tweet/dashboard URL that confirmed the outcome, add a one-sentence summary (≤280 chars), and submit. The annotation lands on `<sim_dir>/outcome.json` and immediately surfaces:
+
+- A **📍 Verified** / **⚠ Called wrong** / **◑ Partial** pill on the gallery card (the pill links straight to the outcome URL when one is provided).
+- A coloured left-edge accent on the card so the verified hall reads at a glance when scrolling fast.
+- A **Verified only** filter chip on `/explore` that flips the listing to the curated set.
+- A dedicated **`/verified`** URL — same component as `/explore` but pre-filtered to the hall of accurate calls. Drop this link into a thread when you want a single page that proves the simulations work.
+
+The annotation is open-ended on purpose — distinct from the binary `/resolve` endpoint, which is YES/NO and tied to Polymarket consensus. A simulation can have both: the binary resolution drives the existing accuracy_score, the outcome annotation drives the gallery credibility surface.
+
+- **Endpoints:** `POST /api/simulation/<id>/outcome` (publish-gated), `GET /api/simulation/<id>/outcome` (read-only, no gate), `GET /api/simulation/public?verified=1` (filtered gallery).
+- **UI:** "Mark outcome" panel inside the Embed dialog; **Verified only** filter chip + 📍 pills on `/explore`; dedicated `/verified` route.
+
 ## Social Share Card
 
 When a simulation is published, the Embed dialog also exposes a **social card** that can be auto-unfurled by Twitter/X, Discord, Slack, LinkedIn, and any other Open-Graph-aware client. Two endpoints back it:
