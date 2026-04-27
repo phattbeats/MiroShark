@@ -161,6 +161,94 @@
               </a>
             </div>
 
+            <!-- Verified-prediction annotation — lets operators turn a
+                 published simulation into a "called it" record on the
+                 /verified gallery page. Only meaningful once the run is
+                 public, so the inputs are disabled until then. -->
+            <div class="outcome-section" :class="{ 'outcome-section-live': isPublic }">
+              <div class="outcome-head">
+                <span class="outcome-icon">📍</span>
+                <div class="outcome-head-body">
+                  <div class="outcome-title">
+                    Mark outcome
+                    <span v-if="outcome && outcome.label" class="outcome-saved-tag">
+                      ✓ {{ outcomeLabelText(outcome.label) }}
+                    </span>
+                  </div>
+                  <div class="outcome-sub">
+                    Did this simulation predict a real event? Annotate it and
+                    your run lands on
+                    <a href="/verified" target="_blank" rel="noopener">/verified</a>
+                    — the public hall of calls that landed.
+                  </div>
+                </div>
+              </div>
+
+              <div class="outcome-fields" :class="{ 'outcome-fields-disabled': !isPublic }">
+                <fieldset class="outcome-radio-group" :disabled="!isPublic">
+                  <label
+                    v-for="opt in outcomeOptions"
+                    :key="opt.value"
+                    class="outcome-radio"
+                    :class="{ 'outcome-radio-active': outcomeForm.label === opt.value }"
+                  >
+                    <input
+                      type="radio"
+                      :value="opt.value"
+                      v-model="outcomeForm.label"
+                    />
+                    <span class="outcome-radio-icon">{{ opt.icon }}</span>
+                    <span class="outcome-radio-label">{{ opt.label }}</span>
+                  </label>
+                </fieldset>
+
+                <input
+                  v-model="outcomeForm.outcome_url"
+                  type="url"
+                  placeholder="Outcome URL (article, tweet, dashboard) — optional"
+                  class="outcome-input"
+                  :disabled="!isPublic"
+                  maxlength="500"
+                />
+                <textarea
+                  v-model="outcomeForm.outcome_summary"
+                  placeholder="What happened, in one or two sentences (max 280 chars)"
+                  class="outcome-textarea"
+                  :disabled="!isPublic"
+                  maxlength="280"
+                  rows="2"
+                ></textarea>
+                <div class="outcome-summary-counter">
+                  {{ outcomeForm.outcome_summary.length }}/280
+                </div>
+
+                <div class="outcome-actions">
+                  <button
+                    class="outcome-submit"
+                    @click="submitOutcome"
+                    :disabled="!isPublic || !outcomeForm.label || outcomeSubmitting"
+                  >
+                    <span v-if="outcomeSubmitting">Saving…</span>
+                    <span v-else-if="outcome">Update outcome</span>
+                    <span v-else>Save outcome</span>
+                  </button>
+                  <a
+                    v-if="outcome"
+                    href="/verified"
+                    target="_blank"
+                    rel="noopener"
+                    class="outcome-link"
+                  >
+                    View on /verified ↗
+                  </a>
+                </div>
+
+                <div v-if="outcomeMessage" class="outcome-message" :class="outcomeMessageClass">
+                  {{ outcomeMessage }}
+                </div>
+              </div>
+            </div>
+
             <!-- Gallery callout — appears once the simulation is public so the
                  operator knows their run is visible on /explore, and offers a
                  one-click jump to see it in situ alongside other public runs. -->
@@ -211,8 +299,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { publishSimulation, getEmbedSummary, getShareCardUrl, getShareLandingUrl } from '../api/simulation'
+import { reactive, ref, computed, watch } from 'vue'
+import {
+  publishSimulation,
+  getEmbedSummary,
+  getShareCardUrl,
+  getShareLandingUrl,
+  getSimulationOutcome,
+  submitSimulationOutcome,
+} from '../api/simulation'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -350,9 +445,89 @@ const copy = async (which) => {
   }
 }
 
+// ── Verified-prediction outcome submission ─────────────────────────────
+const outcomeOptions = [
+  { value: 'correct', label: 'Called it', icon: '📍' },
+  { value: 'partial', label: 'Partial', icon: '◑' },
+  { value: 'incorrect', label: 'Called wrong', icon: '⚠' },
+]
+
+const outcomeForm = reactive({
+  label: '',
+  outcome_url: '',
+  outcome_summary: '',
+})
+
+const outcome = ref(null)
+const outcomeSubmitting = ref(false)
+const outcomeMessage = ref('')
+const outcomeMessageClass = ref('')
+
+const outcomeLabelText = (label) => {
+  const opt = outcomeOptions.find((o) => o.value === label)
+  return opt ? opt.label : label || ''
+}
+
+const _applyOutcomeToForm = (data) => {
+  outcome.value = data || null
+  if (data && data.label) {
+    outcomeForm.label = data.label
+    outcomeForm.outcome_url = data.outcome_url || ''
+    outcomeForm.outcome_summary = data.outcome_summary || ''
+  }
+}
+
+const _resetOutcomeForm = () => {
+  outcomeForm.label = ''
+  outcomeForm.outcome_url = ''
+  outcomeForm.outcome_summary = ''
+  outcome.value = null
+  outcomeMessage.value = ''
+  outcomeMessageClass.value = ''
+}
+
+const loadOutcome = async () => {
+  try {
+    const res = await getSimulationOutcome(props.simulationId)
+    _applyOutcomeToForm(res?.data || null)
+  } catch (err) {
+    // 404 here means the simulation doesn't exist yet — surface nothing.
+    outcome.value = null
+  }
+}
+
+const submitOutcome = async () => {
+  if (!isPublic.value || !outcomeForm.label) return
+  outcomeSubmitting.value = true
+  outcomeMessage.value = ''
+  try {
+    const res = await submitSimulationOutcome(props.simulationId, {
+      label: outcomeForm.label,
+      outcome_url: outcomeForm.outcome_url.trim(),
+      outcome_summary: outcomeForm.outcome_summary.trim(),
+    })
+    if (res?.success && res.data) {
+      _applyOutcomeToForm(res.data)
+      outcomeMessage.value =
+        'Outcome saved — your simulation is visible in the Verified filter.'
+      outcomeMessageClass.value = 'outcome-message-success'
+    } else {
+      outcomeMessage.value = res?.error || 'Could not save outcome.'
+      outcomeMessageClass.value = 'outcome-message-error'
+    }
+  } catch (err) {
+    outcomeMessage.value =
+      err?.response?.data?.error || err?.message || 'Could not save outcome.'
+    outcomeMessageClass.value = 'outcome-message-error'
+  } finally {
+    outcomeSubmitting.value = false
+  }
+}
+
 watch(() => props.open, async (val) => {
   if (!val) return
   copied.value = ''
+  _resetOutcomeForm()
   // Refresh public state when reopened — reflects external flips.
   try {
     const res = await getEmbedSummary(props.simulationId)
@@ -360,6 +535,9 @@ watch(() => props.open, async (val) => {
   } catch (err) {
     if (err?.response?.status === 403) isPublic.value = false
   }
+  // Always pull the saved outcome — the GET endpoint is publish-gate-free
+  // so even private sims will reflect a previously recorded annotation.
+  await loadOutcome()
   // Bust the share-card image cache so the preview reloads with whatever
   // state the simulation is in right now (resolution may have landed
   // since the dialog was last opened).
@@ -743,6 +921,225 @@ watch(isPublic, () => {
 
 .share-download-btn:hover {
   background: #2a2a2a;
+}
+
+.outcome-section {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: #fafafa;
+  border: 1px dashed rgba(10, 10, 10, 0.18);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.outcome-section-live {
+  background: rgba(255, 107, 26, 0.04);
+  border-color: rgba(255, 107, 26, 0.3);
+  border-style: solid;
+}
+
+.outcome-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.outcome-icon {
+  font-size: 18px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.outcome-head-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.outcome-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.outcome-saved-tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--color-orange, #ff6b1a);
+  background: rgba(255, 107, 26, 0.1);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.outcome-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #4a4a4a;
+}
+
+.outcome-sub a {
+  color: var(--color-orange, #ff6b1a);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.outcome-sub a:hover { text-decoration: underline; }
+
+.outcome-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.outcome-fields-disabled { opacity: 0.55; }
+
+.outcome-radio-group {
+  display: flex;
+  gap: 6px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.outcome-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(10, 10, 10, 0.16);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.outcome-radio input {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(10, 10, 10, 0.35);
+  position: relative;
+}
+
+.outcome-radio input:checked {
+  border-color: var(--color-orange, #ff6b1a);
+  background: var(--color-orange, #ff6b1a);
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.outcome-radio-active {
+  border-color: var(--color-orange, #ff6b1a);
+  background: rgba(255, 107, 26, 0.08);
+}
+
+.outcome-radio-icon { font-family: sans-serif; }
+
+.outcome-input,
+.outcome-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(10, 10, 10, 0.14);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  background: #fff;
+  color: #0a0a0a;
+  resize: vertical;
+}
+
+.outcome-input:focus,
+.outcome-textarea:focus {
+  outline: none;
+  border-color: var(--color-orange, #ff6b1a);
+  box-shadow: 0 0 0 3px rgba(255, 107, 26, 0.12);
+}
+
+.outcome-input:disabled,
+.outcome-textarea:disabled {
+  background: rgba(10, 10, 10, 0.03);
+  color: #6b6b6b;
+  cursor: not-allowed;
+}
+
+.outcome-summary-counter {
+  align-self: flex-end;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  color: #6b6b6b;
+  margin-top: -4px;
+}
+
+.outcome-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.outcome-submit {
+  padding: 8px 16px;
+  background: var(--color-orange, #ff6b1a);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.outcome-submit:hover:not(:disabled) {
+  background: #0a0a0a;
+}
+
+.outcome-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.outcome-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  color: var(--color-orange, #ff6b1a);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.outcome-link:hover { text-decoration: underline; }
+
+.outcome-message {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.outcome-message-success {
+  background: rgba(67, 193, 101, 0.12);
+  color: #1f6b35;
+}
+
+.outcome-message-error {
+  background: rgba(255, 68, 68, 0.12);
+  color: #b22020;
 }
 
 .gallery-callout {

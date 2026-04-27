@@ -4613,6 +4613,49 @@ def get_share_card(simulation_id: str):
 # ============== Public Gallery ==============
 
 
+_VALID_OUTCOME_LABELS = ("correct", "incorrect", "partial")
+
+
+def _read_outcome_file(sim_dir: str) -> dict | None:
+    """Read ``<sim_dir>/outcome.json`` if it exists.
+
+    Returns the parsed dict (with the public fields the gallery + embed
+    surfaces care about) or ``None`` when the file is absent or malformed.
+    Never raises — a corrupt artifact must not blank out the gallery.
+    """
+    outcome_path = os.path.join(sim_dir, "outcome.json")
+    if not os.path.exists(outcome_path):
+        return None
+    try:
+        with open(outcome_path, 'r', encoding='utf-8') as f:
+            data = json.load(f) or {}
+    except Exception:
+        return None
+
+    label = (data.get("label") or "").strip().lower()
+    if label not in _VALID_OUTCOME_LABELS:
+        # Silently ignore an artifact with an unknown label — same posture
+        # as the rest of the gallery helper: render the card without it.
+        return None
+
+    summary = (data.get("outcome_summary") or "").strip()
+    if len(summary) > 280:
+        summary = summary[:277].rstrip() + "…"
+
+    url = (data.get("outcome_url") or "").strip()
+    # Only echo URLs we recognize — protects readers from a malformed
+    # ``javascript:``/``file://`` value sneaking onto the gallery card.
+    if url and not (url.startswith("http://") or url.startswith("https://")):
+        url = ""
+
+    return {
+        "label": label,
+        "outcome_url": url,
+        "outcome_summary": summary,
+        "submitted_at": data.get("submitted_at") or "",
+    }
+
+
 def _build_gallery_card_payload(state, sim_dir: str) -> dict:
     """Assemble the minimal card-friendly payload for the public gallery.
 
@@ -4710,6 +4753,8 @@ def _build_gallery_card_payload(state, sim_dir: str) -> dict:
         except Exception:
             pass
 
+    outcome = _read_outcome_file(sim_dir)
+
     return {
         "simulation_id": state.simulation_id,
         "scenario": scenario,
@@ -4721,6 +4766,7 @@ def _build_gallery_card_payload(state, sim_dir: str) -> dict:
         "quality_health": quality_health,
         "final_consensus": final_consensus,
         "resolution_outcome": resolution_outcome,
+        "outcome": outcome,
         "created_at": state.created_at,
         "parent_simulation_id": state.parent_simulation_id,
         "share_card_url": f"/api/simulation/{state.simulation_id}/share-card.png",
@@ -4740,6 +4786,9 @@ def list_public_simulations():
     Query parameters:
         limit: max items to return (default 50, clamped to [1, 100])
         offset: pagination offset (default 0)
+        verified: when truthy ("1", "true", "yes"), filter to simulations
+            with a recorded outcome annotation (see
+            ``POST /api/simulation/<id>/outcome``).
 
     Response shape::
 
@@ -4781,11 +4830,25 @@ def list_public_simulations():
         limit = max(1, min(100, int(limit or 50)))
         offset = max(0, int(offset or 0))
 
+        verified_raw = (request.args.get('verified') or "").strip().lower()
+        verified_only = verified_raw in ("1", "true", "yes", "on")
+
         manager = SimulationManager()
         all_sims = manager.list_simulations()
 
         public_sims = [s for s in all_sims if bool(getattr(s, "is_public", False))]
         public_sims.sort(key=lambda s: s.created_at or "", reverse=True)
+
+        if verified_only:
+            # Filter on disk before paginating so ``total`` reflects the
+            # filtered set — otherwise the "X remaining" hint and
+            # ``has_more`` flag would lie about how much is left.
+            verified_sims = []
+            for s in public_sims:
+                sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, s.simulation_id)
+                if _read_outcome_file(sim_dir) is not None:
+                    verified_sims.append(s)
+            public_sims = verified_sims
 
         total = len(public_sims)
         page = public_sims[offset:offset + limit]
@@ -4810,6 +4873,7 @@ def list_public_simulations():
             "limit": limit,
             "offset": offset,
             "has_more": offset + len(items) < total,
+            "verified_only": verified_only,
         })
         # Short cache so newly-published simulations show up quickly while
         # still absorbing repeat hits from bots/social unfurlers.
@@ -5849,6 +5913,116 @@ def resolve_simulation(simulation_id: str):
             "success": False,
             "error": str(e),
             "traceback": traceback.format_exc()
+        }), 500
+
+
+# ============== Predictive Accuracy Ledger ==============
+
+
+@simulation_bp.route('/<simulation_id>/outcome', methods=['POST', 'GET'])
+def simulation_outcome(simulation_id: str):
+    """Verified-Prediction annotation layer for public simulations.
+
+    A lightweight successor to ``/resolve``: that one writes a binary
+    YES/NO Polymarket-aligned resolution, this one accepts an open-ended
+    "did this run predict a real event?" annotation. The two are
+    complementary — a simulation can have both — and outcome.json is the
+    record the public gallery and ``/verified`` filter read from.
+
+    Body (POST):
+
+        {
+            "label": "correct" | "incorrect" | "partial",   // required
+            "outcome_url": "https://...",                    // optional
+            "outcome_summary": "Tweet-sized description"      // ≤280 chars
+        }
+
+    Returns the saved outcome on success. Submission requires
+    ``is_public=True`` on the simulation (toggle via ``/publish``).
+
+    GET returns the current outcome (or ``data: null``) — no publish
+    gate so the embed dialog can show the existing annotation when the
+    operator re-opens it.
+    """
+    try:
+        manager = SimulationManager()
+        state = manager.get_simulation(simulation_id)
+        if not state:
+            return jsonify({"success": False, "error": f"Simulation not found: {simulation_id}"}), 404
+
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+
+        if request.method == 'GET':
+            outcome = _read_outcome_file(sim_dir)
+            return jsonify({"success": True, "data": outcome})
+
+        if not bool(getattr(state, "is_public", False)):
+            return jsonify({
+                "success": False,
+                "error": "Simulation must be public to record an outcome. POST /api/simulation/<id>/publish to enable.",
+            }), 403
+
+        data = request.get_json(force=True, silent=True) or {}
+        label = (data.get("label") or "").strip().lower()
+        if label not in _VALID_OUTCOME_LABELS:
+            return jsonify({
+                "success": False,
+                "error": "label must be one of: correct, incorrect, partial",
+            }), 400
+
+        outcome_url = (data.get("outcome_url") or "").strip()
+        if outcome_url and not (outcome_url.startswith("http://") or outcome_url.startswith("https://")):
+            return jsonify({
+                "success": False,
+                "error": "outcome_url must be an http(s) URL",
+            }), 400
+        if len(outcome_url) > 500:
+            return jsonify({
+                "success": False,
+                "error": "outcome_url must be 500 characters or fewer",
+            }), 400
+
+        outcome_summary = (data.get("outcome_summary") or "").strip()
+        if len(outcome_summary) > 280:
+            return jsonify({
+                "success": False,
+                "error": "outcome_summary must be 280 characters or fewer",
+            }), 400
+
+        try:
+            os.makedirs(sim_dir, exist_ok=True)
+        except OSError as exc:
+            logger.error(f"outcome: failed to ensure sim_dir for {simulation_id}: {exc}")
+            return jsonify({"success": False, "error": "Could not persist outcome."}), 500
+
+        record = {
+            "simulation_id": simulation_id,
+            "label": label,
+            "outcome_url": outcome_url,
+            "outcome_summary": outcome_summary,
+            "submitted_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+        outcome_path = os.path.join(sim_dir, "outcome.json")
+        try:
+            with open(outcome_path, 'w', encoding='utf-8') as f:
+                json.dump(record, f, ensure_ascii=False, indent=2)
+        except OSError as exc:
+            logger.error(f"outcome: failed to write {outcome_path}: {exc}")
+            return jsonify({"success": False, "error": "Could not persist outcome."}), 500
+
+        logger.info(
+            f"outcome: recorded label={label} for {simulation_id} (url_set={bool(outcome_url)})"
+        )
+
+        return jsonify({"success": True, "data": _read_outcome_file(sim_dir)})
+
+    except Exception as e:
+        logger.error(f"Failed to handle outcome for {simulation_id}: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc(),
         }), 500
 
 

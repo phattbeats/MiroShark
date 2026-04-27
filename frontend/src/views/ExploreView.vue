@@ -22,25 +22,53 @@
       <!-- Header -->
       <header class="explore-header">
         <div class="tag-row">
-          <span class="orange-tag">◎ Explore</span>
+          <span class="orange-tag">{{ verifiedOnly ? '📍 Verified' : '◎ Explore' }}</span>
           <span class="meta-sep">·</span>
-          <span class="meta-text">Public simulation gallery</span>
+          <span class="meta-text">
+            {{ verifiedOnly ? 'Predictions that called real events' : 'Public simulation gallery' }}
+          </span>
         </div>
-        <h1 class="page-title">Simulations the community ran.</h1>
+        <h1 class="page-title">{{ verifiedOnly ? 'Calls that landed.' : 'Simulations the community ran.' }}</h1>
         <p class="page-subtitle">
-          Every card is a real MiroShark run someone published. Open one to see
-          the full belief drift, agent network, and prediction outcome — or fork
-          it in one click and run your own variant with the same agent population.
+          <template v-if="verifiedOnly">
+            Each card is a public MiroShark run whose operator marked the
+            real-world outcome. Hover the badge for the source link, open
+            one to see how the agent consensus formed, or fork it to test
+            the same agent population on a fresh scenario.
+          </template>
+          <template v-else>
+            Every card is a real MiroShark run someone published. Open one to see
+            the full belief drift, agent network, and prediction outcome — or fork
+            it in one click and run your own variant with the same agent population.
+          </template>
         </p>
         <div class="stats-row">
           <span class="stat-chip">
             <span class="stat-num">{{ loading ? '…' : total }}</span>
-            <span class="stat-label">published</span>
+            <span class="stat-label">{{ verifiedOnly ? 'verified' : 'published' }}</span>
           </span>
-          <span v-if="!loading && items.length > 0" class="stat-chip">
+          <span v-if="!verifiedOnly && !loading && items.length > 0" class="stat-chip">
             <span class="stat-num">{{ resolvedCount }}</span>
             <span class="stat-label">resolved</span>
           </span>
+          <span v-if="!verifiedOnly && !loading && items.length > 0" class="stat-chip">
+            <span class="stat-num">{{ verifiedCount }}</span>
+            <span class="stat-label">verified</span>
+          </span>
+
+          <!-- Verified filter chip — toggles a `?verified=1` fetch + the
+               /verified URL so the view is shareable. -->
+          <button
+            class="filter-chip"
+            :class="{ 'filter-chip-active': verifiedFilter }"
+            @click="toggleVerifiedFilter"
+            :disabled="loading"
+            :title="verifiedFilter ? 'Show all public simulations' : 'Show only simulations with a recorded outcome'"
+          >
+            <span class="filter-chip-icon">📍</span>
+            <span>Verified only</span>
+          </button>
+
           <button
             class="refresh-btn"
             @click="refresh"
@@ -70,13 +98,28 @@
 
       <!-- Empty -->
       <div v-else-if="items.length === 0" class="gallery-empty">
-        <div class="empty-icon">◇</div>
-        <div class="empty-title">No public simulations yet.</div>
-        <div class="empty-msg">
-          Yours could be first. Run a simulation, click the share icon on the
-          result page, toggle "Public" — it'll appear here within 30 seconds.
+        <div class="empty-icon">{{ verifiedFilter ? '📍' : '◇' }}</div>
+        <div class="empty-title">
+          {{ verifiedFilter ? 'No verified predictions yet.' : 'No public simulations yet.' }}
         </div>
-        <router-link to="/" class="empty-cta">Run a simulation →</router-link>
+        <div class="empty-msg">
+          <template v-if="verifiedFilter">
+            Once an operator marks a public simulation's real-world outcome
+            from the Embed dialog, it shows up here. In the meantime, browse
+            every published run on
+            <router-link to="/explore" class="inline-link">/explore</router-link>.
+          </template>
+          <template v-else>
+            Yours could be first. Run a simulation, click the share icon on the
+            result page, toggle "Public" — it'll appear here within 30 seconds.
+          </template>
+        </div>
+        <router-link
+          :to="verifiedFilter ? '/explore' : '/'"
+          class="empty-cta"
+        >
+          {{ verifiedFilter ? 'Browse all public sims →' : 'Run a simulation →' }}
+        </router-link>
       </div>
 
       <!-- Grid -->
@@ -85,7 +128,12 @@
           v-for="item in items"
           :key="item.simulation_id"
           class="gallery-card"
-          :class="{ 'card-resolved': item.resolution_outcome }"
+          :class="{
+            'card-resolved': item.resolution_outcome,
+            'card-verified-correct': item.outcome && item.outcome.label === 'correct',
+            'card-verified-incorrect': item.outcome && item.outcome.label === 'incorrect',
+            'card-verified-partial': item.outcome && item.outcome.label === 'partial',
+          }"
         >
           <!-- Thumbnail: the server-rendered share card PNG -->
           <router-link
@@ -110,6 +158,20 @@
             </h2>
 
             <div class="card-pills">
+              <component
+                v-if="item.outcome && item.outcome.label"
+                :is="item.outcome.outcome_url ? 'a' : 'span'"
+                :href="item.outcome.outcome_url || undefined"
+                :target="item.outcome.outcome_url ? '_blank' : undefined"
+                :rel="item.outcome.outcome_url ? 'noopener noreferrer' : undefined"
+                class="pill pill-verified"
+                :class="outcomePillClass(item.outcome.label)"
+                :title="outcomePillTitle(item.outcome)"
+                @click.stop
+              >
+                {{ outcomePillIcon(item.outcome.label) }}
+                {{ outcomePillLabel(item.outcome.label) }}
+              </component>
               <span
                 v-if="item.quality_health"
                 class="pill"
@@ -232,13 +294,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   getPublicSimulations,
   forkSimulation,
   getShareCardUrl,
 } from '../api/simulation'
+
+const props = defineProps({
+  // When true, the view boots in verified-only mode. Wired to the
+  // `/verified` route; users on `/explore` can also flip it on via the
+  // filter chip in the header.
+  verifiedOnly: { type: Boolean, default: false },
+})
 
 const router = useRouter()
 
@@ -251,9 +320,14 @@ const loadingMore = ref(false)
 const error = ref('')
 const forkingId = ref('')
 const forkErrors = ref({})
+const verifiedFilter = ref(props.verifiedOnly)
 
 const resolvedCount = computed(
   () => items.value.filter((item) => item.resolution_outcome).length,
+)
+
+const verifiedCount = computed(
+  () => items.value.filter((item) => item.outcome && item.outcome.label).length,
 )
 
 const shareCardSrc = (item) => {
@@ -332,8 +406,41 @@ const formatDate = (iso) => {
   return String(iso).slice(0, 10)
 }
 
+const outcomePillLabel = (label) => {
+  if (label === 'correct') return 'Verified'
+  if (label === 'incorrect') return 'Called wrong'
+  if (label === 'partial') return 'Partial'
+  return ''
+}
+
+const outcomePillIcon = (label) => {
+  if (label === 'correct') return '📍'
+  if (label === 'incorrect') return '⚠'
+  if (label === 'partial') return '◑'
+  return ''
+}
+
+const outcomePillClass = (label) => {
+  if (label === 'correct') return 'pill-verified-correct'
+  if (label === 'incorrect') return 'pill-verified-incorrect'
+  if (label === 'partial') return 'pill-verified-partial'
+  return ''
+}
+
+const outcomePillTitle = (outcome) => {
+  if (!outcome) return ''
+  const summary = (outcome.outcome_summary || '').trim()
+  const link = outcome.outcome_url ? ` — ${outcome.outcome_url}` : ''
+  if (summary) return summary + link
+  return outcomePillLabel(outcome.label) + link
+}
+
 const loadPage = async (offset = 0) => {
-  const res = await getPublicSimulations({ limit, offset })
+  const res = await getPublicSimulations({
+    limit,
+    offset,
+    verifiedOnly: verifiedFilter.value,
+  })
   if (!res?.success) {
     throw new Error(res?.error || 'Request failed')
   }
@@ -343,6 +450,30 @@ const loadPage = async (offset = 0) => {
     hasMore: !!res.has_more,
   }
 }
+
+const toggleVerifiedFilter = () => {
+  verifiedFilter.value = !verifiedFilter.value
+  // Keep the URL in lockstep with the filter so the page is shareable —
+  // /verified for the curated hall, /explore for everything.
+  if (verifiedFilter.value) {
+    if (router.currentRoute.value.path !== '/verified') {
+      router.replace({ name: 'Verified' })
+    }
+  } else if (router.currentRoute.value.path !== '/explore') {
+    router.replace({ name: 'Explore' })
+  }
+  refresh()
+}
+
+watch(
+  () => props.verifiedOnly,
+  (next) => {
+    if (verifiedFilter.value !== next) {
+      verifiedFilter.value = next
+      refresh()
+    }
+  },
+)
 
 const refresh = async () => {
   loading.value = true
@@ -793,6 +924,111 @@ onMounted(refresh)
 .pill-status {
   background: rgba(10, 10, 10, 0.06);
   color: rgba(10, 10, 10, 0.55);
+}
+
+/* Verified-prediction pills — slightly stronger visual weight than the
+   generic pills so the credibility signal lands at a glance. */
+.pill-verified {
+  text-decoration: none;
+  cursor: default;
+  letter-spacing: 0.6px;
+}
+
+a.pill-verified {
+  cursor: pointer;
+}
+
+a.pill-verified:hover {
+  filter: brightness(0.92);
+}
+
+.pill-verified-correct {
+  background: var(--color-orange);
+  color: var(--color-white);
+}
+
+.pill-verified-incorrect {
+  background: rgba(255, 68, 68, 0.18);
+  color: #c52d2d;
+  outline: 1px solid rgba(255, 68, 68, 0.35);
+  outline-offset: -1px;
+}
+
+.pill-verified-partial {
+  background: rgba(255, 179, 71, 0.22);
+  color: #8a4a0a;
+  outline: 1px solid rgba(255, 179, 71, 0.5);
+  outline-offset: -1px;
+}
+
+/* Card-level accent strip — same idea as .card-resolved (a thin coloured
+   left border) but using the outcome palette so the verified hall reads
+   at a glance even when scrolling fast. */
+.card-verified-correct {
+  border-left: 3px solid var(--color-orange);
+}
+
+.card-verified-incorrect {
+  border-left: 3px solid var(--color-red);
+}
+
+.card-verified-partial {
+  border-left: 3px solid #f59e0b;
+}
+
+/* Filter chip in the stats row — toggles `?verified=1`. Active state
+   leans on the brand orange so it reads as the primary call-to-action
+   when an operator is hunting for credibility-anchored sims. */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: var(--border-medium);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: rgba(10, 10, 10, 0.7);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-transform: uppercase;
+}
+
+.filter-chip:hover:not(:disabled) {
+  border-color: var(--color-orange);
+  color: var(--color-orange);
+}
+
+.filter-chip-active {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: var(--color-white);
+}
+
+.filter-chip-active:hover:not(:disabled) {
+  background: var(--color-black);
+  border-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.filter-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.filter-chip-icon {
+  font-family: sans-serif;
+}
+
+.inline-link {
+  color: var(--color-orange);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.inline-link:hover {
+  text-decoration: underline;
 }
 
 /* ── Consensus bar ── */

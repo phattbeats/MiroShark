@@ -1153,6 +1153,13 @@ paths:
         - in: query
           name: offset
           schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: verified
+          description: |
+            Truthy values (`1`, `true`, `yes`, `on`) restrict the listing to
+            simulations with a recorded outcome annotation — i.e. the
+            "Verified Prediction" hall.
+          schema: { type: string }
       responses:
         "200":
           description: Gallery cards.
@@ -1171,6 +1178,7 @@ paths:
                       limit: { type: integer }
                       offset: { type: integer }
                       has_more: { type: boolean }
+                      verified_only: { type: boolean }
 
   # ────────────────────────────────────────────────────────────────────
   # Export
@@ -1235,6 +1243,83 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/SuccessEnvelope" }
+
+  /api/simulation/{simulation_id}/outcome:
+    get:
+      tags: [Publish & Embed]
+      summary: Read the verified-prediction annotation for a simulation.
+      description: |
+        Returns the saved outcome (or `data: null` when the simulation has
+        none). Distinct from `/resolve`, which is binary (YES/NO) and tied
+        to Polymarket consensus. This annotation is open-ended, gallery-
+        facing, and the source for the `?verified=1` filter on
+        `/api/simulation/public`.
+      parameters:
+        - $ref: "#/components/parameters/SimulationIdPath"
+      responses:
+        "200":
+          description: Outcome (may be null when none has been submitted).
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        oneOf:
+                          - $ref: "#/components/schemas/SimulationOutcome"
+                          - type: "null"
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [Publish & Embed]
+      summary: Record a verified-prediction annotation for a public simulation.
+      description: |
+        Requires `is_public=true` on the simulation (POST `/publish` to
+        enable). Submitting again overwrites the previous annotation —
+        operators can correct a wrong call without leaving stale records.
+      parameters:
+        - $ref: "#/components/parameters/SimulationIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [label]
+              properties:
+                label:
+                  type: string
+                  enum: [correct, incorrect, partial]
+                  description: How the agent consensus held up against reality.
+                outcome_url:
+                  type: string
+                  format: uri
+                  maxLength: 500
+                  description: Optional pointer to the article/tweet/dashboard that confirmed the outcome.
+                outcome_summary:
+                  type: string
+                  maxLength: 280
+                  description: Tweet-sized human description of what really happened.
+            example:
+              label: correct
+              outcome_url: https://example.com/aave-incident
+              outcome_summary: "Aave's GHO peg broke under the simulated stress scenario on 2026-04-25, matching the agent consensus."
+      responses:
+        "200":
+          description: Outcome saved.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data: { $ref: "#/components/schemas/SimulationOutcome" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "403":
+          description: Simulation is not public.
+        "404": { $ref: "#/components/responses/NotFound" }
 
   # ────────────────────────────────────────────────────────────────────
   # Report Agent
@@ -1904,11 +1989,36 @@ components:
             bearish: { type: number }
         resolution_outcome:
           oneOf: [{ type: string }, { type: "null" }]
+        outcome:
+          oneOf:
+            - $ref: "#/components/schemas/SimulationOutcome"
+            - type: "null"
         created_at: { type: string, format: date-time }
         parent_simulation_id:
           oneOf: [{ type: string }, { type: "null" }]
         share_card_url: { type: string }
         share_landing_url: { type: string }
+
+    SimulationOutcome:
+      type: object
+      description: |
+        Verified-prediction annotation written by the operator after a
+        public simulation's real-world counterpart resolved. Drives the
+        ◎ Verified badge on the gallery and the `/verified` filter view.
+      properties:
+        label:
+          type: string
+          enum: [correct, incorrect, partial]
+        outcome_url:
+          type: string
+          format: uri
+          description: External link confirming the outcome (may be empty).
+        outcome_summary:
+          type: string
+          description: Tweet-sized human description (≤280 chars).
+        submitted_at:
+          type: string
+          format: date-time
 
     SettingsUpdate:
       type: object
