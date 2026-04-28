@@ -286,12 +286,14 @@ class LLMClient:
                 "options": {"num_ctx": self._num_ctx}
             }
 
-        # OpenRouter metadata: tag each generation with caller/simulation
-        # context. Specifically structured so OpenRouter forwards it cleanly
-        # to Langfuse — `user` becomes Langfuse `sessionId`, `metadata`
-        # becomes the trace metadata block, `tags` powers the filter UI.
+        # OpenRouter → Langfuse Broadcast pass-through.
+        # Spec: https://openrouter.ai/docs/guides/features/broadcast/langfuse
+        # OpenRouter forwards exactly three top-level keys (`user`,
+        # `session_id`, `trace`) to Langfuse. Everything else (including
+        # the `metadata`, `tags`, `name` fields we used to set) is dropped
+        # at the broadcast boundary. Any extra keys nested under `trace`
+        # become Langfuse trace metadata and are filterable in the UI.
         if not self._is_ollama() and 'openrouter' in (self.base_url or ''):
-            # Detect caller for metadata
             caller = 'unknown'
             for frame_info in inspect.stack()[1:5]:
                 mod = frame_info.filename
@@ -310,38 +312,43 @@ class LLMClient:
             prompt_type = TraceContext.get('prompt_type', '') or _prompt_type_from_caller(caller)
             effective_phase = sim_phase or _phase_from_prompt_type(prompt_type)
 
-            extra = kwargs.get("extra_body", {})
-            metadata = {
+            try:
+                round_int = (int(round_num) if isinstance(round_num, int)
+                             else (int(round_num) if (isinstance(round_num, str)
+                                   and round_num.isdigit()) else None))
+            except (TypeError, ValueError):
+                round_int = None
+
+            trace_block = {
+                # Documented keys — Langfuse renders these as first-class
+                # fields on the trace/generation in the dashboard.
+                "trace_id": run_id or sim_id or None,
+                "trace_name": "MiroShark Run" if run_id else "MiroShark Call",
+                "span_name": effective_phase or None,
+                "generation_name": prompt_type or caller,
+                "environment": "miroshark",
+                # Free-form keys → Langfuse trace metadata (filterable).
+                # These replace the old `extra["metadata"]` block.
+                "source": "miroshark",
+                "run_id": run_id or None,
+                "simulation_id": sim_id or None,
                 "caller": caller,
-                "prompt_type": prompt_type,
-                "sim_phase": effective_phase,
-                "run_id": run_id,
-                "simulation_id": sim_id,
-                "agent_name": str(agent_name)[:64],
-                "agent_id": str(agent_id) if agent_id else "",
-                "round": (int(round_num) if isinstance(round_num, int)
-                          else (int(round_num) if (isinstance(round_num, str)
-                                and round_num.isdigit()) else None)),
+                "prompt_type": prompt_type or None,
+                "sim_phase": effective_phase or None,
+                "agent_name": str(agent_name)[:64] if agent_name else None,
+                "agent_id": str(agent_id) if agent_id else None,
+                "round": round_int,
             }
-            extra["metadata"] = {k: v for k, v in metadata.items()
-                                 if v not in ("", None)}
-            # OpenRouter forwards `user` as the Langfuse sessionId, which
-            # is how we group every call from one sim into one session.
+            trace_block = {k: v for k, v in trace_block.items() if v not in ("", None)}
+
+            extra = kwargs.get("extra_body", {})
+            extra["trace"] = trace_block
+            # `user` → Langfuse userId (per-tenant analytics).
+            # `session_id` → Langfuse sessionId (groups conversational calls).
+            # Both keys are documented in the broadcast spec.
             if sim_id:
                 extra["user"] = sim_id
-            # Tags surface in Langfuse's filter sidebar. Keep it short —
-            # just the things we actually want to slice by.
-            tags = ["miroshark"]
-            if prompt_type:
-                tags.append(prompt_type)
-            if effective_phase:
-                tags.append(f"phase:{effective_phase}")
-            if run_id:
-                tags.append(f"run:{run_id}")
-            extra["tags"] = tags
-            # Trace name: gives Langfuse's list view a useful label per
-            # call instead of every row reading "OpenRouter Request".
-            extra["name"] = prompt_type or caller
+                extra["session_id"] = sim_id
             # Disable chain-of-thought on reasoning-capable models by default —
             # we want short, deterministic outputs, not a 100-token <think>
             # trace padding every call. Saves 50-80% latency on Qwen3/Grok-4.1
@@ -349,15 +356,6 @@ class LLMClient:
             if Config.LLM_DISABLE_REASONING:
                 extra["reasoning"] = {"enabled": False}
             kwargs["extra_body"] = extra
-            if not getattr(LLMClient, "_extra_body_logged", False):
-                print(
-                    "[langfuse-debug] llm_client.extra_body sample (first call only): "
-                    f"user={extra.get('user')!r} "
-                    f"metadata_keys={sorted((extra.get('metadata') or {}).keys())!r} "
-                    f"tags={extra.get('tags')!r} name={extra.get('name')!r}",
-                    flush=True,
-                )
-                LLMClient._extra_body_logged = True
 
         t0 = time.perf_counter()
         try:
