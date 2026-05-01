@@ -23,6 +23,13 @@ RUN npm ci \
 # Copy project source code
 COPY . .
 
+# CAMEL-AI tool-call ordering fix for MiniMax compatibility.
+# Drops the patch into the venv's site-packages and registers a .pth file
+# so it auto-loads in any Python subprocess that uses the venv (including
+# the OASIS simulation engine spawned by the backend).
+RUN cp /app/camel_tool_call_fix.py /app/backend/.venv/lib/python3.11/site-packages/camel_tool_call_fix.py \
+ && echo "import camel_tool_call_fix" > /app/backend/.venv/lib/python3.11/site-packages/zzz_camel_tool_call_fix.pth
+
 EXPOSE 3000 5001
 
 # Start both frontend and backend simultaneously (development mode)
