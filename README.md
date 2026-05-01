@@ -262,6 +262,54 @@ cp .env.example .env
 AGPL-3.0. See [LICENSE](./LICENSE).
 AGPL-3.0,详见 [LICENSE](./LICENSE)。
 
+---
+
+## Running on Unraid
+
+**Docker image:** `therealphatt/miroshark-unraid:latest`
+**Repository:** https://github.com/phattbeats/MiroShark
+
+### Prerequisites
+
+- [Docker container template for MiroShark](https://github.com/phattbeats/miroshark-unraid) (Unraid CA template)
+- Neo4j (required for memory/graph store)
+- Optionally: LM Studio for local LLM inference
+
+### Quick Start (Unraid)
+
+1. Stop any existing MiroShark container
+2. In Unraid, change the template Repository to: `therealphatt/miroshark-unraid:latest`
+3. Apply — container pulls and starts automatically
+
+### Environment Variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `LLM_API_KEY` | API key for your LLM provider | Yes |
+| `LLM_BASE_URL` | Base URL for LLM API | Yes |
+| `LLM_MODEL` | Model name (e.g. `gpt-4o`, `claude-sonnet-4-7`) | Yes |
+| `NEO4J_URI` | Neo4j connection URI | Yes |
+| `NEO4J_USERNAME` | Neo4j username | Yes |
+| `NEO4J_PASSWORD` | Neo4j password | Yes |
+| `EMBEDDING_MODEL` | Embedding model for RAG | No |
+
+### Port Mappings
+
+| Container | Host | Note |
+|---|---|---|
+| MiroShark frontend | 3030 → 3000 | 3000 conflicts with some apps |
+| API | 5001 → 5001 | Direct API access |
+
+### CAMEL Tool Call Fix
+
+The `camel_tool_call_fix.py` patch is automatically applied in this image. If running MiniMax-M2.7, orphaned tool messages are automatically repaired before reaching the LLM — no manual patching required.
+
+### Attribution
+
+Fork of [aaronjmars/MiroShark](https://github.com/aaronjmars/MiroShark) with PHATT TECH Unraid optimizations and daily upstream sync.
+
+
+
 Support the project · 支持本项目:`0xd7bc6a05a56655fb2052f742b012d1dfd66e1ba3`
 
 ## Star History
