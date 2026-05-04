@@ -26,6 +26,27 @@ No document and no specific article in mind? Type a question on the Home screen 
 
 - **Endpoint:** `POST /api/simulation/ask`
 
+## Shareable Scenario Links
+
+Every other share surface (`/share/<id>`, `/watch/<id>`, replay GIF, transcript, RSS, trajectory CSV, gallery search) points readers at a *finished* simulation. Shareable Scenario Links cover the other half — the *un-run* scenario. Drop a URL into a tweet, blog post, or Discord message and the reader lands on the New Sim form with the scenario already pre-filled, one click away from launching their own run with the exact same setup.
+
+The URL accepts four optional query parameters, each independently:
+
+| Param | Effect | Cap |
+|---|---|---|
+| `scenario` | Pre-fills the Simulation Prompt textarea | 500 chars |
+| `url` | Auto-fetches into the URL Import list (must be `http://` or `https://`) | 2000 chars |
+| `ask` | Pre-fills the Just Ask question field — does *not* auto-run (avoids surprise LLM cost) | 300 chars |
+| `template` | Auto-launches the named preset template (skips the home page entirely) | slug only |
+
+Any combination works. `?scenario=Simulate%20a%20stablecoin%20depeg&url=https://example.com/incident-report` pre-fills the prompt *and* fetches the article in the same flow. `?template=corporate_crisis` skips straight to the template launch path. When pre-fill happens, a dismissible orange-edged banner sits above the console so the operator knows the form was populated by a shared link before they hit Launch.
+
+Inputs are sanitised on read — HTML / `javascript:` URIs / control characters are stripped, length caps prevent megabyte payloads, and `url=` is rejected unless it starts with `http://` or `https://`. Once the form is populated, the URL params are stripped via `router.replace` so a refresh doesn't replay the pre-fill and a copy-paste of the address bar reflects the user's edited state, not the original shared link.
+
+The reverse direction lives in two places. On the home page, a discreet **🔗 Share as link** button beneath the Simulation Prompt textarea constructs a `?scenario=...&url=...&ask=...` URL from the current form state and copies it to the clipboard — the un-run-scenario counterpart to the **Fork this scenario** button on the live watch / share-card pages. On every preset template card a small **🔗** icon next to the Launch button copies a `?template=<slug>` URL — Aaron's "try this sim" tweets gain a one-click CTA that drops the reader directly into the named template's launch flow.
+
+Pure frontend; no backend changes. Sanitization lives in `frontend/src/utils/urlParams.js` (DOMPurify-backed) and is reused by both the read path on `/` and the write path on the home page + template gallery.
+
 ## Counterfactual Branching
 
 Run a simulation, pause to inspect, then ask: "what if the CEO resigns in round 24?" — click **⤷ Branch** in the simulation workspace, enter a trigger round and a breaking-news injection, and MiroShark forks the simulation with the parent's full agent population. When the runner reaches the trigger round, the injection is promoted to a director event and prepended to every agent's observation prompt as a BREAKING block. Compare the branch against the original via the existing **Compare** view.
@@ -159,6 +180,25 @@ Two endpoints, same row schema, different serialization:
 
 Same publish gate as the share card and transcript (`is_public=true`). The bullish / neutral / bearish percentages use the same ±0.2 stance threshold as every other surface, so a number in the CSV matches what the gallery, share card, replay GIF, transcript, webhook, and feed report for the same round. The Embed dialog exposes a "Download .csv" + "Download .jsonl" pair beneath the transcript row, plus a copyable CSV URL and a `pd.read_csv("<url>")` quickstart snippet.
 
+## Gallery Search & Filtering
+
+`/explore` is the public research surface — every published MiroShark simulation, browsable as a card grid. Once the corpus grew past a few dozen entries the reverse-chronological scroll stopped being a tool, so the gallery now indexes itself: a keyword search box, a consensus filter chip group, a quality filter chip group, and a sort dropdown sit above the cards. The active filter set lives in URL params (`?q=…&consensus=bearish&quality=excellent&sort=rounds`), so any filtered view is bookmarkable and shareable — "every excellent-quality bearish call about Aave" is a URL you can tweet.
+
+- **`q`** — case-insensitive substring match against the scenario text. Trimmed; capped at 200 chars.
+- **`consensus`** — `bullish` / `neutral` / `bearish`. Filters by the dominant final-round stance using the same ±0.2 threshold the share card, replay GIF, transcript, webhook, and feed renderers all use, so a "bullish" filter here matches what those surfaces report for the same simulation.
+- **`quality`** — `excellent` / `good` / `fair` / `poor`. Compared case-insensitively against the first word of `quality_health`.
+- **`outcome`** — `correct` / `incorrect` / `partial`. Implies `verified=1` (verified-only).
+- **`sort`** — `date` (default — newest first), `rounds` (highest current_round first), or `agents` (largest population first).
+- **`page`** — 1-based page number; alternative to `offset`. `page=1` is offset 0. The two compose the same way: `total` reflects the **filtered** count (not the corpus size), so the load-more "X remaining" hint and `has_more` flag stay accurate inside the active filter set.
+
+The `/verified` route preserves the `verifiedOnly: true` mode and stays compatible with every filter — `/verified?q=aave&consensus=bullish` works. Toggling Verified ↔ Explore via the header chip carries the active query string across the route swap so the user doesn't lose their search.
+
+- **Endpoint:** `GET /api/simulation/public?q=…&consensus=bullish&quality=excellent&sort=rounds&page=2`
+- **Compose with verified:** `GET /api/simulation/public?verified=1&consensus=bearish` returns every bearish call that has a recorded outcome.
+- **Implementation:** pure stdlib in-memory filter over the gallery cards already assembled by the public endpoint. Zero new dependencies. The endpoint stays cached for 30 s, so a busy gallery amortises the per-sim card build over many filtered requests.
+
+A "📊 Reset" button appears once any filter is active; the empty state ("No simulations match your filters") points back at the same reset rather than dead-ending on a "no public sims yet" message that wouldn't apply.
+
 ## Public Gallery Feeds (RSS / Atom)
 
 The same cards `/explore` renders, served as a syndication feed so researchers and tooling already on Feedly / Readwise / Inoreader / NetNewsWire / Obsidian RSS subscribe in their existing toolchain — no login, no MiroShark account. Every newly published simulation lands in their reader the same way an AI newsletter or Substack post does.
@@ -177,6 +217,21 @@ Each entry carries the scenario as the title (truncated with an ellipsis past 10
 - **Implementation:** pure stdlib (`xml.etree.ElementTree` + `html`). Zero new dependencies; same ±0.2 stance threshold as every other surface so a "62% bullish" string matches the gallery card byte-for-byte.
 
 The Embed dialog has a "Follow the gallery via RSS" callout with one-click subscribe links for the Atom feed, the RSS 2.0 feed, and the verified-only Atom feed. The /explore header has a "📡 Subscribe via RSS" chip that mirrors the active filter (verified-only when the filter is on).
+
+## Live Watch Page (Spectator Broadcast)
+
+The seventh thin renderer over the same on-disk `sim_dir/` folder. The previous six (gallery card, share card, replay GIF, transcript, RSS / Atom feed, trajectory CSV / JSONL) all surface a *finished* simulation; the watch page surfaces a *live* one — the format MiroShark was missing for "tweet a sim mid-run" sharing.
+
+`GET /watch/<simulation_id>` returns a self-contained server-rendered HTML page built for live spectating: a minimal full-viewport view with a belief bar, round counter, agent count, quality health, progress bar, and a vanilla-JS poller that updates the DOM in place every 15 s by hitting the existing `/api/simulation/<id>/embed-summary` and `/api/simulation/<id>/run-status` REST endpoints. Once the runner reaches a terminal state (`completed` / `failed` / `stopped`) polling stops and the "View full simulation →" + "Fork this scenario →" CTAs are revealed.
+
+- **OG / Twitter unfurl:** the body carries `og:type`, `og:title`, `og:description`, `og:image` (1200×630 share-card PNG), `twitter:card=summary_large_image`, etc. — same auto-unfurl behaviour as `/share/<id>`. The `og:description` becomes "Round N/M · Bullish X% · Neutral Y% · Bearish Z% — watch live." for in-flight runs, falls back to the bare scenario for idle runs, and to a generic string when nothing is published yet.
+- **Self-contained:** no SPA build dependency. The poller is vanilla JS, the styles are inline. Works on a stripped-down deployment, behind a restrictive CSP that allows only `img-src 'self'`, and even with JS disabled (the SSR HTML still shows a meaningful frame).
+- **Publish gate:** the underlying live endpoints honour `is_public`, so a private simulation only renders the bare broadcast frame (no scenario, no live numbers). The fact a private sim *exists* with that id never leaks through the page chrome.
+- **Stance threshold parity:** the bootstrap blob exposes the ±0.2 threshold the page uses for the bullish / neutral / bearish split — same threshold as every other surface, so a spectator who sees the share card on Twitter and clicks through to `/watch/<id>` doesn't see the numbers shift mid-flow.
+- **Caching:** `Cache-Control: public, max-age=60` — short enough to keep the unfurl reasonably fresh after a newly-published run, long enough to absorb crawler load.
+- **Implementation:** `app/services/watch_renderer.py` (pure stdlib `html` + `json`) + `app/api/watch.py` (Flask blueprint mounted at the root, no `/api` prefix, mirroring `share_bp`). Zero new dependencies.
+
+The Embed dialog has a "Watch live (broadcast page)" callout — distinct from the share-card section above — with an "Open watch page ↗" button and a copyable URL. The callout is publish-gated to make the affordance match the underlying behaviour.
 
 ## Article Generation
 

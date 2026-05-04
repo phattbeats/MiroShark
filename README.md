@@ -78,6 +78,7 @@ After launching, click the **中 / EN** toggle in the top-right of the navbar to
 | **Smart Setup** | Drop in a doc → three auto-generated Bull / Bear / Neutral scenarios in ~2s |
 | **What's Trending** | Pick a live news item from RSS feeds; pre-fills the scenario in one click |
 | **Just Ask** | Type a question with no document — MiroShark researches and writes the seed briefing |
+| **Shareable Scenario Links** | Drop a `?scenario=...&url=...` URL into a tweet or blog post — readers land on the New Sim form already pre-filled. `?template=<slug>` auto-launches one of the preset templates. The un-run-scenario counterpart to "Fork this scenario" on `/watch` and `/share` |
 | **Counterfactual Branching** | Fork a running simulation with an injected event ("what if the CEO resigns in round 24?") |
 | **Director Mode** | Inject breaking news into the *current* timeline without forking |
 | **Preset Templates** | 6 benchmarked scenarios: crypto launch, corporate crisis, political debate, product announcement, campus controversy, historical what-if |
@@ -89,7 +90,9 @@ After launching, click the **中 / EN** toggle in the top-right of the navbar to
 | **Animated Belief Replay** | 1200×630 GIF — one frame per round, belief bars sliding to each round's distribution. Discord and Slack auto-play GIFs from the direct URL |
 | **Transcript Export** | Per-round agent posts + stance labels as Markdown (YAML front matter for Notion / Obsidian / Substack) or structured JSON (for SDKs and LLM-as-judge pipelines) |
 | **Trajectory Export** | One row per round as RFC 4180 CSV or JSONL — `pandas.read_csv("…/trajectory.csv")` lands ready for Pandas / Excel / Tableau / R / Observable. Same ±0.2 stance threshold as every other surface |
+| **Live Watch Page** | `/watch/<sim_id>` — minimal full-viewport broadcast page with a vanilla-JS poller that refreshes the belief bar, round counter, and progress bar every 15 s while the simulation runs. Auto-unfurls as a 1200×630 image card when tweeted; the "tweet a sim mid-run" format alongside the finished-result share card |
 | **Public Gallery** | `/explore` browses every published simulation as a card grid — preview the share card, consensus split, and quality health; click to open or one-click fork |
+| **Gallery Search & Filter** | Keyword search + bullish/neutral/bearish + excellent/good/fair/poor + sort by date/rounds/agents on `/explore` and `/verified`. URL-encoded so `?q=aave&consensus=bearish` is bookmarkable. Same ±0.2 stance threshold as every other surface |
 | **Verified Predictions** | Annotate any public sim with the real-world outcome (called it / partial / called wrong + URL). `/verified` is the dedicated hall of calls that landed |
 | **RSS / Atom Feeds** | `/api/feed.atom` + `/api/feed.rss` — every newly published simulation lands in Feedly / Readwise / Inoreader / NetNewsWire / Obsidian RSS without anyone curating it. `?verified=1` for the verified-only stream |
 | **Article Generation** | Substack-style write-up of what happened, grounded in actual posts and trades |
@@ -205,6 +208,7 @@ cp .env.example .env
 | **智能配置** | 投入文档 → 约 2 秒生成三套自动情景(看涨/看跌/中立) |
 | **热门追踪** | 从 RSS 中挑选实时新闻,一键预填情景 |
 | **直接提问** | 不用文档,直接打字提问 — MiroShark 自行调研并撰写种子简报 |
+| **可分享情景链接** | 在推文或博客文章中放入 `?scenario=...&url=...` 链接 — 读者一打开就会看到已预填的「新建模拟」表单。`?template=<slug>` 可自动启动任一预设模板。这是 `/watch` 与 `/share` 上「派生此情景」的「未运行情景」对应版本 |
 | **反事实分支** | 在运行中的模拟里派生分支并注入事件(「如果 24 轮时 CEO 辞职会怎样?」) |
 | **导演模式** | 在当前时间线中投入突发新闻,无需派生分支 |
 | **预设模板** | 6 套基准情景:加密代币发布、企业危机、政治辩论、产品发布、校园风波、历史假设 |
@@ -216,6 +220,7 @@ cp .env.example .env
 | **信念回放动图** | 1200×630 GIF,每轮一帧,信念条动态滑向各轮分布。Discord 与 Slack 在直接 URL 上自动播放 |
 | **转录导出** | 每轮智能体发帖与立场标签,导出为 Markdown(YAML 头,适配 Notion / Obsidian / Substack)或结构化 JSON(适配 SDK 与 LLM 评审管线) |
 | **公开图库** | `/explore` 以卡片网格浏览所有公开模拟 — 预览分享卡、共识分布与质量指标;一键打开或派生 |
+| **图库搜索与筛选** | 在 `/explore` 与 `/verified` 上提供关键词搜索 + 看涨/中立/看跌 + 优秀/良好/一般/较差 + 按日期/轮次/智能体数量排序。URL 编码后 `?q=aave&consensus=bearish` 可作为书签分享。与其他所有表面共享同一 ±0.2 立场阈值 |
 | **已验证预言** | 为公开模拟标注真实结果(命中 / 部分 / 失误 + 链接)。`/verified` 是命中预言专属展厅 |
 | **RSS / Atom 订阅源** | `/api/feed.atom` + `/api/feed.rss` — 每个新发布的模拟无需任何整理就会进入 Feedly / Readwise / Inoreader / NetNewsWire / Obsidian RSS。`?verified=1` 只看已验证内容 |
 | **文章生成** | Substack 风格的复盘文章,基于真实发帖与交易数据 |
