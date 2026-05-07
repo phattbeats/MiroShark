@@ -4909,6 +4909,7 @@ def get_share_card(simulation_id: str):
     unfurler hits don't re-render.
     """
     from ..services import share_card as share_card_renderer
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -4950,6 +4951,10 @@ def get_share_card(simulation_id: str):
         response.headers["Content-Disposition"] = (
             f'inline; filename="miroshark-{simulation_id[:12]}.png"'
         )
+        surface_stats.increment_surface_stat(
+            os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id),
+            "share_card",
+        )
         return response
 
     except Exception as e:
@@ -4974,6 +4979,7 @@ def get_replay_gif(simulation_id: str):
     Cached on disk by content hash so repeat hits don't re-render.
     """
     from ..services import replay_gif as replay_renderer
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -5016,6 +5022,10 @@ def get_replay_gif(simulation_id: str):
         response.headers["Content-Disposition"] = (
             f'inline; filename="miroshark-{simulation_id[:12]}-replay.gif"'
         )
+        surface_stats.increment_surface_stat(
+            os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id),
+            "replay_gif",
+        )
         return response
 
     except Exception as e:
@@ -5036,6 +5046,7 @@ def _serve_transcript(simulation_id: str, fmt: str):
     scans for, but the actual logic lives here.
     """
     from ..services import transcript as transcript_renderer
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -5062,10 +5073,12 @@ def _serve_transcript(simulation_id: str, fmt: str):
             payload = transcript_renderer.render_json_bytes(data)
             mimetype = "application/json; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-transcript.json"
+            surface_key = "transcript_json"
         else:
             payload = transcript_renderer.render_markdown_bytes(data)
             mimetype = "text/markdown; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-transcript.md"
+            surface_key = "transcript_md"
 
         response = Response(payload, mimetype=mimetype)
         # Short cache — the transcript can change every round on a
@@ -5078,6 +5091,7 @@ def _serve_transcript(simulation_id: str, fmt: str):
         response.headers["Content-Disposition"] = (
             f'inline; filename="{filename}"'
         )
+        surface_stats.increment_surface_stat(sim_dir, surface_key)
         return response
 
     except Exception as e:
@@ -5127,6 +5141,7 @@ def _serve_trajectory(simulation_id: str, fmt: str):
     but the actual logic lives here.
     """
     from ..services import trajectory_export
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -5153,10 +5168,12 @@ def _serve_trajectory(simulation_id: str, fmt: str):
             payload = trajectory_export.render_jsonl(rows)
             mimetype = "application/jsonl; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-trajectory.jsonl"
+            surface_key = "trajectory_jsonl"
         else:
             payload = trajectory_export.render_csv(rows)
             mimetype = "text/csv; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-trajectory.csv"
+            surface_key = "trajectory_csv"
 
         response = Response(payload, mimetype=mimetype)
         # Short cache — the trajectory grows by one row per round on a
@@ -5171,6 +5188,7 @@ def _serve_trajectory(simulation_id: str, fmt: str):
         response.headers["Content-Disposition"] = (
             f'attachment; filename="{filename}"'
         )
+        surface_stats.increment_surface_stat(sim_dir, surface_key)
         return response
 
     except Exception as e:
@@ -5236,6 +5254,7 @@ def _serve_thread(simulation_id: str, fmt: str):
     drift test scans for, but the actual logic lives here.
     """
     from ..services import thread_formatter
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -5270,10 +5289,12 @@ def _serve_thread(simulation_id: str, fmt: str):
             payload = thread_formatter.render_thread_json(thread)
             mimetype = "application/json; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-thread.json"
+            surface_key = "thread_json"
         else:
             payload = thread_formatter.render_thread_txt(thread)
             mimetype = "text/plain; charset=utf-8"
             filename = f"miroshark-{simulation_id[:12]}-thread.txt"
+            surface_key = "thread_txt"
 
         response = Response(payload, mimetype=mimetype)
         # Short cache — the thread can change as new rounds land on a
@@ -5290,6 +5311,7 @@ def _serve_thread(simulation_id: str, fmt: str):
         response.headers["Content-Disposition"] = (
             f'inline; filename="{filename}"'
         )
+        surface_stats.increment_surface_stat(sim_dir, surface_key)
         return response
 
     except Exception as e:
@@ -5335,6 +5357,248 @@ def get_thread_json(simulation_id: str):
     Same publish gate as ``thread.txt``.
     """
     return _serve_thread(simulation_id, "json")
+
+
+@simulation_bp.route('/<simulation_id>/surface-stats', methods=['GET'])
+def get_surface_stats(simulation_id: str):
+    """Per-share-surface request counters for a published simulation.
+
+    Returns the number of times each share surface has served a
+    successful response for this simulation — share card PNG, replay
+    GIF, transcript (Markdown + JSON), trajectory (CSV + JSONL), tweet
+    thread (TXT + JSON), live watch page, and Atom / RSS feeds. Plus a
+    synthetic ``total`` summing all counters.
+
+    The first **inbound** observability surface — pairs with the
+    outbound webhook delivery log (``/<id>/webhook-log``) so an operator
+    has both directions of the distribution loop visible from the
+    EmbedDialog.
+
+    Same publish gate as the share card / transcript / trajectory /
+    thread endpoints — the counter file lives inside the sim's
+    on-disk directory and is only meaningful for sims the operator has
+    chosen to surface publicly.
+    """
+    from ..services import surface_stats
+
+    locale = get_locale(request)
+    try:
+        try:
+            summary = _build_embed_summary_payload(simulation_id)
+        except LookupError as exc:
+            return jsonify({"success": False, "error": str(exc)}), 404
+
+        if not summary.get("is_public"):
+            return jsonify({
+                "success": False,
+                "error": _t(
+                    "Simulation is not published. POST /api/simulation/<id>/publish to enable.",
+                    "该模拟未发布,请通过 POST /api/simulation/<id>/publish 启用。",
+                    locale,
+                ),
+            }), 403
+
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+        stats = surface_stats.read_surface_stats(sim_dir)
+
+        return jsonify({
+            "success": True,
+            "simulation_id": simulation_id,
+            "stats": stats,
+        })
+
+    except Exception as e:
+        logger.error(f"surface-stats: failed for {simulation_id}: {e}\n{traceback.format_exc()}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+        }), 500
+
+
+# ============== Webhook Delivery Log ==============
+#
+# PR #46 shipped the outbound completion webhook. This pair of routes
+# closes the operational gap: every Zapier / Make / n8n / Slack /
+# Discord integration built on top of that webhook needs a way to ask
+# "did it fire? what did the endpoint return? how long did it take?".
+# Without a delivery log the operator finds out about a 5xx from their
+# downstream system only by reading server logs manually.
+#
+# Both routes are admin-token gated — these endpoints leak nothing
+# secret (the URL is masked, no payload bodies persist), but the retry
+# is a side-effect-producing mutation and the log itself can include
+# error strings from the downstream service that an operator wouldn't
+# want a public probe to fingerprint.
+
+
+@simulation_bp.route('/<simulation_id>/webhook-log', methods=['GET'])
+@require_admin_token
+def get_webhook_log(simulation_id: str):
+    """Return the recent webhook delivery attempts for a simulation.
+
+    Reads ``<sim_dir>/webhook-log.jsonl`` — one line per attempt,
+    bounded to the last ``WEBHOOK_LOG_MAX_LINES`` deliveries by the
+    dispatcher itself. The response slice is the last 10 entries
+    newest-first; ``total_attempts`` is the all-time monotonic counter
+    so the dialog can show "showing last 10 of N".
+
+    Auth: requires ``Authorization: Bearer $MIROSHARK_ADMIN_TOKEN``.
+    """
+    locale = get_locale(request)
+    try:
+        validate_simulation_id(simulation_id)
+        manager = SimulationManager()
+        state = manager.get_simulation(simulation_id)
+        if not state:
+            return jsonify({"success": False, "error": _t(
+                f"Simulation not found: {simulation_id}",
+                f"未找到模拟:{simulation_id}",
+                locale,
+            )}), 404
+
+        from ..services.webhook_service import (
+            read_webhook_log,
+            WEBHOOK_LOG_RETURN_LIMIT,
+        )
+
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+        data = read_webhook_log(sim_dir, limit=WEBHOOK_LOG_RETURN_LIMIT)
+        return jsonify({"success": True, "data": data})
+
+    except Exception as e:
+        logger.error(f"webhook-log: failed for {simulation_id}: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@simulation_bp.route('/<simulation_id>/webhook-retry', methods=['POST'])
+@require_admin_token
+def retry_webhook(simulation_id: str):
+    """Re-fire the completion webhook for an already-finished simulation.
+
+    Useful when the original delivery hit a transient 5xx, the operator
+    pointed the URL at the wrong endpoint, or the consuming integration
+    was down at the time. The resulting attempt appends a fresh entry
+    to the delivery log with ``trigger:"retry"`` so a future log read
+    can tell auto-fired vs operator-fired deliveries apart.
+
+    Body (optional): ``{"status": "completed" | "failed"}`` — defaults
+    to the simulation's current runner status. The retry payload
+    carries an extra top-level ``retry: true`` so downstream consumers
+    can dedupe / handle replays differently if they care.
+
+    Returns 400 when no webhook URL is configured (configure one in
+    Settings or via the ``WEBHOOK_URL`` env var first), 409 when the
+    simulation has not reached a terminal state.
+
+    Auth: requires ``Authorization: Bearer $MIROSHARK_ADMIN_TOKEN``.
+    """
+    locale = get_locale(request)
+    try:
+        validate_simulation_id(simulation_id)
+        manager = SimulationManager()
+        state = manager.get_simulation(simulation_id)
+        if not state:
+            return jsonify({"success": False, "error": _t(
+                f"Simulation not found: {simulation_id}",
+                f"未找到模拟:{simulation_id}",
+                locale,
+            )}), 404
+
+        from ..services.webhook_service import (
+            retry_webhook_for_simulation,
+            _resolve_webhook_url,
+            claim_retry_slot,
+            RETRY_COOLDOWN_SEC,
+        )
+
+        cooldown_remaining = claim_retry_slot(simulation_id)
+        if cooldown_remaining is not None:
+            wait_s = max(1, int(round(cooldown_remaining)))
+            return jsonify({
+                "success": False,
+                "error": _t(
+                    f"Retry rate-limited — wait {wait_s}s before retrying this simulation again "
+                    f"(cooldown: {RETRY_COOLDOWN_SEC:g}s).",
+                    f"重试限速 — 请等待 {wait_s} 秒后再次重试该模拟(冷却时间:{RETRY_COOLDOWN_SEC:g} 秒)。",
+                    locale,
+                ),
+                "retry_after_seconds": wait_s,
+            }), 429
+
+        if not _resolve_webhook_url():
+            return jsonify({
+                "success": False,
+                "error": _t(
+                    "No webhook URL configured. Set WEBHOOK_URL in Settings "
+                    "or via the env var, then retry.",
+                    "未配置 webhook URL,请在设置或环境变量中设置 WEBHOOK_URL,然后重试。",
+                    locale,
+                ),
+            }), 400
+
+        run_state = SimulationRunner.get_run_state(simulation_id)
+        runner_status_str = ""
+        if run_state and hasattr(run_state, "runner_status"):
+            rs = run_state.runner_status
+            runner_status_str = (rs.value if hasattr(rs, "value") else str(rs)).lower()
+
+        body = request.get_json(silent=True) or {}
+        requested_status = (body.get("status") or "").strip().lower()
+        if requested_status:
+            if requested_status not in ("completed", "failed"):
+                return jsonify({
+                    "success": False,
+                    "error": _t(
+                        "status must be 'completed' or 'failed'",
+                        "status 必须为 'completed' 或 'failed'",
+                        locale,
+                    ),
+                }), 400
+            status = requested_status
+        else:
+            sim_status = (state.status.value if hasattr(state.status, "value") else str(state.status)).lower()
+            if runner_status_str in ("completed", "failed"):
+                status = runner_status_str
+            elif sim_status in ("completed", "failed"):
+                status = sim_status
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": _t(
+                        "Simulation has not reached a terminal state yet "
+                        "(current: " + (runner_status_str or sim_status or "unknown") + "). "
+                        "Wait for completion or pass status explicitly.",
+                        "模拟尚未达到终止状态(当前:" + (runner_status_str or sim_status or "unknown") + "),请等待完成或显式传入 status。",
+                        locale,
+                    ),
+                }), 409
+
+        sim_dir = os.path.join(Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id)
+        completed_at = getattr(run_state, "completed_at", None) if run_state else None
+        result = retry_webhook_for_simulation(
+            simulation_id,
+            status,
+            sim_dir=sim_dir,
+            state=run_state,
+            completed_at=completed_at,
+            base_url=_resolve_share_base_url(),
+        )
+
+        if not result.get("queued"):
+            return jsonify({
+                "success": False,
+                "error": _t(
+                    "Could not queue retry: " + str(result.get("error", "unknown")),
+                    "无法排队重试:" + str(result.get("error", "unknown")),
+                    locale,
+                ),
+            }), 400
+
+        return jsonify({"success": True, "data": result})
+
+    except Exception as e:
+        logger.error(f"webhook-retry: failed for {simulation_id}: {e}\n{traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # ============== Public Gallery ==============

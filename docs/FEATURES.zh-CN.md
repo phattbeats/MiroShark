@@ -190,6 +190,31 @@ WONDERWALL_MODEL_NAME=your-model-id
 
 实现:`app/services/thread_formatter.py`(纯标准库 `json` + `os`,~430 行)+ `app/api/simulation.py` 中的 `_serve_thread()` 共享函数体,镜像 `_serve_transcript` / `_serve_trajectory` 模式。零新增依赖。
 
+## 分发统计(分享面使用分析)
+
+第一个**入站**可观测性界面,与出站 Webhook 投递日志相对应。每一次成功的分享面响应都会在磁盘上(`<sim_dir>/surface-stats.json`)递增一个计数器;`GET /api/simulation/<id>/surface-stats` 返回每个分享面的计数,让运维 MiroShark 的 DeFi 基金或研究小组,能看到他们的受众实际上使用的是哪一个面。
+
+跟踪的计数器(每个分享面一个):
+
+- `share_card` — `share-card.png` 服务次数
+- `replay_gif` — `replay.gif` 服务次数
+- `transcript_md` / `transcript_json` — `transcript.md` / `transcript.json` 服务次数
+- `trajectory_csv` / `trajectory_jsonl` — `trajectory.csv` / `trajectory.jsonl` 服务次数
+- `thread_txt` / `thread_json` — `thread.txt` / `thread.json` 服务次数
+- `watch_page` — `/watch/<id>` 服务次数(仅公开模拟)
+- `feed_atom` / `feed_rss` — 此模拟出现在已渲染的 Atom 或 RSS 订阅源中的次数
+
+以及一个合成的 `total` 字段汇总所有计数器。每个键都始终存在(零默认),因此前端无需为缺失字段做特殊处理。
+
+实现:
+
+- **原子写入。** 每次递增是一个通过 tempfile + `os.replace` 的读-改-写过程,确保两个并发请求不会把 JSON 截断为 `{` 而丢失全部历史计数。与 webhook 投递日志使用同一模式。
+- **有界。** 单个小型 JSON 对象 — 仅 `SURFACE_KEYS` 中的键被持久化;来自调用方的未知键会被静默丢弃,绝不会写入。
+- **fire-and-forget。** 递增永远不抛异常;损坏的计数器文件会被静默重置为零。即使分析层故障(只读挂载、磁盘满、暂存文件被杀毒锁定),服务路径也始终成功。
+- **仅标准库。** `json` + `os` + `tempfile`。零新增依赖。
+
+嵌入对话框有「📊 分发统计」面板(默认折叠,点击 ▾ 展开)— 一个有序的两列表(分享面 · 计数,按计数倒序排序),一个「总服务数:N」行,以及一个「↻ 刷新」按钮。该面板有发布门控;私有模拟会显示「发布模拟以查看分发统计。」。与每个其他分享面一样的发布门控(`is_public=true`)。
+
 ## 图库搜索与筛选
 
 `/explore` 是公开研究界面 — 每一次发布的 MiroShark 模拟,都以卡片网格浏览。当语料库突破几十条后,反向时间序列的滚动列表就不再是工具,因此图库现在自带索引:卡片之上有一个关键词搜索框、一组共识筛选芯片、一组质量筛选芯片以及一个排序下拉。激活的筛选集合保存在 URL 参数中(`?q=…&consensus=bearish&quality=excellent&sort=rounds`),因此任意筛选视图都可作为书签分享 — "每一次关于 Aave 的优秀质量看跌预言"成了一个可发推文的 URL。
@@ -227,6 +252,31 @@ WONDERWALL_MODEL_NAME=your-model-id
 - **实现:** 纯标准库(`xml.etree.ElementTree` + `html`)。无新增依赖;立场阈值与其他界面一样是 ±0.2,所以"62% 看涨"字符串与画廊卡片字节对字节一致。
 
 嵌入对话框有一条"通过 RSS 关注画廊"的提示,带 Atom 订阅、RSS 2.0 订阅、仅已验证 Atom 订阅的一键订阅链接。/explore 头部有一个"📡 通过 RSS 订阅"芯片,会镜像当前激活过滤(开启已验证过滤时也会跟随)。
+
+## Webhook 投递日志
+
+每一次 Webhook 投递尝试(在 **设置 → 集成 → Webhook** 中配置,详见 [WEBHOOKS.zh-CN.md](WEBHOOKS.zh-CN.md))都会在 `<sim_dir>/webhook-log.jsonl` 追加一行 JSON。每行记录:
+
+- **`attempt`** — 1 起单调递增计数器(磁盘截断到 50 行后仍持续递增)。
+- **`timestamp`** — 投递完成的 UTC ISO-8601 时间。
+- **`url_masked`** — `scheme://host/***`。Slack / Discord webhook URL 路径中的密钥**绝不**写入磁盘。
+- **`event`** / **`status`** — 投递载荷的 `event` 字段(`simulation.completed` / `simulation.failed`)与运行到达的终止状态。
+- **`status_code`** — 下游端点返回的 HTTP 状态码,对网络错误 / 超时为 `null`(便于把真实 5xx 与 TCP 重置区分开)。
+- **`ok`** — 2xx 响应为 `true`,其他情况为 `false`。
+- **`latency_ms`** — HTTP 调用的实测耗时(毫秒)。
+- **`error`** — 失败时的可读上游错误字符串(例如 `HTTP 503`、`URL error: timeout`);成功时为 `null`。
+- **`trigger`** — runner 自动触发为 `auto`,运维者通过重试端点驱动为 `retry`。
+
+两个端点暴露日志:
+
+- **`GET /api/simulation/<id>/webhook-log`** — 需管理员 token。返回最近 10 条记录(从新到旧)+ 全程 `total_attempts` 计数器 + 磁盘留存上限(`max_retained: 50`)。运维者据此核对 webhook 是否触发、看 HTTP 状态 / 延迟,以及决定是否重试。
+- **`POST /api/simulation/<id>/webhook-retry`** — 需管理员 token。重发已经处于终止状态的模拟的完成 webhook(原投递偶发 5xx、URL 当时配错、消费集成当时宕机时有用)。重发载荷带 `retry: true`,下游消费者可据此对重放去重。绕过自动触发路径使用的进程内 `(sim_id, status)` 去重门(那道门只防止 runner 的两条终止代码路径自动双发;运维者显式重试理应总能通过)。未配置 webhook URL 时返回 400,模拟尚未到达终止状态时返回 409。
+
+嵌入对话框在 outcome 行下方有一个 **📡 Webhook 投递历史** 面板(需管理员 token,默认折叠以保持对话框紧凑,适配未配置 webhook 的用户)。每次投递渲染为状态 chip(✓ 绿色对应 2xx,✗ 红色对应 4xx/5xx,⏱ 琥珀色对应超时),含 HTTP 状态码、延迟、触发标签和时间戳。**刷新** 重新拉取日志;**重试投递** 重发 webhook 并在短暂延迟后刷新,以便新一次投递自动出现。
+
+调度器在 POST 返回(或超时)之后才写盘,所以投递路径仍是 fire-and-forget — 日志写入永远不会阻塞模拟 runner。日志写入采用读-改-重命名模式(通过 `os.replace` 原子化),日志永远不会因部分写入而损坏。URL 在序列化前就掩码,所以 Slack / Discord URL 中的密钥落盘那刻便已不存在。
+
+实现:`app/services/webhook_service.py` 中的辅助(`_record_delivery`、`_append_log_entry`、`read_webhook_log`、`retry_webhook_for_simulation`)+ `_start_dispatch_thread` 在自动触发与重试路径间共享。零新增依赖(纯标准库 `json` + `os` + `time` + `threading`)。磁盘上限 50 行;旧投递自动滚出,日志永不无界增长。
 
 ## 文章生成
 

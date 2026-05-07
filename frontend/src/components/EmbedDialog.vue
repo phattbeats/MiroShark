@@ -468,6 +468,84 @@
               </div>
             </div>
 
+            <!-- Inbound observability — per-share-surface request
+                 counters. Pairs with the outbound webhook delivery log
+                 so an operator running MiroShark for a DeFi fund or
+                 research group has both directions of the distribution
+                 loop visible from the same dialog. Collapsed by default
+                 to keep the panel compact for users who only care about
+                 the share / publish / outcome flow. -->
+            <div class="transcript-section surface-stats-section">
+              <div class="transcript-head surface-stats-head" @click="toggleSurfaceStats">
+                <span class="transcript-icon">📊</span>
+                <div class="transcript-head-body">
+                  <div class="transcript-title">
+                    {{ $tr('Distribution', '分发统计') }}
+                    <span v-if="isPublic && surfaceStatsTotal > 0" class="surface-stats-total-badge">
+                      {{ surfaceStatsTotal }}
+                    </span>
+                  </div>
+                  <div class="transcript-sub">
+                    {{ $tr('How many times each share surface has been served — the inbound side of the distribution loop the webhook log tracks on the outbound side.', '每个分享面已被服务的次数 — 分发回路的入站侧,webhook 日志跟踪的是出站侧。') }}
+                  </div>
+                </div>
+                <button
+                  class="surface-stats-chevron"
+                  :class="{ 'surface-stats-chevron-open': surfaceStatsExpanded }"
+                  :aria-expanded="surfaceStatsExpanded"
+                  type="button"
+                >
+                  ▾
+                </button>
+              </div>
+
+              <div v-if="surfaceStatsExpanded" class="surface-stats-body">
+                <div v-if="!isPublic" class="transcript-empty">
+                  {{ $tr('Publish the simulation to see distribution stats.', '发布模拟以查看分发统计。') }}
+                </div>
+                <div v-else-if="surfaceStatsLoading" class="surface-stats-loading">
+                  {{ $tr('Loading distribution data…', '加载分发数据…') }}
+                </div>
+                <div v-else-if="surfaceStatsError" class="transcript-empty surface-stats-error">
+                  {{ surfaceStatsError }}
+                </div>
+                <div v-else-if="surfaceStatsAllZero" class="transcript-empty">
+                  {{ $tr('No surface serves recorded yet — share this simulation to see distribution data appear here.', '尚未记录任何分享面服务 — 分享此模拟即可在此查看分发数据。') }}
+                </div>
+                <div v-else class="surface-stats-table">
+                  <div
+                    v-for="row in surfaceStatsRows"
+                    :key="`stats-row-${row.key}`"
+                    class="surface-stats-row"
+                    :class="{ 'surface-stats-row-zero': row.count === 0 }"
+                  >
+                    <span class="surface-stats-label">{{ row.label }}</span>
+                    <span class="surface-stats-count">{{ row.count }}</span>
+                  </div>
+                  <div class="surface-stats-row surface-stats-row-total">
+                    <span class="surface-stats-label">{{ $tr('Total serves', '总服务数') }}</span>
+                    <span class="surface-stats-count">{{ surfaceStatsTotal }}</span>
+                  </div>
+                </div>
+
+                <div v-if="!surfaceStatsAllZero" class="surface-stats-caveat">
+                  {{ $tr('Counts origin hits only — CDN and browser caches are not counted, so true audience reach is higher.', '仅统计源服务器命中 — 不计入 CDN 与浏览器缓存,实际受众覆盖更高。') }}
+                </div>
+
+                <div v-if="isPublic" class="surface-stats-actions">
+                  <button
+                    class="surface-stats-refresh"
+                    type="button"
+                    :disabled="surfaceStatsLoading"
+                    @click="loadSurfaceStats"
+                  >
+                    <span v-if="surfaceStatsLoading">{{ $tr('Refreshing…', '刷新中…') }}</span>
+                    <span v-else>↻ {{ $tr('Refresh', '刷新') }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <!-- Verified-prediction annotation — lets operators turn a
                  published simulation into a "called it" record on the
                  /verified gallery page. Only meaningful once the run is
@@ -551,6 +629,96 @@
 
                 <div v-if="outcomeMessage" class="outcome-message" :class="outcomeMessageClass">
                   {{ outcomeMessage }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Webhook delivery history — every Zapier / Make / n8n /
+                 Slack / Discord integration built on top of the outbound
+                 completion webhook (PR #46) needs a feedback loop so the
+                 operator can verify it fired. Reads the last 10 entries
+                 from <sim_dir>/webhook-log.jsonl. Admin-token gated
+                 server-side; the panel shows a "configure first" hint
+                 instead of a hard error when the token is unset. -->
+            <div class="webhook-log-section">
+              <div class="webhook-log-head">
+                <span class="webhook-log-icon">📡</span>
+                <div class="webhook-log-head-body">
+                  <div class="webhook-log-title">
+                    {{ $tr('Webhook delivery history', 'Webhook 投递历史') }}
+                    <span v-if="webhookLogTotal > 0" class="webhook-log-count">
+                      {{ webhookLogTotal }} {{ webhookLogTotal === 1 ? $tr('attempt', '次') : $tr('attempts', '次') }}
+                    </span>
+                  </div>
+                  <div class="webhook-log-sub">
+                    {{ $tr('Auto-fires on simulation completion. Records the last 50 attempts on disk so a delivery failure is visible without checking server logs.', '在模拟完成时自动触发。最多在磁盘上保留 50 次投递记录,无需查看服务器日志即可发现失败。') }}
+                  </div>
+                </div>
+                <button
+                  class="webhook-log-toggle"
+                  @click="toggleWebhookLog"
+                  :title="webhookLogExpanded ? $tr('Hide history', '隐藏历史') : $tr('Show history', '显示历史')"
+                >
+                  {{ webhookLogExpanded ? '▾' : '▸' }}
+                </button>
+              </div>
+
+              <div v-if="webhookLogExpanded" class="webhook-log-body">
+                <div v-if="webhookLogLoading" class="webhook-log-loading">
+                  {{ $tr('Loading delivery history…', '正在加载投递历史…') }}
+                </div>
+
+                <div v-else-if="webhookLogConfigError" class="webhook-log-config-hint">
+                  {{ $tr('Admin authentication is not configured on this deployment. Set MIROSHARK_ADMIN_TOKEN to enable the delivery log.', '此部署未配置管理员身份验证。设置 MIROSHARK_ADMIN_TOKEN 以启用投递日志。') }}
+                </div>
+
+                <div v-else-if="webhookLogError" class="webhook-log-error">
+                  {{ webhookLogError }}
+                </div>
+
+                <div v-else-if="webhookLogEntries.length === 0" class="webhook-log-empty">
+                  {{ $tr('No deliveries recorded yet. The webhook fires automatically on simulation completion.', '暂无投递记录。Webhook 会在模拟完成时自动触发。') }}
+                </div>
+
+                <ul v-else class="webhook-log-list">
+                  <li
+                    v-for="entry in webhookLogEntries"
+                    :key="entry.attempt"
+                    class="webhook-log-row"
+                    :class="webhookEntryClass(entry)"
+                  >
+                    <span class="webhook-log-row-icon">{{ webhookEntryIcon(entry) }}</span>
+                    <span class="webhook-log-row-attempt">#{{ entry.attempt }}</span>
+                    <span class="webhook-log-row-code">{{ webhookEntryCode(entry) }}</span>
+                    <span class="webhook-log-row-latency">{{ formatLatency(entry.latency_ms) }}</span>
+                    <span class="webhook-log-row-trigger">{{ entry.trigger || '—' }}</span>
+                    <span class="webhook-log-row-time" :title="entry.timestamp || ''">
+                      {{ formatLogTime(entry.timestamp) }}
+                    </span>
+                  </li>
+                </ul>
+
+                <div class="webhook-log-actions">
+                  <button
+                    class="webhook-log-refresh"
+                    @click="loadWebhookLog"
+                    :disabled="webhookLogLoading"
+                  >
+                    {{ $tr('Refresh', '刷新') }}
+                  </button>
+                  <button
+                    class="webhook-log-retry"
+                    @click="retryWebhook"
+                    :disabled="webhookRetrying || !canRetryWebhook"
+                    :title="canRetryWebhook ? $tr('Re-fire the webhook with the same payload', '使用相同 payload 重发 webhook') : $tr('Retry available after the simulation reaches a terminal state', '模拟到达终止状态后可重试')"
+                  >
+                    <span v-if="webhookRetrying">{{ $tr('Queueing…', '排队中…') }}</span>
+                    <span v-else>{{ $tr('Retry delivery', '重试投递') }}</span>
+                  </button>
+                </div>
+
+                <div v-if="webhookRetryMessage" class="webhook-log-message" :class="webhookRetryMessageClass">
+                  {{ webhookRetryMessage }}
                 </div>
               </div>
             </div>
@@ -664,9 +832,12 @@ import {
   getTrajectoryJsonlUrl,
   getThreadTxtUrl,
   getThreadJsonUrl,
+  getSurfaceStats,
   getFeedUrl,
   getSimulationOutcome,
   submitSimulationOutcome,
+  getWebhookLog,
+  retryWebhookDelivery,
 } from '../api/simulation'
 import { tr } from '../i18n'
 
@@ -851,6 +1022,90 @@ const loadThread = async () => {
     threadTruncated.value = false
   } finally {
     threadLoading.value = false
+  }
+}
+
+// ── Surface-stats state ────────────────────────────────────────────────
+// The first inbound observability surface — pairs with the outbound
+// webhook delivery log. Counters live in `<sim_dir>/surface-stats.json`
+// and are incremented by every successful `_serve_X` handler. The
+// panel is collapsed by default to keep the dialog compact for users
+// who only care about the share / publish / outcome flow.
+const surfaceStatsExpanded = ref(false)
+const surfaceStatsLoading = ref(false)
+const surfaceStatsError = ref('')
+const surfaceStats = ref(null)
+
+const SURFACE_STAT_LABELS = [
+  { key: 'share_card', label: tr('Share card · PNG', '分享卡片 · PNG') },
+  { key: 'replay_gif', label: tr('Replay GIF', '回放 GIF') },
+  { key: 'transcript_md', label: tr('Transcript · Markdown', '记录 · Markdown') },
+  { key: 'transcript_json', label: tr('Transcript · JSON', '记录 · JSON') },
+  { key: 'trajectory_csv', label: tr('Trajectory · CSV', '轨迹 · CSV') },
+  { key: 'trajectory_jsonl', label: tr('Trajectory · JSONL', '轨迹 · JSONL') },
+  { key: 'thread_txt', label: tr('Tweet thread · TXT', '推文串 · TXT') },
+  { key: 'thread_json', label: tr('Tweet thread · JSON', '推文串 · JSON') },
+  { key: 'watch_page', label: tr('Watch page', '观看页面') },
+  { key: 'feed_atom', label: tr('Atom feed', 'Atom 源') },
+  { key: 'feed_rss', label: tr('RSS feed', 'RSS 源') },
+]
+
+const surfaceStatsRows = computed(() => {
+  const stats = surfaceStats.value || {}
+  return SURFACE_STAT_LABELS
+    .map((row) => ({ ...row, count: Number(stats[row.key] || 0) }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key))
+})
+
+const surfaceStatsTotal = computed(() => {
+  if (!surfaceStats.value) return 0
+  return Number(surfaceStats.value.total || 0)
+})
+
+const surfaceStatsAllZero = computed(() => {
+  if (!surfaceStats.value) return true
+  return surfaceStatsTotal.value === 0
+})
+
+const loadSurfaceStats = async () => {
+  if (!props.simulationId || !isPublic.value) {
+    surfaceStats.value = null
+    return
+  }
+  surfaceStatsLoading.value = true
+  surfaceStatsError.value = ''
+  try {
+    const res = await getSurfaceStats(props.simulationId)
+    if (res?.success && res.stats) {
+      surfaceStats.value = res.stats
+    } else if (res?.data?.stats) {
+      surfaceStats.value = res.data.stats
+    } else {
+      surfaceStats.value = null
+      surfaceStatsError.value = res?.error
+        || tr('Could not load distribution stats.', '无法加载分发统计。')
+    }
+  } catch (err) {
+    if (err?.response?.status === 403) {
+      surfaceStatsError.value = tr(
+        'Publish the simulation to see distribution stats.',
+        '发布模拟以查看分发统计。',
+      )
+    } else {
+      surfaceStatsError.value = err?.response?.data?.error
+        || err?.message
+        || tr('Could not load distribution stats.', '无法加载分发统计。')
+    }
+    surfaceStats.value = null
+  } finally {
+    surfaceStatsLoading.value = false
+  }
+}
+
+const toggleSurfaceStats = () => {
+  surfaceStatsExpanded.value = !surfaceStatsExpanded.value
+  if (surfaceStatsExpanded.value && !surfaceStats.value) {
+    loadSurfaceStats()
   }
 }
 
@@ -1056,6 +1311,174 @@ const submitOutcome = async () => {
   }
 }
 
+// ── Webhook delivery log ───────────────────────────────────────────────
+// Operators get no feedback today on whether the outbound completion
+// webhook actually fired — this panel reads ``<sim_dir>/webhook-log.jsonl``
+// (admin-token gated server-side) so a 5xx from Zapier / n8n / Slack /
+// Discord doesn't disappear into server logs.
+const webhookLogExpanded = ref(false)
+const webhookLogLoading = ref(false)
+const webhookLogEntries = ref([])
+const webhookLogTotal = ref(0)
+const webhookLogError = ref('')
+const webhookLogConfigError = ref(false)
+const webhookRetrying = ref(false)
+const webhookRetryMessage = ref('')
+const webhookRetryMessageClass = ref('')
+const runnerStatus = ref('')
+
+const canRetryWebhook = computed(() => {
+  // Retry only meaningful once the run has reached a terminal state —
+  // before then there's no completion event to replay.
+  const s = (runnerStatus.value || '').toLowerCase()
+  return s === 'completed' || s === 'failed'
+})
+
+const formatLatency = (ms) => {
+  if (typeof ms !== 'number' || Number.isNaN(ms)) return '—'
+  if (ms < 1000) return `${ms}ms`
+  return `${(ms / 1000).toFixed(2)}s`
+}
+
+const formatLogTime = (iso) => {
+  if (!iso || typeof iso !== 'string') return '—'
+  try {
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return iso
+    // Compact time-only label so the row stays one line on narrow screens.
+    return d.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return iso
+  }
+}
+
+const webhookEntryClass = (entry) => {
+  if (!entry) return ''
+  if (entry.ok) return 'webhook-row-ok'
+  if (entry.status_code === null && (entry.error || '').toLowerCase().includes('timeout')) {
+    return 'webhook-row-timeout'
+  }
+  return 'webhook-row-fail'
+}
+
+const webhookEntryIcon = (entry) => {
+  if (!entry) return ''
+  if (entry.ok) return '✓'
+  if (entry.status_code === null && (entry.error || '').toLowerCase().includes('timeout')) {
+    return '⏱'
+  }
+  return '✗'
+}
+
+const webhookEntryCode = (entry) => {
+  if (!entry) return '—'
+  if (typeof entry.status_code === 'number') return `HTTP ${entry.status_code}`
+  if (entry.error) {
+    const text = String(entry.error)
+    return text.length > 40 ? `${text.slice(0, 39)}…` : text
+  }
+  return '—'
+}
+
+const loadWebhookLog = async () => {
+  if (!props.simulationId) return
+  webhookLogLoading.value = true
+  webhookLogError.value = ''
+  webhookLogConfigError.value = false
+  try {
+    const res = await getWebhookLog(props.simulationId)
+    const data = res?.data || {}
+    webhookLogEntries.value = Array.isArray(data.entries) ? data.entries : []
+    webhookLogTotal.value = Number(data.total_attempts || 0)
+  } catch (err) {
+    const status = err?.response?.status
+    if (status === 503) {
+      webhookLogConfigError.value = true
+    } else if (status === 401) {
+      webhookLogError.value = tr(
+        'Admin token does not match — set Authorization: Bearer $MIROSHARK_ADMIN_TOKEN at your reverse proxy to view the log.',
+        '管理员 token 不匹配 — 请在反向代理处设置 Authorization: Bearer $MIROSHARK_ADMIN_TOKEN 以查看日志。',
+      )
+    } else {
+      webhookLogError.value =
+        err?.response?.data?.error || err?.message || tr('Could not load delivery history.', '无法加载投递历史。')
+    }
+    webhookLogEntries.value = []
+    webhookLogTotal.value = 0
+  } finally {
+    webhookLogLoading.value = false
+  }
+}
+
+const toggleWebhookLog = () => {
+  webhookLogExpanded.value = !webhookLogExpanded.value
+  if (webhookLogExpanded.value && webhookLogEntries.value.length === 0 && !webhookLogError.value) {
+    loadWebhookLog()
+  }
+}
+
+const retryWebhook = async () => {
+  if (!canRetryWebhook.value || webhookRetrying.value) return
+  webhookRetrying.value = true
+  webhookRetryMessage.value = ''
+  webhookRetryMessageClass.value = ''
+  try {
+    const res = await retryWebhookDelivery(props.simulationId, {})
+    if (res?.success && res.data?.queued) {
+      webhookRetryMessage.value = tr(
+        'Queued — refresh in a moment to see the new attempt.',
+        '已排队 — 稍后刷新查看新一次投递。',
+      )
+      webhookRetryMessageClass.value = 'webhook-log-message-ok'
+      // Pull fresh entries after a short delay so the daemon thread has
+      // time to log its result. 1.2s comfortably covers a healthy
+      // round-trip; a slow downstream still surfaces on the next manual
+      // Refresh click.
+      setTimeout(() => loadWebhookLog(), 1200)
+    } else {
+      webhookRetryMessage.value =
+        res?.error || tr('Could not queue retry.', '无法排队重试。')
+      webhookRetryMessageClass.value = 'webhook-log-message-error'
+    }
+  } catch (err) {
+    const status = err?.response?.status
+    if (status === 400) {
+      webhookRetryMessage.value = err?.response?.data?.error
+        || tr('No webhook URL configured.', '未配置 webhook URL。')
+    } else if (status === 409) {
+      webhookRetryMessage.value = err?.response?.data?.error
+        || tr('Simulation has not finished yet.', '模拟尚未完成。')
+    } else if (status === 503) {
+      webhookRetryMessage.value = tr(
+        'Admin authentication not configured.',
+        '未配置管理员身份验证。',
+      )
+    } else {
+      webhookRetryMessage.value =
+        err?.response?.data?.error || err?.message || tr('Could not queue retry.', '无法排队重试。')
+    }
+    webhookRetryMessageClass.value = 'webhook-log-message-error'
+  } finally {
+    webhookRetrying.value = false
+  }
+}
+
+const _resetWebhookLogState = () => {
+  webhookLogExpanded.value = false
+  webhookLogEntries.value = []
+  webhookLogTotal.value = 0
+  webhookLogError.value = ''
+  webhookLogConfigError.value = false
+  webhookRetryMessage.value = ''
+  webhookRetryMessageClass.value = ''
+  runnerStatus.value = ''
+}
+
 watch(() => props.open, async (val) => {
   if (!val) return
   copied.value = ''
@@ -1065,10 +1488,15 @@ watch(() => props.open, async (val) => {
   replayPlay.value = false
   replayLoaded.value = false
   _resetOutcomeForm()
+  _resetWebhookLogState()
   // Refresh public state when reopened — reflects external flips.
   try {
     const res = await getEmbedSummary(props.simulationId)
     if (typeof res?.data?.is_public === 'boolean') isPublic.value = res.data.is_public
+    // Capture the runner status so the Retry button knows whether the
+    // sim has reached a terminal state — auto-fire only triggers on
+    // completed/failed, so retry semantics need the same gate.
+    runnerStatus.value = res?.data?.runner_status || res?.data?.status || ''
   } catch (err) {
     if (err?.response?.status === 403) isPublic.value = false
   }
@@ -1083,6 +1511,14 @@ watch(() => props.open, async (val) => {
   // gate, so a private sim resolves cleanly to the empty state without
   // an extra round-trip on every dialog open.
   loadThread()
+  // Reset surface-stats state on each open so a previously expanded
+  // panel doesn't show stale numbers from a different sim. The
+  // counters are only fetched on demand (when the operator expands
+  // the panel) so a viewer who only cares about the share flow
+  // doesn't pay the network round-trip.
+  surfaceStatsExpanded.value = false
+  surfaceStats.value = null
+  surfaceStatsError.value = ''
 })
 
 // When the operator toggles public on, the share-card endpoint flips from
@@ -1092,6 +1528,13 @@ watch(isPublic, () => {
   // Re-fetch the thread when the publish flag flips — going public means
   // the gate now passes, so the previously-403 fetch should retry.
   loadThread()
+  // Same publish-gate flip applies to the surface-stats panel — pull
+  // fresh counters if the user has the panel expanded.
+  if (surfaceStatsExpanded.value) {
+    loadSurfaceStats()
+  } else {
+    surfaceStats.value = null
+  }
 })
 </script>
 
@@ -1827,6 +2270,170 @@ watch(isPublic, () => {
   font-style: italic;
 }
 
+/* Surface usage analytics — pairs visually with the transcript /
+   trajectory / thread sections (same shell, same head shape) so the
+   dialog reads as one continuous Publish & Embed flow. The head is
+   the click target that toggles the body open / closed; body uses a
+   compact two-column grid (label / count) sorted by count desc so
+   the operator's most-used surface lands at the top of the table. */
+.surface-stats-section {
+  cursor: default;
+}
+
+.surface-stats-head {
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+}
+
+.surface-stats-head:hover .surface-stats-chevron {
+  color: #0a0a0a;
+}
+
+.surface-stats-total-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #0a0a0a;
+  background: #f4ecd8;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.surface-stats-chevron {
+  border: 0;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1;
+  color: #6b6b6b;
+  cursor: pointer;
+  padding: 4px 6px;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.surface-stats-chevron-open {
+  transform: rotate(180deg);
+  color: #0a0a0a;
+}
+
+.surface-stats-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.surface-stats-loading {
+  font-size: 12px;
+  color: #6b6b6b;
+  font-style: italic;
+}
+
+.surface-stats-error {
+  color: #b91c1c;
+}
+
+.surface-stats-table {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+  column-gap: 14px;
+  padding: 10px 12px;
+  background: #fafaf7;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.surface-stats-row {
+  display: contents;
+  color: #1a1a1a;
+}
+
+.surface-stats-row > .surface-stats-label {
+  padding: 3px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.surface-stats-row > .surface-stats-count {
+  padding: 3px 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.surface-stats-row-zero > .surface-stats-label,
+.surface-stats-row-zero > .surface-stats-count {
+  color: #9b9b9b;
+  font-weight: 400;
+}
+
+.surface-stats-row-total {
+  border-top: 1px solid #ececec;
+  margin-top: 2px;
+  padding-top: 2px;
+}
+
+.surface-stats-row-total > .surface-stats-label {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.surface-stats-row-total > .surface-stats-count {
+  font-weight: 700;
+}
+
+.surface-stats-caveat {
+  margin-top: 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #6b6b6b;
+  background: #f7f7f7;
+  border-radius: 4px;
+}
+
+.surface-stats-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.surface-stats-refresh {
+  border: 1px solid #d4d4d4;
+  background: #ffffff;
+  color: #1a1a1a;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.surface-stats-refresh:hover:not(:disabled) {
+  background: #f4ecd8;
+  border-color: #c2a76b;
+}
+
+.surface-stats-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .surface-stats-table {
+    font-size: 11px;
+  }
+}
+
 /* Live watch page — distinct visual treatment (warm orange tint)
    to signal the broadcast/live framing vs. the finished-result
    share card above. Reuses the structural rules from the transcript
@@ -2289,6 +2896,240 @@ watch(isPublic, () => {
 .snippet-copy-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Webhook delivery history — collapsed by default to keep the dialog
+   compact for users who don't have a webhook configured. Expands to a
+   compact tabular row layout that reads like a tail of a delivery log
+   (one row per attempt, status colour, latency, trigger, time). */
+.webhook-log-section {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: #fafafa;
+  border: 1px solid rgba(10, 10, 10, 0.08);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.webhook-log-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.webhook-log-icon {
+  font-size: 20px;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.webhook-log-head-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.webhook-log-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.webhook-log-count {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #4a4a4a;
+  padding: 2px 7px;
+  background: rgba(10, 10, 10, 0.06);
+  border-radius: 999px;
+}
+
+.webhook-log-sub {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #4a4a4a;
+  margin-top: 4px;
+}
+
+.webhook-log-toggle {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(10, 10, 10, 0.18);
+  color: #0a0a0a;
+  font-size: 13px;
+  font-weight: 600;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.webhook-log-toggle:hover {
+  background: rgba(10, 10, 10, 0.05);
+}
+
+.webhook-log-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.webhook-log-loading,
+.webhook-log-empty,
+.webhook-log-config-hint,
+.webhook-log-error {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #4a4a4a;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(10, 10, 10, 0.04);
+}
+
+.webhook-log-config-hint {
+  background: rgba(255, 178, 0, 0.12);
+  color: #7a4a00;
+}
+
+.webhook-log-error {
+  background: rgba(255, 68, 68, 0.10);
+  color: #b22020;
+}
+
+.webhook-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.webhook-log-row {
+  display: grid;
+  grid-template-columns: auto auto auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.06);
+}
+
+.webhook-log-row-icon {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.webhook-log-row-attempt {
+  color: #4a4a4a;
+  font-size: 11px;
+}
+
+.webhook-log-row-code {
+  font-weight: 600;
+  color: #0a0a0a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.webhook-log-row-latency {
+  color: #4a4a4a;
+}
+
+.webhook-log-row-trigger {
+  color: #6a6a6a;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.webhook-log-row-time {
+  color: #6a6a6a;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.webhook-row-ok .webhook-log-row-icon { color: #2e7d32; }
+.webhook-row-fail .webhook-log-row-icon { color: #b22020; }
+.webhook-row-timeout .webhook-log-row-icon { color: #b97000; }
+
+.webhook-row-ok { border-left: 3px solid #2e7d32; }
+.webhook-row-fail { border-left: 3px solid #b22020; }
+.webhook-row-timeout { border-left: 3px solid #b97000; }
+
+.webhook-log-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.webhook-log-refresh,
+.webhook-log-retry {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  border: 1px solid rgba(10, 10, 10, 0.18);
+  background: #fff;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.webhook-log-refresh:hover,
+.webhook-log-retry:hover {
+  background: #0a0a0a;
+  color: #fff;
+  border-color: #0a0a0a;
+}
+
+.webhook-log-refresh:disabled,
+.webhook-log-retry:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.webhook-log-message {
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.webhook-log-message-ok {
+  background: rgba(67, 193, 101, 0.12);
+  color: #1f6b35;
+}
+
+.webhook-log-message-error {
+  background: rgba(255, 68, 68, 0.12);
+  color: #b22020;
+}
+
+@media (max-width: 600px) {
+  .webhook-log-row {
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+    grid-row-gap: 2px;
+  }
+  .webhook-log-row-trigger,
+  .webhook-log-row-time { grid-column: 1 / -1; }
 }
 
 /* Transition */

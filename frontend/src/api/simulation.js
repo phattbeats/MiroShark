@@ -548,6 +548,29 @@ export const getThreadJsonUrl = (simulationId, origin) => {
 }
 
 /**
+ * Fetch per-share-surface request counters for a published
+ * simulation. Returns `{success, simulation_id, stats}` where `stats`
+ * is the per-surface counter dict — `share_card`, `replay_gif`,
+ * `transcript_md` / `transcript_json`, `trajectory_csv` /
+ * `trajectory_jsonl`, `thread_txt` / `thread_json`, `watch_page`,
+ * `feed_atom` / `feed_rss`, plus a synthetic `total`.
+ *
+ * The inbound observability surface — pairs with the outbound
+ * webhook delivery log so an operator running MiroShark for a DeFi
+ * fund or research group can see which surfaces their audience
+ * actually uses.
+ *
+ * Same publish gate as the share card / transcript / trajectory /
+ * thread endpoints. Returns 403 for unpublished simulations.
+ *
+ * @param {string} simulationId
+ * @returns {Promise<{success: boolean, simulation_id: string, stats: object}>}
+ */
+export const getSurfaceStats = (simulationId) => {
+  return service.get(`/api/simulation/${simulationId}/surface-stats`)
+}
+
+/**
  * Build the absolute URL of the public share landing page for a
  * simulation. The page exposes Open Graph + Twitter Card meta tags so
  * pasting the URL into Twitter/X / Discord / Slack / LinkedIn unfurls
@@ -802,6 +825,40 @@ export const getSimulationOutcome = (simulationId) => {
  */
 export const submitSimulationOutcome = (simulationId, data) => {
   return service.post(`/api/simulation/${simulationId}/outcome`, data)
+}
+
+/**
+ * Fetch the recent webhook delivery attempts for a simulation.
+ *
+ * Reads `<sim_dir>/webhook-log.jsonl` server-side and returns the
+ * newest 10 entries plus the all-time `total_attempts` count. Useful
+ * for the EmbedDialog "Delivery history" panel — operators can verify
+ * that the outbound webhook fired, what the downstream endpoint
+ * returned, and how long the round trip took.
+ *
+ * Admin-token gated server-side. The SPA does not attach the token —
+ * deployments behind a reverse proxy that adds the bearer header
+ * automatically work; localhost dev installs without a configured
+ * token will see a 503 and the panel renders a "configure first" hint.
+ *
+ * @param {string} simulationId
+ */
+export const getWebhookLog = (simulationId) => {
+  return service.get(`/api/simulation/${simulationId}/webhook-log`)
+}
+
+/**
+ * Re-fire the completion webhook for an already-finished simulation.
+ *
+ * Intended for the "Retry delivery" button in the EmbedDialog
+ * Delivery history panel. The retry payload carries an extra
+ * `retry: true` so downstream consumers can dedupe or surface replays.
+ *
+ * @param {string} simulationId
+ * @param {Object} [data] - { status?: 'completed' | 'failed' }
+ */
+export const retryWebhookDelivery = (simulationId, data = {}) => {
+  return service.post(`/api/simulation/${simulationId}/webhook-retry`, data)
 }
 
 /**
