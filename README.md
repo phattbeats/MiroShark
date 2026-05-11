@@ -93,7 +93,7 @@ After launching, click the **中 / EN** toggle in the top-right of the navbar to
 | **Tweet Thread Export** | `GET /api/simulation/<id>/thread.txt` — auto-formatted X / Twitter thread, intro tweet + one tweet per belief inflection point + close tweet (with watch + share URLs). Each tweet ≤280 chars; copy individual tweets or the whole thread. Pairs with the share card / replay GIF / transcript / trajectory / watch page as the sixth share format |
 | **Live Watch Page** | `/watch/<sim_id>` — minimal full-viewport broadcast page with a vanilla-JS poller that refreshes the belief bar, round counter, and progress bar every 15 s while the simulation runs. Auto-unfurls as a 1200×630 image card when tweeted; the "tweet a sim mid-run" format alongside the finished-result share card |
 | **Public Gallery** | `/explore` browses every published simulation as a card grid — preview the share card, consensus split, and quality health; click to open or one-click fork |
-| **Gallery Search & Filter** | Keyword search + bullish/neutral/bearish + excellent/good/fair/poor + sort by date/rounds/agents on `/explore` and `/verified`. URL-encoded so `?q=aave&consensus=bearish` is bookmarkable. Same ±0.2 stance threshold as every other surface |
+| **Gallery Search & Filter** | Keyword search + bullish/neutral/bearish + excellent/good/fair/poor + sort by date/rounds/agents/trending on `/explore` and `/verified`. `trending` ranks by cumulative share-surface serves so the most-distributed sims float to the top. URL-encoded so `?q=aave&consensus=bearish` is bookmarkable. Same ±0.2 stance threshold as every other surface |
 | **Verified Predictions** | Annotate any public sim with the real-world outcome (called it / partial / called wrong + URL). `/verified` is the dedicated hall of calls that landed |
 | **RSS / Atom Feeds** | `/api/feed.atom` + `/api/feed.rss` — every newly published simulation lands in Feedly / Readwise / Inoreader / NetNewsWire / Obsidian RSS without anyone curating it. `?verified=1` for the verified-only stream |
 | **Article Generation** | Substack-style write-up of what happened, grounded in actual posts and trades |
@@ -105,7 +105,7 @@ After launching, click the **中 / EN** toggle in the top-right of the navbar to
 | **Push Notifications** | Web-push alerts when long-running graph / sim / report jobs finish |
 | **Completion Webhook** | POST a JSON summary the moment a sim finishes — wires Slack, Discord, Zapier, Make, n8n, or any custom endpoint with one URL field |
 | **Webhook Delivery Log** | Per-sim `webhook-log.jsonl` records every dispatch attempt (status code, latency, error). Inspect from the EmbedDialog and re-fire any failed delivery with a "Retry" button — closes the operational blindspot every Zapier / n8n integration eventually hits |
-| **Surface Usage Analytics** | `GET /api/simulation/<id>/surface-stats` — per-share-surface request counters (share card / replay GIF / transcript / trajectory / thread / watch page / Atom / RSS) with a synthetic `total`. Inbound observability for the distribution loop the webhook log tracks on the outbound side |
+| **Surface Usage Analytics** | `GET /api/simulation/<id>/surface-stats` — per-share-surface request counters (share card / replay GIF / transcript / trajectory / thread / watch page / Atom / RSS / reproduce.json / lineage) with a synthetic `total`. Inbound observability for the distribution loop the webhook log tracks on the outbound side |
 | **Reproducibility Config** | `GET /api/simulation/<id>/reproduce.json` — citation primitive for the share surfaces. A v1-schema JSON blob carrying every parameter another operator needs to re-run the same simulation: scenario, agent count, total rounds, platform toggles, time-config knobs, director events, and fork / counterfactual lineage. Identical exports of a finished sim are bytewise-identical, so the file hash is a stable citation key |
 | **Lineage Navigator** | `GET /api/simulation/<id>/lineage` — turn the `parent_simulation_id` pointer into a navigable graph. Surfaces the parent a sim was forked / branched from plus every public child whose parent points back at it. Trace the intellectual ancestry of a result without remembering each child sim id |
 
@@ -226,7 +226,7 @@ cp .env.example .env
 | **转录导出** | 每轮智能体发帖与立场标签,导出为 Markdown(YAML 头,适配 Notion / Obsidian / Substack)或结构化 JSON(适配 SDK 与 LLM 评审管线) |
 | **推文串导出** | `GET /api/simulation/<id>/thread.txt` — 自动生成 X / Twitter 推文串:介绍推文 + 每个信念转折点(主导立场翻转的轮次)一条推文 + 末尾推文(附观看与分享 URL)。每条推文 ≤280 字符,可单条复制或整串复制。与分享卡片 / 回放 GIF / 转录 / 轨迹 / 实时观看页一同构成第六种分享形式 |
 | **公开图库** | `/explore` 以卡片网格浏览所有公开模拟 — 预览分享卡、共识分布与质量指标;一键打开或派生 |
-| **图库搜索与筛选** | 在 `/explore` 与 `/verified` 上提供关键词搜索 + 看涨/中立/看跌 + 优秀/良好/一般/较差 + 按日期/轮次/智能体数量排序。URL 编码后 `?q=aave&consensus=bearish` 可作为书签分享。与其他所有表面共享同一 ±0.2 立场阈值 |
+| **图库搜索与筛选** | 在 `/explore` 与 `/verified` 上提供关键词搜索 + 看涨/中立/看跌 + 优秀/良好/一般/较差 + 按日期/轮次/智能体/热门排序。`trending` 按累计分享面服务次数排序,让被分发最广的模拟浮于顶部。URL 编码后 `?q=aave&consensus=bearish` 可作为书签分享。与其他所有表面共享同一 ±0.2 立场阈值 |
 | **已验证预言** | 为公开模拟标注真实结果(命中 / 部分 / 失误 + 链接)。`/verified` 是命中预言专属展厅 |
 | **RSS / Atom 订阅源** | `/api/feed.atom` + `/api/feed.rss` — 每个新发布的模拟无需任何整理就会进入 Feedly / Readwise / Inoreader / NetNewsWire / Obsidian RSS。`?verified=1` 只看已验证内容 |
 | **文章生成** | Substack 风格的复盘文章,基于真实发帖与交易数据 |
@@ -238,7 +238,7 @@ cp .env.example .env
 | **推送通知** | 长耗时图谱 / 模拟 / 报告任务完成时的浏览器推送提醒 |
 | **完成 Webhook** | 模拟一结束即 POST 一份 JSON 摘要 — 一个 URL 字段即可连通 Slack、Discord、Zapier、Make、n8n 或任意自定义端点 |
 | **Webhook 投递日志** | 每个模拟在 `webhook-log.jsonl` 记录每次投递尝试(HTTP 状态码、延迟、错误)。可在 EmbedDialog 中查看,并通过「重试」按钮重发任何失败的投递 — 弥补每个 Zapier / n8n 集成最终都会遇到的运维盲点 |
-| **分发统计(分享面使用分析)** | `GET /api/simulation/<id>/surface-stats` — 每个分享面的请求计数器(分享卡 / 回放 GIF / 转录 / 轨迹 / 推文串 / 观看页 / Atom / RSS),以及合成的 `total`。Webhook 日志在出站侧跟踪分发回路,本面则负责入站可观测性 |
+| **分发统计(分享面使用分析)** | `GET /api/simulation/<id>/surface-stats` — 每个分享面的请求计数器(分享卡 / 回放 GIF / 转录 / 轨迹 / 推文串 / 观看页 / Atom / RSS / `reproduce.json` / `/lineage`),以及合成的 `total`。Webhook 日志在出站侧跟踪分发回路,本面则负责入站可观测性 |
 | **可复现配置导出** | `GET /api/simulation/<id>/reproduce.json` — 分享面背后的引用基元。v1-schema 的 JSON 文档,携带另一位研究者复现同一次模拟所需的全部参数:情景、智能体数、轮次、平台切换、时序配置、导演事件、派生 / 反事实谱系。已完成模拟的多次导出在字节级别完全一致 — 文件哈希可作为稳定的引用键 |
 | **谱系导航** | `GET /api/simulation/<id>/lineage` — 将 `parent_simulation_id` 指针转化为可导航的图。展示该模拟派生 / 分支自的父模拟,以及每一个把父级指回此模拟的公开子模拟。无需记住每个子模拟 ID,即可追踪一项结果的思想脉络 |
 

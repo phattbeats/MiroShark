@@ -5366,8 +5366,10 @@ def get_surface_stats(simulation_id: str):
     Returns the number of times each share surface has served a
     successful response for this simulation — share card PNG, replay
     GIF, transcript (Markdown + JSON), trajectory (CSV + JSONL), tweet
-    thread (TXT + JSON), live watch page, and Atom / RSS feeds. Plus a
-    synthetic ``total`` summing all counters.
+    thread (TXT + JSON), live watch page, Atom / RSS feeds,
+    reproducibility config (``reproduce.json``), and the lineage graph
+    slice (``/lineage``). Plus a synthetic ``total`` summing all
+    counters.
 
     The first **inbound** observability surface — pairs with the
     outbound webhook delivery log (``/<id>/webhook-log``) so an operator
@@ -5375,9 +5377,9 @@ def get_surface_stats(simulation_id: str):
     EmbedDialog.
 
     Same publish gate as the share card / transcript / trajectory /
-    thread endpoints — the counter file lives inside the sim's
-    on-disk directory and is only meaningful for sims the operator has
-    chosen to surface publicly.
+    thread / reproduce.json / lineage endpoints — the counter file
+    lives inside the sim's on-disk directory and is only meaningful
+    for sims the operator has chosen to surface publicly.
     """
     from ..services import surface_stats
 
@@ -5459,6 +5461,7 @@ def get_reproduce_config(simulation_id: str):
     count, rounds, or director events.
     """
     from ..services import repro_export
+    from ..services import surface_stats
     from flask import Response
 
     locale = get_locale(request)
@@ -5510,6 +5513,7 @@ def get_reproduce_config(simulation_id: str):
         response.headers["Content-Disposition"] = (
             f'inline; filename="{filename}"'
         )
+        surface_stats.increment_surface_stat(sim_dir, "reproduce_json")
         return response
 
     except Exception as e:
@@ -5578,6 +5582,7 @@ def get_simulation_lineage(simulation_id: str):
     once the parent and its branches reach terminal states.
     """
     from ..services import lineage_service
+    from ..services import surface_stats
 
     locale = get_locale(request)
     try:
@@ -5611,6 +5616,10 @@ def get_simulation_lineage(simulation_id: str):
 
         response = jsonify({"success": True, "data": payload})
         response.headers["Cache-Control"] = "public, max-age=300"
+        sim_dir = os.path.join(
+            Config.WONDERWALL_SIMULATION_DATA_DIR, simulation_id
+        )
+        surface_stats.increment_surface_stat(sim_dir, "lineage")
         return response
 
     except Exception as e:
@@ -6084,6 +6093,26 @@ def list_public_simulations():
                 )
                 continue
 
+        # ``trending`` ranks public sims by their cumulative share-surface
+        # serves. Inject ``_serves_total`` (the surface-stats counter sum)
+        # into each card before sorting — single sweep over the corpus, so
+        # the per-card cost is one ``json.load`` of the (small) stats file
+        # at most. Sims with no stats file yet degrade to ``0`` so they
+        # land at the bottom rather than raising. Skipped on every other
+        # sort key to keep the default ``date`` path read-free.
+        if sort_key == "trending":
+            from ..services import surface_stats as _surface_stats
+            for card in all_cards:
+                sim_dir = os.path.join(
+                    Config.WONDERWALL_SIMULATION_DATA_DIR,
+                    card.get("simulation_id") or "",
+                )
+                try:
+                    stats = _surface_stats.read_surface_stats(sim_dir)
+                    card[gallery_filters.TRENDING_FIELD] = int(stats.get("total", 0) or 0)
+                except Exception:
+                    card[gallery_filters.TRENDING_FIELD] = 0
+
         page_items, total = gallery_filters.select_filtered_cards(
             all_cards,
             q=q,
@@ -6095,6 +6124,13 @@ def list_public_simulations():
             limit=limit,
             offset=offset,
         )
+
+        # Drop the transient ``_serves_total`` field before serialisation —
+        # it's an implementation detail of the trending sort, not part of
+        # the public response contract. Per-sim surface counts remain
+        # available via ``GET /api/simulation/<id>/surface-stats``.
+        for card in page_items:
+            card.pop(gallery_filters.TRENDING_FIELD, None)
 
         page_num = (offset // limit) + 1 if limit > 0 else 1
 

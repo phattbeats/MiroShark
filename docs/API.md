@@ -93,7 +93,7 @@ Base URL is `http://localhost:5001` in dev. Every endpoint returns JSON unless o
 | `GET` | `/api/simulation/<id>/trajectory.jsonl` | Per-round belief JSONL (DuckDB / pipelines) |
 | `GET` | `/api/simulation/<id>/thread.txt` | Auto-formatted X / Twitter tweet thread (one tweet per belief inflection point, ≤280 chars each) |
 | `GET` | `/api/simulation/<id>/thread.json` | Same tweet thread as `thread.txt` but as `{tweets, total, inflections_recorded, truncated}` for programmatic consumers |
-| `GET` | `/api/simulation/<id>/surface-stats` | Per-share-surface request counters — share card / replay GIF / transcript / trajectory / thread / watch page / Atom / RSS, plus a synthetic `total` |
+| `GET` | `/api/simulation/<id>/surface-stats` | Per-share-surface request counters — share card / replay GIF / transcript / trajectory / thread / watch page / Atom / RSS / reproduce.json / lineage, plus a synthetic `total` |
 | `GET` | `/api/simulation/<id>/reproduce.json` | Citation primitive — v1-schema reproducibility config blob carrying scenario, agent count, total rounds, platform toggles, time-config knobs, director events, and fork / counterfactual lineage. Identical exports of a finished sim are bytewise-identical (citation-hash friendly) |
 | `GET` | `/api/simulation/<id>/lineage` | Lineage graph slice — parent the sim was forked / branched from + every public child whose `parent_simulation_id` points back at it. Closes the navigation gap the reproduction config left open |
 | `GET` | `/api/simulation/<id>/webhook-log` | Recent outbound-webhook delivery attempts (last 10 + total count). Admin-token gated |
@@ -120,7 +120,7 @@ GET /api/simulation/public?q=aave&consensus=bearish&quality=excellent&sort=round
 | `consensus` | `bullish` / `neutral` / `bearish` | Dominant final-round stance using the same ±0.2 threshold the share card / replay GIF / transcript / webhook / feed all use. |
 | `quality` | `excellent` / `good` / `fair` / `poor` | Compared case-insensitively against the first word of `quality_health`. |
 | `outcome` | `correct` / `incorrect` / `partial` | Implies `verified=1` (verified-only). |
-| `sort` | `date` / `rounds` / `agents` | `date` (default — newest first), `rounds` (highest current_round first), or `agents` (largest population first). |
+| `sort` | `date` / `rounds` / `agents` / `trending` | `date` (default — newest first), `rounds` (highest current_round first), `agents` (largest population first), or `trending` (highest cumulative share-surface serve count first — sums every counter the `surface-stats` endpoint exposes). |
 | `verified` | truthy (`1`/`true`/`yes`) | Restrict to simulations with a recorded outcome annotation — the `/verified` hall. |
 | `limit` / `offset` | `[1, 100]` / `≥0` | Pagination knobs. `total` reflects the **filtered** count. |
 | `page` | `≥1` | 1-based alternative to `offset`. Wins over `offset` when both are supplied. |

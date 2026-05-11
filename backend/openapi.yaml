@@ -1412,8 +1412,9 @@ paths:
         successful response for this simulation — share card PNG,
         replay GIF, transcript (Markdown + JSON), trajectory
         (CSV + JSONL), tweet thread (TXT + JSON), live watch page,
-        and Atom / RSS feeds — plus a synthetic `total` summing all
-        counters.
+        Atom / RSS feeds, reproducibility config (`reproduce.json`),
+        and the lineage graph slice (`/lineage`) — plus a synthetic
+        `total` summing all counters.
 
         The **inbound** observability surface — pairs with the
         outbound webhook delivery log so an operator running MiroShark
@@ -1625,11 +1626,15 @@ paths:
           name: sort
           description: |
             `date` (default — newest first), `rounds` (highest
-            `current_round` first), or `agents` (largest population
-            first).
+            `current_round` first), `agents` (largest population
+            first), or `trending` (highest cumulative share-surface
+            serve count first — sums every counter the
+            `surface-stats` endpoint exposes; ties break on date so
+            the most-served-and-most-recent floats above the
+            most-served-and-stale).
           schema:
             type: string
-            enum: [date, rounds, agents]
+            enum: [date, rounds, agents, trending]
             default: date
       responses:
         "200":
@@ -1666,7 +1671,7 @@ paths:
                         enum: [correct, incorrect, partial, null]
                       sort:
                         type: string
-                        enum: [date, rounds, agents]
+                        enum: [date, rounds, agents, trending]
 
   # ────────────────────────────────────────────────────────────────────
   # Export
@@ -3011,6 +3016,8 @@ components:
             - watch_page
             - feed_atom
             - feed_rss
+            - reproduce_json
+            - lineage
             - total
           properties:
             share_card:
@@ -3063,6 +3070,14 @@ components:
               minimum: 0
               description: |
                 Same semantics as `feed_atom` for the RSS 2.0 form.
+            reproduce_json:
+              type: integer
+              minimum: 0
+              description: Successful `reproduce.json` serves.
+            lineage:
+              type: integer
+              minimum: 0
+              description: Successful `/lineage` serves.
             total:
               type: integer
               minimum: 0
