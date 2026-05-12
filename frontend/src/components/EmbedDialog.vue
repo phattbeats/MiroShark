@@ -668,6 +668,70 @@
               </div>
             </div>
 
+            <!-- Jupyter notebook export — analysis-ready surface paired
+                 with the reproducibility config. The repro blob is
+                 "here is the data"; this notebook is "here is the
+                 analysis, ready to run". Trajectory CSV is embedded
+                 directly so the notebook runs air-gapped (no network
+                 call back to the MiroShark host). Same publish gate as
+                 every other share surface. The body is a pure download
+                 surface — there's no inline preview because the .ipynb
+                 is a 30+ KB JSON document the SPA shouldn't pull just
+                 to render a button. -->
+            <div class="transcript-section notebook-section">
+              <div class="transcript-head notebook-head">
+                <span class="transcript-icon">📓</span>
+                <div class="transcript-head-body">
+                  <div class="transcript-title">
+                    {{ $tr('Jupyter notebook', 'Jupyter 笔记本') }}
+                  </div>
+                  <div class="transcript-sub">
+                    {{ $tr('Pre-populated analysis notebook — trajectory data embedded, belief evolution + final consensus charts scaffolded, ready to run in JupyterLab, VS Code, or Colab. No network call back required.', '预填的分析笔记本 — 嵌入轨迹数据,已搭建信念演化与最终共识图表,可在 JupyterLab、VS Code 或 Colab 中直接运行,无需联网。') }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="notebook-body">
+                <div v-if="!isPublic" class="transcript-empty">
+                  {{ $tr('Publish the simulation to enable the Jupyter notebook export.', '发布模拟以启用 Jupyter 笔记本导出。') }}
+                </div>
+                <template v-else>
+                  <div class="repro-curl-block">
+                    <div class="repro-curl-head">
+                      <span class="repro-curl-label">{{ $tr('Download via curl', '使用 curl 下载') }}</span>
+                      <button class="snippet-copy-btn" @click="copy('notebookCurl')">
+                        {{ copied === 'notebookCurl' ? '✓ ' + $tr('Copied', '已复制') : $tr('Copy', '复制') }}
+                      </button>
+                    </div>
+                    <pre class="snippet-code"><code>{{ notebookCurlSnippet }}</code></pre>
+                  </div>
+                  <div class="repro-note">
+                    {{ $tr('Identical exports of a finished simulation produce bytewise-identical notebooks — the file hash is a stable citation key, same property the reproduce.json blob has. Opens directly in JupyterLab, VS Code, and Google Colab.', '已完成模拟的多次导出在字节级别完全一致 — 文件哈希可作为稳定的引用键,与 reproduce.json 一致。可直接在 JupyterLab、VS Code 与 Google Colab 中打开。') }}
+                  </div>
+                  <div class="repro-actions">
+                    <a
+                      v-if="notebookDownloadUrl"
+                      class="repro-download"
+                      :href="notebookDownloadUrl"
+                      :download="notebookDownloadFilename"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {{ $tr('Download notebook.ipynb', '下载 notebook.ipynb') }}
+                    </a>
+                    <button
+                      class="snippet-copy-btn repro-copy-url"
+                      type="button"
+                      @click="copy('notebookUrl')"
+                      :disabled="!notebookDownloadUrl"
+                    >
+                      {{ copied === 'notebookUrl' ? '✓ ' + $tr('URL copied', '已复制 URL') : $tr('Copy URL', '复制 URL') }}
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
             <!-- Lineage navigator — closes the navigation gap PR #75
                  (reproducibility config) left behind. The
                  `parent_simulation_id` pointer existed on disk but was
@@ -995,6 +1059,47 @@
                 <div v-if="webhookRetryMessage" class="webhook-log-message" :class="webhookRetryMessageClass">
                   {{ webhookRetryMessage }}
                 </div>
+
+                <!-- Signature verification hint — appears once a delivery has
+                     succeeded so the operator has proof the basic wire works
+                     before being asked to layer signing on top. Shows the
+                     env var NAME only (`WEBHOOK_SECRET`); the actual secret
+                     value is never echoed by the frontend, the API, or the
+                     delivery log. Collapsed by default to keep the dialog
+                     compact for users on the unsigned default path. -->
+                <div
+                  v-if="hasSuccessfulWebhookDelivery"
+                  class="signature-hint"
+                  :class="{ 'signature-hint-open': signatureHintExpanded }"
+                >
+                  <button
+                    class="signature-hint-toggle"
+                    @click="toggleSignatureHint"
+                    :title="signatureHintExpanded ? $tr('Hide signature verification hint', '隐藏签名验证提示') : $tr('Show signature verification hint', '显示签名验证提示')"
+                  >
+                    <span class="signature-hint-icon">🔐</span>
+                    <span class="signature-hint-title">
+                      {{ $tr('Verify webhook signatures', '验证 webhook 签名') }}
+                    </span>
+                    <span class="signature-hint-chevron">{{ signatureHintExpanded ? '▾' : '▸' }}</span>
+                  </button>
+                  <div v-if="signatureHintExpanded" class="signature-hint-body">
+                    <p class="signature-hint-line">
+                      {{ $tr(
+                        'Set the WEBHOOK_SECRET environment variable on this MiroShark instance and MiroShark will HMAC-sign every dispatch with an X-MiroShark-Signature header. Recipients verify with three lines of stdlib hmac — same scheme Stripe and GitHub use.',
+                        '在这台 MiroShark 实例上设置 WEBHOOK_SECRET 环境变量,MiroShark 就会用 HMAC 对每一次投递签名,并通过 X-MiroShark-Signature 头部送出。消费方用三行 stdlib hmac 即可校验 — Stripe 和 GitHub 用的就是同一套。'
+                      ) }}
+                    </p>
+                    <code class="signature-hint-code">WEBHOOK_SECRET=&lt;your 32+ char secret&gt;</code>
+                    <p class="signature-hint-line">
+                      <a
+                        href="https://github.com/aaronjmars/MiroShark/blob/main/docs/WEBHOOKS.md#verifying-webhook-signatures"
+                        target="_blank"
+                        rel="noopener"
+                      >{{ $tr('Verification snippets (Python / Node.js / curl)', '验证示例(Python / Node.js / curl)') }} ↗</a>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1110,6 +1215,7 @@ import {
   getSurfaceStats,
   getReproductionUrl,
   getReproduction,
+  getNotebookUrl,
   getSimulationLineage,
   getFeedUrl,
   getSimulationOutcome,
@@ -1328,6 +1434,7 @@ const SURFACE_STAT_LABELS = [
   { key: 'feed_rss', label: tr('RSS feed', 'RSS 源') },
   { key: 'reproduce_json', label: tr('Reproduce config · JSON', '可复现配置 · JSON') },
   { key: 'lineage', label: tr('Lineage graph', '谱系图') },
+  { key: 'notebook_ipynb', label: tr('Jupyter notebook · IPYNB', 'Jupyter 笔记本 · IPYNB') },
 ]
 
 const surfaceStatsRows = computed(() => {
@@ -1491,6 +1598,28 @@ const reproCurlSnippet = computed(() => {
   // forwards redirects (the production deploy may sit behind a CDN
   // that issues a 308 to the canonical host).
   return `curl -fsSL '${reproDownloadUrl.value}' -o reproduce.json`
+})
+
+// ── Notebook export state ──────────────────────────────────────────────
+// Pre-populated Jupyter notebook download — sits beneath the
+// reproducibility config because both are institution-targeted: the
+// repro blob is "here is the data", the notebook is "here is the
+// analysis, ready to run". Pure download surface — there is no parsed
+// preview because the .ipynb body is a 30 KB+ JSON document the SPA
+// shouldn't pull just to render a button.
+const notebookDownloadUrl = computed(() => {
+  if (!props.simulationId || !origin.value) return ''
+  return getNotebookUrl(props.simulationId, origin.value)
+})
+
+const notebookDownloadFilename = computed(() => {
+  if (!props.simulationId) return 'notebook.ipynb'
+  return `miroshark-${props.simulationId.slice(0, 12)}-notebook.ipynb`
+})
+
+const notebookCurlSnippet = computed(() => {
+  if (!notebookDownloadUrl.value) return ''
+  return `curl -fsSL '${notebookDownloadUrl.value}' -o ${notebookDownloadFilename.value}`
 })
 
 const loadRepro = async () => {
@@ -1776,6 +1905,8 @@ const copy = async (which) => {
   }
   else if (which === 'reproUrl') text = reproDownloadUrl.value
   else if (which === 'reproCurl') text = reproCurlSnippet.value
+  else if (which === 'notebookUrl') text = notebookDownloadUrl.value
+  else if (which === 'notebookCurl') text = notebookCurlSnippet.value
   if (!text) return
   try {
     await navigator.clipboard.writeText(text)
@@ -1930,6 +2061,20 @@ const webhookEntryClass = (entry) => {
     return 'webhook-row-timeout'
   }
   return 'webhook-row-fail'
+}
+
+// Show the "Verify webhook signatures" hint once the operator has
+// confirmed their webhook is wired up (at least one 2xx delivery
+// on disk). Earlier than that, the hint would be talking about
+// signing a connection that hasn't proven it works — bad time to
+// recommend an additional moving part.
+const hasSuccessfulWebhookDelivery = computed(() =>
+  webhookLogEntries.value.some((e) => e && e.ok === true),
+)
+
+const signatureHintExpanded = ref(false)
+const toggleSignatureHint = () => {
+  signatureHintExpanded.value = !signatureHintExpanded.value
 }
 
 const webhookEntryIcon = (entry) => {
@@ -4111,6 +4256,70 @@ watch(isPublic, () => {
 .webhook-log-message-error {
   background: rgba(255, 68, 68, 0.12);
   color: #b22020;
+}
+
+.signature-hint {
+  margin-top: 4px;
+  border: 1px solid rgba(10, 10, 10, 0.10);
+  border-radius: 6px;
+  background: rgba(10, 10, 10, 0.025);
+}
+
+.signature-hint-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0a0a0a;
+  cursor: pointer;
+  text-align: left;
+}
+
+.signature-hint-icon {
+  font-size: 14px;
+}
+
+.signature-hint-title {
+  flex: 1;
+}
+
+.signature-hint-chevron {
+  color: rgba(10, 10, 10, 0.5);
+  font-size: 12px;
+}
+
+.signature-hint-body {
+  padding: 0 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.signature-hint-line {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(10, 10, 10, 0.78);
+}
+
+.signature-hint-line a {
+  color: #0a0a0a;
+  text-decoration: underline;
+}
+
+.signature-hint-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  background: rgba(10, 10, 10, 0.06);
+  padding: 6px 8px;
+  border-radius: 4px;
+  color: #0a0a0a;
+  user-select: all;
 }
 
 @media (max-width: 600px) {
