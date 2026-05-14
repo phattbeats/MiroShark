@@ -211,12 +211,34 @@ Two endpoints, same payload, different XML format:
 Each entry carries the scenario as the title (truncated with an ellipsis past 100 chars), the bullish / neutral / bearish consensus split as the summary line, the share-card PNG as `<media:thumbnail>` + `<media:content>` (so River-view aggregators surface a preview image), and the animated replay GIF as a second `<media:content>` (so Feedly's magazine layout shows motion). Outcome and quality are exposed as `<category>` elements so subscribers can filter on them in their reader.
 
 - **Verified-only feed:** append `?verified=1` for the curated stream of simulations whose operators marked a real-world outcome — the syndication mirror of `/verified`.
-- **Selection:** mirrors `GET /api/simulation/public` exactly — newest 20 published runs, sorted by `created_at` descending, publish-gated.
+- **Filtered feeds:** the same filter knobs the gallery API exposes work on the feed surface — `?consensus=bullish&quality=excellent&sort=trending&q=etf&outcome=correct&limit=N` (default 20, max 50). Filters combine with logical AND, unknown values fall back to "no filter" for that knob, and active filters surface in the feed channel title + subtitle ("MiroShark · Public Simulations · Bullish · Excellent · Filtered: …"). Same ±0.2 stance dominance threshold as the gallery, so `consensus=bullish` returns the same set on both surfaces. Subscribe to "bullish-only" in Feedly, pipe "trending + excellent" into an n8n workflow, or tail "correct outcomes only" in a Slack channel via Zapier — without any new write paths or new dependencies. The Embed dialog has a filter builder that previews the URL and exposes a one-click copy button.
+- **Selection:** mirrors `GET /api/simulation/public` exactly — newest 20 published runs by default, sorted by `created_at` descending, publish-gated. Filtered variants reuse the same `gallery_filters.select_filtered_cards` helper so a `consensus=bullish` set on `/explore` matches the corresponding feed slice byte-for-byte.
 - **Auto-discovery:** the SPA's `index.html` declares `<link rel="alternate" type="application/atom+xml">` (and the RSS variant) so browsers expose the feed via the address-bar globe icon.
 - **Caching:** `Cache-Control: public, max-age=300` — five minutes is short enough for newly published sims to appear in the next aggregator poll, long enough to absorb aggressive polling without taxing the gallery query.
 - **Implementation:** pure stdlib (`xml.etree.ElementTree` + `html`). Zero new dependencies; same ±0.2 stance threshold as every other surface so a "62% bullish" string matches the gallery card byte-for-byte.
 
-The Embed dialog has a "Follow the gallery via RSS" callout with one-click subscribe links for the Atom feed, the RSS 2.0 feed, and the verified-only Atom feed. The /explore header has a "📡 Subscribe via RSS" chip that mirrors the active filter (verified-only when the filter is on).
+The Embed dialog has a "Follow the gallery via RSS" callout with one-click subscribe links for the Atom feed, the RSS 2.0 feed, and the verified-only Atom feed, plus a **filter builder** (consensus + quality + sort) that emits the matching `?consensus=…&quality=…&sort=…` URL with a copy button — the slice an operator picks lands directly in any reader that consumes RSS or Atom. The /explore header has a "📡 Subscribe via RSS" chip that mirrors the active filter (verified-only when the filter is on).
+
+## Search-Engine Sitemap (`/sitemap.xml` + `/robots.txt`)
+
+The auto-generated discovery surface for web search. Every other share surface (`/share/<id>`, `/watch/<id>`, RSS / Atom, replay GIF) makes an *individual* simulation findable to someone who already has the link. The sitemap closes the gap on the *other* half — researchers and operators who don't know the simulation exists yet but search for the scenario keywords.
+
+`GET /sitemap.xml` walks the public-simulation corpus once per request and emits the sitemaps.org 0.9 XML document Googlebot / Bingbot / DuckDuckBot expect:
+
+- One `<url>` block per published sim's `/share/<id>` page (priority `0.8`, the canonical citation surface).
+- One `<url>` block per published sim's `/watch/<id>` page (priority `0.7`, the live broadcast surface).
+- `<lastmod>` in W3C `YYYY-MM-DD` form, derived from `state.json`'s `updated_at` / `created_at` / file mtime fallback chain.
+- `<changefreq>always</changefreq>` for in-progress sims (the belief bars genuinely change every round); `weekly` for completed share entries, `daily` for completed watch entries (the watch page re-renders less often once the run terminates).
+- Sims sorted by `simulation_id` ascending so two consecutive renders against the same corpus produce byte-identical XML.
+
+`GET /robots.txt` is the companion discovery file. Every deployment serves it (whether the sitemap is enabled or not) so well-behaved crawlers see the `Disallow: /api/` directive that keeps the JSON namespace out of the search index. When the sitemap is enabled, a trailing `Sitemap: <PUBLIC_BASE_URL>/sitemap.xml` line points crawlers at it for automatic discovery — submit once to Google Search Console and every newly published sim becomes searchable on the next crawl. The robots file always carries `Allow:` lines for the public-discovery surfaces (`/share/`, `/watch/`, `/explore`, `/verified`, `/embed/`) so crawlers know which routes they're invited into.
+
+- **Opt-out:** `ENABLE_SITEMAP=false` (default `true`) makes `/sitemap.xml` return `404` and drops the `Sitemap:` line from `robots.txt`. Operators running a private MiroShark instance — or one indexing sensitive scenarios — flip the flag.
+- **Bounded:** capped at 50,000 `<url>` entries (the spec ceiling per file). MiroShark's public corpus is currently three-figure small; the cap is defense-in-depth against pathological bulk-fork patterns rather than a normal truncation case.
+- **Caching:** `Cache-Control: public, max-age=3600` — hourly is fast enough for a freshly published sim to surface to crawlers at the next refresh, slow enough that a noisy crawler doesn't tax the gallery query.
+- **Implementation:** `app/services/sitemap.py` (~270 LoC, pure stdlib `xml.etree.ElementTree` + `os` + `datetime`) + `app/api/sitemap.py` (Flask blueprint mounted at the root, no `/api` prefix, mirroring `share_bp` / `watch_bp`). Zero new dependencies.
+
+The Embed dialog has a "🔍 Discoverable in web search" callout — distinct from the RSS subscribe block above — with a "View sitemap.xml ↗" link. The flag comes from a public `GET /api/config/sitemap` endpoint so the dialog renders the right hint when an operator has opted out.
 
 ## Live Watch Page (Spectator Broadcast)
 

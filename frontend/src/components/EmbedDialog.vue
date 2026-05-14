@@ -1182,6 +1182,114 @@
                   {{ $tr('Verified only ↗', '仅已验证 ↗') }}
                 </a>
               </div>
+
+              <!-- Filtered feed builder — the gallery's consensus /
+                   quality / sort knobs composed onto the feed URL so a
+                   reader can subscribe to a slice ("bullish + excellent",
+                   "what's hot right now") rather than the full firehose.
+                   The URL is fully composable; defaults are omitted from
+                   the query string so an unfiltered selection keeps the
+                   original feed URL.  -->
+              <div class="feed-filter-builder">
+                <div class="feed-filter-builder-title">
+                  {{ $tr('Build a filtered feed', '构建筛选源') }}
+                </div>
+                <div class="feed-filter-builder-controls">
+                  <label class="feed-filter-control">
+                    <span class="feed-filter-label">
+                      {{ $tr('Consensus', '共识') }}
+                    </span>
+                    <select v-model="feedFilters.consensus" class="feed-filter-select">
+                      <option value="">{{ $tr('Any', '全部') }}</option>
+                      <option value="bullish">{{ $tr('Bullish', '看涨') }}</option>
+                      <option value="neutral">{{ $tr('Neutral', '中性') }}</option>
+                      <option value="bearish">{{ $tr('Bearish', '看跌') }}</option>
+                    </select>
+                  </label>
+                  <label class="feed-filter-control">
+                    <span class="feed-filter-label">
+                      {{ $tr('Quality', '质量') }}
+                    </span>
+                    <select v-model="feedFilters.quality" class="feed-filter-select">
+                      <option value="">{{ $tr('Any', '全部') }}</option>
+                      <option value="excellent">{{ $tr('Excellent', '优') }}</option>
+                      <option value="good">{{ $tr('Good', '良') }}</option>
+                      <option value="fair">{{ $tr('Fair', '中') }}</option>
+                      <option value="poor">{{ $tr('Poor', '差') }}</option>
+                    </select>
+                  </label>
+                  <label class="feed-filter-control">
+                    <span class="feed-filter-label">
+                      {{ $tr('Sort', '排序') }}
+                    </span>
+                    <select v-model="feedFilters.sort" class="feed-filter-select">
+                      <option value="date">{{ $tr('Newest', '最新') }}</option>
+                      <option value="trending">{{ $tr('Trending', '热门') }}</option>
+                      <option value="rounds">{{ $tr('Most rounds', '轮次最多') }}</option>
+                      <option value="agents">{{ $tr('Most agents', '智能体最多') }}</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="feed-filter-builder-actions">
+                  <input
+                    class="feed-filter-url"
+                    type="text"
+                    readonly
+                    :value="filteredFeedUrl"
+                    :title="$tr('Copy and paste into Feedly, n8n, Zapier, or any RSS reader', '复制到 Feedly、n8n、Zapier 或其他任意 RSS 阅读器')"
+                  />
+                  <button
+                    type="button"
+                    class="feed-filter-copy"
+                    :class="{ 'feed-filter-copy-active': filteredFeedActive }"
+                    @click="copyFilteredFeedUrl"
+                  >
+                    <span v-if="copiedFilteredFeed">
+                      {{ $tr('Copied ✓', '已复制 ✓') }}
+                    </span>
+                    <span v-else>
+                      {{ $tr('Copy filtered feed URL', '复制筛选源链接') }}
+                    </span>
+                  </button>
+                </div>
+                <div class="feed-filter-builder-note">
+                  {{ $tr('Subscribe in Feedly, Inoreader, n8n, Zapier, Make — filters match the gallery API exactly. Same ±0.2 stance threshold every other surface uses.', '可在 Feedly、Inoreader、n8n、Zapier、Make 等订阅。筛选条件与画廊 API 完全一致;采用与其他所有面板相同的 ±0.2 立场阈值。') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Search-engine indexing row — every published simulation is
+                 a /share/<id> page that researchers might land on through
+                 a Google search. This row tells the operator their sim is
+                 in the auto-generated /sitemap.xml that crawlers discover
+                 via the standard robots.txt Sitemap: directive. -->
+            <div class="feed-callout sitemap-callout">
+              <div class="feed-callout-head">
+                <span class="feed-callout-icon">🔍</span>
+                <div class="feed-callout-body">
+                  <div class="feed-callout-title">
+                    {{ sitemapEnabled
+                        ? $tr('Discoverable in web search', '可在网页搜索中发现')
+                        : $tr('Search indexing disabled', '已禁用搜索索引') }}
+                  </div>
+                  <div class="feed-callout-desc">
+                    {{ sitemapEnabled
+                        ? $tr('Auto-generated /sitemap.xml lists every published simulation’s share + watch URLs. /robots.txt advertises it via the standard Sitemap: directive — submit once to Google Search Console and every newly published sim becomes searchable.', '自动生成的 /sitemap.xml 列出每个已发布模拟的 share 与 watch URL。/robots.txt 通过标准 Sitemap: 指令通告 — 在 Google Search Console 提交一次后,每个新发布的模拟即可被搜索到。')
+                        : $tr('Sitemap disabled — set ENABLE_SITEMAP=true in your environment to surface this deployment’s public simulations to search engines.', '已禁用 Sitemap — 在环境中设置 ENABLE_SITEMAP=true,即可让此部署的公开模拟被搜索引擎收录。') }}
+                  </div>
+                </div>
+              </div>
+              <div v-if="sitemapEnabled" class="feed-callout-actions">
+                <a
+                  class="feed-callout-link"
+                  :href="sitemapUrl"
+                  target="_blank"
+                  rel="noopener"
+                  :title="$tr('Open /sitemap.xml in a new tab', '在新标签中打开 /sitemap.xml')"
+                >
+                  {{ $tr('View sitemap.xml ↗', '查看 sitemap.xml ↗') }}
+                </a>
+              </div>
             </div>
           </div>
 
@@ -1218,6 +1326,8 @@ import {
   getNotebookUrl,
   getSimulationLineage,
   getFeedUrl,
+  getSitemapUrl,
+  getSitemapConfig,
   getSimulationOutcome,
   submitSimulationOutcome,
   getWebhookLog,
@@ -1844,6 +1954,74 @@ const feedVerifiedAtomUrl = computed(() =>
   getFeedUrl({ format: 'atom', verified: true, origin: origin.value }),
 )
 
+// Filtered feeds — the operator picks a slice once and copies the URL
+// into Feedly / n8n / Zapier / any RSS consumer. Defaults match the
+// most-asked slices ("bullish-only signal", "excellent-quality only",
+// "what's hot right now"); the underlying URL is fully composable so a
+// reader could hand-edit the query string to combine knobs.
+const feedFilters = reactive({
+  consensus: '',
+  quality: '',
+  sort: 'date',
+})
+const filteredFeedUrl = computed(() =>
+  getFeedUrl({
+    format: 'atom',
+    origin: origin.value,
+    consensus: feedFilters.consensus || undefined,
+    quality: feedFilters.quality || undefined,
+    sort: feedFilters.sort || undefined,
+  }),
+)
+const filteredFeedActive = computed(
+  () =>
+    !!feedFilters.consensus ||
+    !!feedFilters.quality ||
+    (!!feedFilters.sort && feedFilters.sort !== 'date'),
+)
+const copiedFilteredFeed = ref(false)
+const copyFilteredFeedUrl = async () => {
+  try {
+    await navigator.clipboard.writeText(filteredFeedUrl.value)
+    copiedFilteredFeed.value = true
+    setTimeout(() => {
+      copiedFilteredFeed.value = false
+    }, 1800)
+  } catch (_err) {
+    // Clipboard API can fail in non-secure contexts; the URL is still
+    // visible in the input so the user can copy manually.
+    copiedFilteredFeed.value = false
+  }
+}
+
+// Search-engine sitemap surface — independent of `simulationId` (the
+// sitemap lists every published sim across the gallery), exposed here
+// so an operator who just published gets a one-click "your sim is
+// crawler-discoverable" callout. The flag comes from the public
+// /api/config/sitemap endpoint so the dialog can swap to a "disabled"
+// hint when the deployment opted out.
+const sitemapUrl = computed(() => {
+  if (!origin.value) return ''
+  return getSitemapUrl(origin.value)
+})
+const sitemapEnabled = ref(true)
+const sitemapConfigLoaded = ref(false)
+const loadSitemapConfig = async () => {
+  if (sitemapConfigLoaded.value) return
+  try {
+    const res = await getSitemapConfig()
+    sitemapEnabled.value = !!res?.data?.enabled
+  } catch {
+    // Best-effort — a transient failure shouldn't blank out the row.
+    // Default to ``enabled = true`` so the operator still sees the
+    // sitemap link; the route itself returns 404 when disabled, which
+    // is the authoritative answer.
+    sitemapEnabled.value = true
+  } finally {
+    sitemapConfigLoaded.value = true
+  }
+}
+
 const replayLoaded = ref(false)
 const replayPlay = ref(false)
 const onReplayLoad = () => {
@@ -2214,6 +2392,12 @@ watch(() => props.open, async (val) => {
   // Always pull the saved outcome — the GET endpoint is publish-gate-free
   // so even private sims will reflect a previously recorded annotation.
   await loadOutcome()
+  // Pull the sitemap config once per dialog open so the search-engine
+  // indexing row knows whether to render the "enabled" or "disabled"
+  // hint. Cheap (single small JSON) and the result rarely changes,
+  // but reading on each open keeps the row in sync if an operator
+  // toggles ``ENABLE_SITEMAP`` and reloads.
+  loadSitemapConfig()
   // Bust the share-card image cache so the preview reloads with whatever
   // state the simulation is in right now (resolution may have landed
   // since the dialog was last opened).
@@ -4027,6 +4211,113 @@ watch(isPublic, () => {
   background: var(--color-orange, #ff6b1a);
   color: #fff;
   border-color: var(--color-orange, #ff6b1a);
+}
+
+.feed-filter-builder {
+  margin-top: 4px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid rgba(10, 10, 10, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feed-filter-builder-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+}
+
+.feed-filter-builder-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.feed-filter-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 110px;
+  flex: 1 1 110px;
+}
+
+.feed-filter-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.feed-filter-select {
+  padding: 6px 8px;
+  font-size: 12.5px;
+  border: 1px solid rgba(10, 10, 10, 0.16);
+  border-radius: 6px;
+  background: #fafafa;
+  color: #0a0a0a;
+  font-family: inherit;
+}
+
+.feed-filter-select:focus {
+  outline: none;
+  border-color: var(--color-orange, #ff6b1a);
+  background: #ffffff;
+}
+
+.feed-filter-builder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.feed-filter-url {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-family: 'SFMono-Regular', 'Menlo', monospace;
+  border: 1px solid rgba(10, 10, 10, 0.16);
+  border-radius: 6px;
+  background: #fafafa;
+  color: #0a0a0a;
+}
+
+.feed-filter-copy {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--color-orange, #ff6b1a);
+  border: 1px solid rgba(255, 107, 26, 0.45);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.feed-filter-copy:hover {
+  background: var(--color-orange, #ff6b1a);
+  color: #fff;
+}
+
+.feed-filter-copy-active {
+  background: var(--color-orange, #ff6b1a);
+  color: #fff;
+}
+
+.feed-filter-builder-note {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #6a6a6a;
 }
 
 .snippet-copy-btn:disabled {

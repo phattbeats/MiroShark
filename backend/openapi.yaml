@@ -82,6 +82,8 @@ tags:
     description: MCP server status surface for AI IDE clients.
   - name: Documentation
     description: This OpenAPI spec and Swagger UI.
+  - name: Discovery
+    description: Search-engine sitemap and robots.txt — auto-generated discovery surfaces over the public-simulation gallery.
 
 paths:
 
@@ -1748,7 +1750,7 @@ paths:
         newsletter does.
 
         Mirrors `GET /api/simulation/public` selection (publish-gated,
-        sorted by `created_at` desc, capped at 20 entries) so a
+        sorted by `created_at` desc, default cap 20 entries) so a
         subscription stays in lockstep with what shows up on `/explore`.
         Pure stdlib XML — zero new dependencies.
 
@@ -1759,6 +1761,14 @@ paths:
 
         Browsers auto-discover this feed via the `<link rel="alternate"
         type="application/atom+xml">` tag in `index.html`.
+
+        **Filtered feeds.** The same filter knobs the gallery API
+        exposes are honoured here — `?consensus=bullish&quality=excellent`
+        turns the feed into a "bullish + excellent" signal source for
+        n8n, Zapier, Make, or any RSS reader. Filters combine with
+        logical AND, unknown values fall back to "no filter" for that
+        knob, and active filters are echoed in the feed channel title
+        + subtitle so subscribers can tell which slice they're on.
       parameters:
         - in: query
           name: verified
@@ -1767,6 +1777,65 @@ paths:
             simulations with a recorded outcome annotation — the same
             curated set the `/verified` page surfaces.
           schema: { type: string }
+        - in: query
+          name: q
+          description: |
+            Case-insensitive substring search over each simulation's
+            scenario text. Matches the gallery API's `?q=` knob.
+          schema: { type: string }
+        - in: query
+          name: consensus
+          description: |
+            Filter to simulations whose dominant belief stance matches
+            the value. Uses the same ±0.2 stance threshold the gallery,
+            share card, replay GIF, and webhook all share — a
+            33.4 / 33.3 / 33.3 split falls out of every bucket.
+          schema:
+            type: string
+            enum: [bullish, neutral, bearish]
+        - in: query
+          name: quality
+          description: |
+            Filter to simulations whose `quality_health` tier matches
+            the value. Compared case-insensitively against the
+            lowercased first word, so `Good with caveats` slots into
+            `quality=good`.
+          schema:
+            type: string
+            enum: [excellent, good, fair, poor]
+        - in: query
+          name: outcome
+          description: |
+            Filter to simulations whose operator-marked outcome label
+            matches the value. Subset of `verified=1` that further
+            narrows on the resolution direction.
+          schema:
+            type: string
+            enum: [correct, incorrect, partial]
+        - in: query
+          name: sort
+          description: |
+            Sort key. `date` is newest-first (default). `trending` ranks
+            cards by their cumulative share-surface serves
+            (`surface-stats.json` total) so a viral run floats above a
+            forgotten one. `rounds` / `agents` mirror the gallery sort
+            keys.
+          schema:
+            type: string
+            enum: [date, rounds, agents, trending]
+            default: date
+        - in: query
+          name: limit
+          description: |
+            Maximum entries to include. Clamped to the feed-specific cap
+            (50) — smaller than the gallery API's 100 because
+            aggressive aggregators re-fetch the feed every few minutes
+            and a 100-entry XML doc costs them too much per poll.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
       responses:
         "200":
           description: |
@@ -1780,11 +1849,14 @@ paths:
       tags: [Publish & Embed]
       summary: RSS 2.0 syndication feed of the public simulation gallery.
       description: |
-        Same content + selection as `/api/feed.atom` rendered as RSS 2.0
-        for older readers and self-hosted aggregators that haven't moved
-        off the legacy format. Published runs include their share-card
-        PNG as an `<enclosure>` so podcast-style readers handle it
-        natively.
+        Same content + selection + filter knobs as `/api/feed.atom`
+        rendered as RSS 2.0 for older readers and self-hosted
+        aggregators that haven't moved off the legacy format. Published
+        runs include their share-card PNG as an `<enclosure>` so
+        podcast-style readers handle it natively. Filtered streams
+        (`?consensus=` / `?quality=` / `?sort=trending` / `?q=` /
+        `?outcome=` / `?verified=` / `?limit=`) are supported so the
+        discovery channel doesn't fragment on format.
       parameters:
         - in: query
           name: verified
@@ -1792,6 +1864,45 @@ paths:
             Truthy values (`1`, `true`, `yes`, `on`) restrict the feed to
             simulations with a recorded outcome annotation.
           schema: { type: string }
+        - in: query
+          name: q
+          description: |
+            Case-insensitive substring search over each simulation's
+            scenario text.
+          schema: { type: string }
+        - in: query
+          name: consensus
+          description: Dominant-stance filter, same semantics as `/api/feed.atom`.
+          schema:
+            type: string
+            enum: [bullish, neutral, bearish]
+        - in: query
+          name: quality
+          description: Quality-tier filter, same semantics as `/api/feed.atom`.
+          schema:
+            type: string
+            enum: [excellent, good, fair, poor]
+        - in: query
+          name: outcome
+          description: Outcome-label filter, same semantics as `/api/feed.atom`.
+          schema:
+            type: string
+            enum: [correct, incorrect, partial]
+        - in: query
+          name: sort
+          description: Sort key, same options as `/api/feed.atom`.
+          schema:
+            type: string
+            enum: [date, rounds, agents, trending]
+            default: date
+        - in: query
+          name: limit
+          description: Maximum entries to include, capped at 50.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
       responses:
         "200":
           description: |
@@ -1799,6 +1910,115 @@ paths:
           content:
             application/rss+xml:
               schema: { type: string }
+
+  /sitemap.xml:
+    get:
+      tags: [Discovery]
+      summary: Auto-generated public-simulation sitemap (sitemaps.org 0.9).
+      description: |
+        Walks the public-simulation corpus (`is_public=true` only) and
+        emits one `<url>` block per `/share/<id>` plus one per
+        `/watch/<id>`. `<lastmod>` is W3C `YYYY-MM-DD` form derived
+        from the simulation's `updated_at` / `created_at` /
+        `state.json` mtime fallback chain. `<changefreq>` is `always`
+        for in-progress sims (the belief bars genuinely change every
+        round) and `weekly` for completed share entries / `daily` for
+        completed watch entries.
+
+        Mounted at the root (no `/api` prefix) so crawlers find it
+        where the protocol convention places it. `Cache-Control:
+        public, max-age=3600` — hourly is fast enough for a freshly
+        published sim to appear at the next refresh, slow enough to
+        absorb noisy crawler polling. Sims are sorted by
+        `simulation_id` ascending so two consecutive renders against
+        the same corpus produce byte-identical XML.
+
+        Capped at 50,000 `<url>` entries per the sitemap spec
+        ceiling. MiroShark's public corpus is currently three-figure
+        small; the cap is defense-in-depth against pathological
+        bulk-fork patterns.
+
+        Returns `404` when `ENABLE_SITEMAP=false` so private
+        deployments don't even hint that the sitemap surface exists.
+        `robots.txt` advertises this URL via the standard `Sitemap:`
+        directive — submit once to Google Search Console (or any
+        compliant crawler) and every newly published sim becomes
+        searchable on the next crawl.
+      responses:
+        "200":
+          description: |
+            Sitemap XML document. `Content-Type: application/xml`.
+          content:
+            application/xml:
+              schema: { type: string }
+        "404":
+          description: |
+            `ENABLE_SITEMAP=false` on this deployment.
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /robots.txt:
+    get:
+      tags: [Discovery]
+      summary: Crawler directives for the deployment.
+      description: |
+        Always served (whether `ENABLE_SITEMAP=true` or not) so
+        well-behaved crawlers see the `Disallow: /api/` directive
+        that keeps the JSON namespace out of the search index. Carries
+        `Allow:` lines for the public-discovery surfaces (`/share/`,
+        `/watch/`, `/explore`, `/verified`, `/embed/`).
+
+        When the sitemap is enabled, a trailing
+        `Sitemap: <PUBLIC_BASE_URL>/sitemap.xml` line points crawlers
+        at it for automatic discovery. When disabled, the line is
+        omitted so the URL doesn't leak through robots.txt either.
+        `Cache-Control: public, max-age=3600` mirrors the sitemap
+        cadence so a single CDN purge refreshes both surfaces.
+      responses:
+        "200":
+          description: |
+            Plain-text robots directives.
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/config/sitemap:
+    get:
+      tags: [Discovery]
+      summary: Public sitemap-config flag for the SPA.
+      description: |
+        Exposes whether `/sitemap.xml` is enabled on this deployment
+        so the EmbedDialog renders the right hint without leaking
+        any secret config. Returns `{enabled, sitemap_url}` where
+        `sitemap_url` is the absolute public URL when enabled and
+        `null` otherwise. Public — the flag is not sensitive and the
+        URL is the same one any crawler would discover via
+        robots.txt.
+      responses:
+        "200":
+          description: Sitemap config envelope.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, data]
+                properties:
+                  success: { type: boolean, enum: [true] }
+                  data:
+                    type: object
+                    required: [enabled, sitemap_url]
+                    properties:
+                      enabled:
+                        type: boolean
+                        description: Whether `/sitemap.xml` serves content on this deployment.
+                      sitemap_url:
+                        type: string
+                        nullable: true
+                        description: |
+                          Absolute URL of `/sitemap.xml` when enabled
+                          and a base URL is resolvable; `null`
+                          otherwise.
 
   /api/simulation/{simulation_id}/export:
     get:
