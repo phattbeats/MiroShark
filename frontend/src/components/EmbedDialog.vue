@@ -378,6 +378,75 @@
               </p>
             </div>
 
+            <!-- Belief trajectory chart as a stdlib-pure SVG. Scalable
+                 vector companion to the share card (PNG verdict),
+                 replay GIF (motion), and Jupyter notebook (matplotlib).
+                 Embeddable as <img> in Notion, Substack, Ghost, GitHub
+                 READMEs, and LaTeX — vector means no resolution choice,
+                 and <img> means no JS at the embed site. -->
+            <div class="transcript-section trajectory-section chart-svg-section">
+              <div class="transcript-head">
+                <span class="transcript-icon">📈</span>
+                <div class="transcript-head-body">
+                  <div class="transcript-title">{{ $tr('Trajectory chart (SVG)', '轨迹图(SVG)') }}</div>
+                  <div class="transcript-sub">
+                    {{ $tr('Vector belief chart — bullish / neutral / bearish curves across every round. Same ±0.2 stance threshold as every other surface. Embed as <img> in Notion, Substack, Ghost, GitHub READMEs, and LaTeX — scales to any size with no JavaScript.', '矢量信念图 — 每轮的看涨 / 中性 / 看跌曲线。与其他所有界面使用相同的 ±0.2 立场阈值。作为 <img> 嵌入 Notion、Substack、Ghost、GitHub README 和 LaTeX — 无需 JavaScript 即可缩放到任何尺寸。') }}
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="isPublic && chartSvgUrl" class="chart-svg-preview">
+                <img
+                  :src="chartSvgUrl"
+                  alt="MiroShark belief trajectory chart"
+                  loading="lazy"
+                  class="chart-svg-img"
+                />
+              </div>
+
+              <div class="transcript-actions">
+                <a
+                  v-if="isPublic && chartSvgUrl"
+                  class="transcript-download-btn"
+                  :href="chartSvgUrl"
+                  :download="`miroshark-${simulationId.slice(0, 12)}-chart.svg`"
+                >
+                  ↓ {{ $tr('Download .svg', '下载 .svg') }}
+                </a>
+                <span v-if="!isPublic" class="transcript-empty">
+                  {{ $tr('Publish the simulation to enable the trajectory chart.', '发布模拟以启用轨迹图。') }}
+                </span>
+              </div>
+
+              <div class="snippet-block transcript-snippet">
+                <div class="snippet-head">
+                  <span class="snippet-label">{{ $tr('Chart URL (paste into <img src="…">)', '图表 URL(粘贴至 <img src="…">)') }}</span>
+                  <button
+                    class="snippet-copy-btn"
+                    @click="copy('chartSvg')"
+                    :disabled="!isPublic"
+                  >
+                    {{ copied === 'chartSvg' ? '✓ ' + $tr('Copied', '已复制') : $tr('Copy URL', '复制 URL') }}
+                  </button>
+                </div>
+                <pre class="snippet-code"><code>{{ chartSvgUrl || '—' }}</code></pre>
+              </div>
+
+              <div class="snippet-block transcript-snippet">
+                <div class="snippet-head">
+                  <span class="snippet-label">{{ $tr('HTML embed', 'HTML 嵌入') }}</span>
+                  <button
+                    class="snippet-copy-btn"
+                    @click="copy('chartSvgEmbed')"
+                    :disabled="!isPublic"
+                  >
+                    {{ copied === 'chartSvgEmbed' ? '✓ ' + $tr('Copied', '已复制') : $tr('Copy snippet', '复制代码片段') }}
+                  </button>
+                </div>
+                <pre class="snippet-code"><code>{{ chartSvgEmbedSnippet }}</code></pre>
+              </div>
+            </div>
+
             <!-- Twitter / X tweet thread — pairs with the share card
                  (visual), replay GIF (motion), transcript (prose), and
                  trajectory CSV (data) as the sixth share format. The
@@ -1440,7 +1509,7 @@
                     {{ $tr('Channel notifications on completion', '完成时的频道通知') }}
                   </div>
                   <div class="feed-callout-desc">
-                    {{ $tr('MiroShark POSTs a platform-native card to each configured channel the moment a simulation completes or fails — Discord gets a consensus-coloured embed, Slack gets a Block Kit message, the generic webhook gets the raw JSON. Each channel is opt-in via its own env var.', 'MiroShark 在模拟完成或失败时,会向每个已配置渠道推送对应平台原生的卡片 — Discord 收到按共识着色的 embed,Slack 收到 Block Kit 消息,通用 Webhook 收到原始 JSON。每个渠道可通过各自的环境变量单独启用。') }}
+                    {{ $tr('MiroShark POSTs a platform-native card to each configured channel the moment a simulation completes or fails — Discord gets a consensus-coloured embed, Slack gets a Block Kit message, Email gets a multipart/alternative message with plain-text belief bars and an HTML CTA, the generic webhook gets the raw JSON. Each channel is opt-in via its own env var.', 'MiroShark 在模拟完成或失败时,会向每个已配置渠道推送对应平台原生的卡片 — Discord 收到按共识着色的 embed,Slack 收到 Block Kit 消息,邮件渠道发出包含纯文本信念条与 HTML CTA 的 multipart/alternative 邮件,通用 Webhook 收到原始 JSON。每个渠道可通过各自的环境变量单独启用。') }}
                   </div>
                   <div class="notifications-chips">
                     <span
@@ -1472,6 +1541,16 @@
                     >
                       <span class="notifications-chip-dot">{{ notifConfig.slack_configured ? '✓' : '○' }}</span>
                       Slack
+                    </span>
+                    <span
+                      class="notifications-chip"
+                      :class="{ 'notifications-chip-on': notifConfig.email_configured }"
+                      :title="notifConfig.email_configured
+                        ? $tr('SMTP completion emails are wired up — every terminal-state transition ships a multipart/alternative message to the configured recipients', 'SMTP 完成邮件已接入 — 每次模拟达到终止状态都会向已配置收件人发出 multipart/alternative 邮件')
+                        : $tr('Set SMTP_HOST and SMTP_TO to enable completion emails (SMTP_USER/SMTP_PASSWORD optional)', '设置 SMTP_HOST 与 SMTP_TO 即可启用完成邮件(SMTP_USER/SMTP_PASSWORD 可选)')"
+                    >
+                      <span class="notifications-chip-dot">{{ notifConfig.email_configured ? '✓' : '○' }}</span>
+                      Email
                     </span>
                   </div>
                 </div>
@@ -1515,6 +1594,7 @@ import {
   getTranscriptJsonUrl,
   getTrajectoryCsvUrl,
   getTrajectoryJsonlUrl,
+  getChartSvgUrl,
   getThreadTxtUrl,
   getThreadJsonUrl,
   getSurfaceStats,
@@ -1658,6 +1738,16 @@ const trajectoryCsvUrl = computed(() => {
 const trajectoryJsonlUrl = computed(() => {
   if (!props.simulationId || !origin.value) return ''
   return getTrajectoryJsonlUrl(props.simulationId, origin.value)
+})
+
+const chartSvgUrl = computed(() => {
+  if (!props.simulationId || !origin.value) return ''
+  return getChartSvgUrl(props.simulationId, origin.value)
+})
+
+const chartSvgEmbedSnippet = computed(() => {
+  const url = chartSvgUrl.value || 'https://your-host/api/simulation/<id>/chart.svg'
+  return `<img src="${url}" alt="MiroShark belief trajectory chart" style="max-width:100%;height:auto;" />`
 })
 
 const threadTxtUrl = computed(() => {
@@ -2222,8 +2312,9 @@ const loadSitemapConfig = async () => {
   }
 }
 
-// Notification-channel config — three booleans tracking the live
-// state of WEBHOOK_URL / DISCORD_WEBHOOK_URL / SLACK_WEBHOOK_URL.
+// Notification-channel config — four booleans tracking the live
+// state of WEBHOOK_URL / DISCORD_WEBHOOK_URL / SLACK_WEBHOOK_URL /
+// (SMTP_HOST + SMTP_TO).
 // The chips render off these booleans so an operator sees at a
 // glance which channels will fire on the next terminal-state event.
 // We default everything to ``false`` (chip = ○) so a fetch failure
@@ -2232,6 +2323,7 @@ const notifConfig = ref({
   webhook_configured: false,
   discord_configured: false,
   slack_configured: false,
+  email_configured: false,
   dkg_configured: false,
   dkg_network: null,
 })
@@ -2245,6 +2337,7 @@ const loadNotificationsConfig = async () => {
       webhook_configured: !!data.webhook_configured,
       discord_configured: !!data.discord_configured,
       slack_configured: !!data.slack_configured,
+      email_configured: !!data.email_configured,
       dkg_configured: !!data.dkg_configured,
       dkg_network: data.dkg_network || null,
     }
@@ -2253,6 +2346,7 @@ const loadNotificationsConfig = async () => {
       webhook_configured: false,
       discord_configured: false,
       slack_configured: false,
+      email_configured: false,
       dkg_configured: false,
       dkg_network: null,
     }
@@ -2312,6 +2406,8 @@ const copy = async (which) => {
   else if (which === 'watch') text = watchUrl.value
   else if (which === 'transcriptMd') text = transcriptMarkdownUrl.value
   else if (which === 'trajectoryCsv') text = trajectoryCsvUrl.value
+  else if (which === 'chartSvg') text = chartSvgUrl.value
+  else if (which === 'chartSvgEmbed') text = chartSvgEmbedSnippet.value
   else if (which === 'threadTxt') text = threadTxtUrl.value
   else if (which === 'threadFull') {
     // The full thread copy joins the per-tweet array with the same
@@ -3465,6 +3561,27 @@ watch(isPublic, () => {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
   color: #2a2a2a;
+}
+
+/* Trajectory chart SVG — scalable-vector preview block matches the
+   transcript / trajectory section visual rhythm. ``loading="lazy"``
+   means the bytes don't transit until the dialog is scrolled into
+   view, so opening the dialog stays snappy on slow networks. */
+.chart-svg-preview {
+  margin-top: 10px;
+  background: #fafafa;
+  border: 1px solid rgba(10, 10, 10, 0.08);
+  border-radius: 6px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.chart-svg-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: 4px;
 }
 
 /* Tweet thread — short-form text companion to the transcript / share

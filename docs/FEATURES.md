@@ -180,6 +180,16 @@ Two endpoints, same row schema, different serialization:
 
 Same publish gate as the share card and transcript (`is_public=true`). The bullish / neutral / bearish percentages use the same ±0.2 stance threshold as every other surface, so a number in the CSV matches what the gallery, share card, replay GIF, transcript, webhook, and feed report for the same round. The Embed dialog exposes a "Download .csv" + "Download .jsonl" pair beneath the transcript row, plus a copyable CSV URL and a `pd.read_csv("<url>")` quickstart snippet.
 
+## Trajectory Chart SVG
+
+The scalable-vector companion to the trajectory CSV / JSONL data export. Where the CSV gives Pandas / Excel / Tableau / R the raw numbers, `GET /api/simulation/<id>/chart.svg` gives every other platform a ready-made image of the belief journey — bullish (`#22c55e`), neutral (`#6b7280`), bearish (`#ef4444`) polylines plotted against round number on a fixed `viewBox="0 0 800 400"`, with a 5-line y-axis grid, round-number x-axis labels, a three-swatch legend, and the scenario title.
+
+Pure-stdlib `xml.etree.ElementTree` renderer — no Cairo, no matplotlib, no Pillow, zero new dependencies. Same approach as the sitemap (PR #82) and the Jupyter notebook (PR #80). The output is bytewise-deterministic so the byte hash works as a cache key the same way the reproduce.json hash works as a citation key.
+
+Embeddable anywhere `<img>` renders — Notion, Substack, Ghost, GitHub READMEs, LinkedIn posts, Discord embeds with image attachments, and LaTeX papers via `\includesvg{}`. Vector means a reader on a 5K display sees crisp lines, and a reader on a phone sees the same chart sized down without losing axis labels. `<img>` means no JavaScript at the embed site — the chart loads with the page like any other static asset.
+
+Same publish gate as the trajectory CSV. Returns `404` when the simulation hasn't recorded any rounds yet (the embed site can render its own placeholder rather than a blank SVG that looks like a styling bug). The Embed dialog exposes a `📈 Trajectory chart (SVG)` section beneath the trajectory CSV row: a lazy-loaded preview, a "Download .svg" anchor, a copyable URL, and a paste-ready `<img>` embed snippet. The chart-svg counter joins the surface-stats schema so an operator can see how many embeds the chart drove independently of the share card and replay GIF.
+
 ## Gallery Search & Filtering
 
 `/explore` is the public research surface — every published MiroShark simulation, browsable as a card grid. Once the corpus grew past a few dozen entries the reverse-chronological scroll stopped being a tool, so the gallery now indexes itself: a keyword search box, a consensus filter chip group, a quality filter chip group, and a sort dropdown sit above the cards. The active filter set lives in URL params (`?q=…&consensus=bearish&quality=excellent&sort=rounds`), so any filtered view is bookmarkable and shareable — "every excellent-quality bearish call about Aave" is a URL you can tweet.
@@ -421,14 +431,15 @@ When `WEBHOOK_SECRET` is set, every outbound webhook payload is HMAC-signed and 
 
 Implementation: `compute_signature(payload_bytes, secret=None)` reads `WEBHOOK_SECRET` at call time (so a Settings change or env mutation takes effect immediately), returns `"sha256=" + hmac.sha256(secret, body).hexdigest()` or `None` when blank. `_post_json` injects the header only when `compute_signature` returns non-None — auto-fire, retry, and the `Send test event` button all share the same dispatch path, so all three paths sign consistently. Zero new dependencies (pure stdlib `hmac` + `hashlib`).
 
-## Channel-Native Completion Notifications (Discord + Slack)
+## Channel-Native Completion Notifications (Discord + Slack + Email)
 
-The generic webhook (`WEBHOOK_URL`) posts a raw JSON blob — perfect for Zapier / Make / n8n, but Discord renders nothing from JSON and Slack inlines it as an ugly code block. Two channel-native paths land formatted cards in the platform's own format:
+The generic webhook (`WEBHOOK_URL`) posts a raw JSON blob — perfect for Zapier / Make / n8n, but Discord renders nothing from JSON and Slack inlines it as an ugly code block. Three channel-native paths land formatted cards (or emails) in the platform's own format:
 
 - **Discord rich embed** — set `DISCORD_WEBHOOK_URL` (Discord → Server Settings → Integrations → Webhooks). MiroShark POSTs a Discord embed with: scenario title, consensus-coloured border (`#22c55e` bullish / `#6b7280` neutral / `#ef4444` bearish / `#f59e0b` failed), Bullish / Neutral / Bearish / Quality / Rounds / Agents fields, share-card thumbnail, and a clickable share-page link. Failure runs append the truncated exit-code message as an `Error` field.
 - **Slack Block Kit** — set `SLACK_WEBHOOK_URL` (api.slack.com/apps → Incoming Webhooks). MiroShark POSTs a Block Kit message with: scenario header, status-verb context line, `mrkdwn` belief bars (`█████░░░░░ 52.0%`), Quality / Scale / Resolution fields, and a "View simulation" action button. Failure runs append a fenced-code error section.
+- **SMTP completion email** — set `SMTP_HOST` and `SMTP_TO` (comma-separated recipients). MiroShark sends a `multipart/alternative` message: subject `[MiroShark] Bullish: <scenario>` so inbox filters can triage by direction without parsing the body, a plain-text part with the same Unicode block bars Slack uses, and an HTML part with inline-CSS swatches matching the Discord embed colours and a consensus-coloured "View simulation →" CTA. `SMTP_USER` / `SMTP_PASSWORD` are optional so an unauthenticated relay (`localhost:25`, self-hosted Postfix) works alongside the Gmail / SendGrid / Mailgun path. The one notification channel with zero platform dependency — every operator already has a mailbox.
 
-Channels are independent. Set one, two, or all three — each fires on every `simulation.completed` / `simulation.failed` event, deduped per `(sim_id, status)` so the runner's two terminal code paths never produce duplicate cards. The SPA exposes `GET /api/config/notifications` returning `{webhook_configured, discord_configured, slack_configured}` so the EmbedDialog can render live status chips beside the share-and-embed surfaces. Pure stdlib `urllib.request` — zero new dependencies. Full setup walkthrough in [NOTIFICATIONS.md](NOTIFICATIONS.md).
+Channels are independent. Set one, two, three, or all four — each fires on every `simulation.completed` / `simulation.failed` event, deduped per `(sim_id, status)` so the runner's two terminal code paths never produce duplicate cards. The SPA exposes `GET /api/config/notifications` returning `{webhook_configured, discord_configured, slack_configured, email_configured}` so the EmbedDialog can render live status chips beside the share-and-embed surfaces. Pure stdlib `urllib.request` + `smtplib` — zero new dependencies. Full setup walkthrough in [NOTIFICATIONS.md](NOTIFICATIONS.md).
 
 ## Article Generation
 
